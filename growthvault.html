@@ -3173,10 +3173,12 @@
                 // User signed in, load from Firebase
                 await listBuilder.loadFromFirebase();
             } else {
-                // User signed out, disconnect Firebase and clear content
+                // User signed out, disconnect Firebase and clear everything
                 listBuilder.disconnectFirebase();
                 listBuilder.items = [];
                 listBuilder.authorOrder = [];
+                listBuilder.undoStack = [];
+                localStorage.removeItem(listBuilder.storageKey);
                 listBuilder.renderItems();
                 showToast('Signed out successfully', 'default');
             }
