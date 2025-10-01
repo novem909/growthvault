@@ -2954,7 +2954,7 @@
             const syncStatus = document.getElementById('syncStatus');
 
             if (user) {
-                authText.textContent = user.displayName?.split(' ')[0] || 'Sign Out';
+                authText.textContent = 'Sign Out';
                 syncStatus.style.display = 'block';
                 updateSyncStatus('synced');
             } else {
