@@ -60,7 +60,7 @@
             box-shadow: 0 10px 30px var(--shadow-light);
             overflow: hidden;
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
         }
 
         .header {
@@ -83,7 +83,7 @@
             cursor: pointer;
             font-size: 0.85em;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
             backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
@@ -103,7 +103,7 @@
             cursor: pointer;
             font-size: 0.85em;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
             backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
@@ -218,12 +218,14 @@
             font-size: 0.95em;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             align-self: flex-end;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
             letter-spacing: 0.025em;
             position: relative;
             overflow: hidden;
+            will-change: transform;
+            transform: translateZ(0);
         }
 
 
@@ -260,7 +262,7 @@
             font-size: 0.85em;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             text-decoration: none;
             display: inline-block;
         }
@@ -279,7 +281,7 @@
             font-size: 0.85em;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
         }
 
         .btn-danger:hover {
@@ -349,7 +351,7 @@
             padding: 24px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             color: white;
             text-align: center;
@@ -361,6 +363,9 @@
             position: relative;
             overflow: hidden;
             user-select: none;
+            will-change: transform;
+            contain: layout style paint;
+            transform: translateZ(0);
         }
 
         .author-box.dragging {
@@ -379,7 +384,7 @@
         .author-box.drag-over {
             box-shadow: 0 0 0 3px #6366f1, 0 0 20px rgba(99, 102, 241, 0.4);
             transform: scale(1.05);
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
         }
 
         @keyframes swapPulse {
@@ -408,7 +413,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             color: white;
             font-size: 14px;
             backdrop-filter: blur(10px);
@@ -451,7 +456,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
             backdrop-filter: blur(10px);
             opacity: 0;
@@ -483,7 +488,7 @@
 
         .editable-header {
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
             padding: 5px;
             border-radius: 5px;
         }
@@ -524,6 +529,9 @@
             transition: background 0.3s ease;
             display: flex;
             flex-direction: column;
+
+            transform: translateZ(0);
+            will-change: transform;
         }
 
         @keyframes modalSlideIn {
@@ -568,7 +576,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
@@ -587,7 +595,7 @@
             cursor: pointer;
             font-size: 0.9em;
             font-weight: 500;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
             margin-right: 12px;
         }
@@ -646,7 +654,7 @@
         .modal-content-section {
             margin-bottom: 20px;
             border-radius: 12px;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             position: relative;
         }
 
@@ -726,7 +734,7 @@
             color: var(--text-muted);
             border: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
         }
 
         .author-subtitle {
@@ -811,7 +819,7 @@
             font-weight: 600;
             margin: 0;
             letter-spacing: -0.025em;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease;
             cursor: pointer;
             padding: 8px 12px;
             border-radius: 8px;
@@ -843,7 +851,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
@@ -862,7 +870,7 @@
             cursor: pointer;
             font-size: 0.9em;
             font-weight: 500;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
             margin-right: 12px;
         }
@@ -885,11 +893,11 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 1px 4px var(--shadow-light);
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             cursor: move;
             position: relative;
             user-select: none;
-        }
+        `r`n            contain: layout style paint;}
 
         .popup-list-item:hover {
             transform: translateY(-2px);
@@ -950,7 +958,7 @@
             margin-bottom: 8px;
             margin-top: 36px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid transparent;
@@ -976,7 +984,7 @@
             transition: box-shadow 0.2s ease, transform 0.2s ease;
             cursor: move;
             position: relative;
-        }
+        `r`n            contain: layout style paint;}
 
         .list-item:hover {
             transform: translateY(-2px);
@@ -1055,7 +1063,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
             backdrop-filter: blur(10px);
         }
@@ -1080,7 +1088,152 @@
             opacity: 0.5;
         }
 
-        @media (max-width: 768px) {
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: transform 0.2s ease;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        .fab:hover {
+            transform: translateY(-2px) translateZ(0);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95) translateZ(0);
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-size: 0.9em;
+            z-index: 2000;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            max-width: 90%;
+            will-change: transform, opacity;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #059669;
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Skeleton Loaders */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                #f0f0f0 25%,
+                #e0e0e0 50%,
+                #f0f0f0 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        [data-theme="dark"] .skeleton {
+            background: linear-gradient(
+                90deg,
+                #334155 25%,
+                #475569 50%,
+                #334155 75%
+            );
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-author {
+            height: 160px;
+            margin-bottom: 16px;
+        }
+
+        /* Pull to Refresh */
+        .pull-to-refresh {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .pull-to-refresh.visible {
+            opacity: 1;
+        }
+
+        .refresh-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }        @media (max-width: 768px) {
             body {
                 padding: 12px;
             }
@@ -1211,7 +1364,10 @@
                 margin: 5vh auto;
                 padding: 24px 16px;
                 border-radius: 12px;
-            }
+    
+            transform: translateZ(0);
+            will-change: transform;
+        }
 
             .modal-header {
                 margin-bottom: 20px;
@@ -1289,7 +1445,8 @@
 
             .popup-list-item {
                 padding: 16px;
-            }
+
+            contain: layout style paint;}
 
             .item-title {
                 font-size: 1em;
@@ -1328,7 +1485,20 @@
                 opacity: 1;
             }
 
-            .empty-state {
+
+            .fab {
+                bottom: 16px;
+                right: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+
+            .toast {
+                bottom: 80px;
+                font-size: 0.85em;
+                padding: 10px 20px;
+            }            .empty-state {
                 padding: 40px 16px;
             }
 
@@ -1432,6 +1602,12 @@
         </div>
     </div>
 
+
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="scrollToForm()" title="Add new item">
+        +
+    </button>
     <script>
         // Firebase Configuration and Initialization
         const firebaseConfig = {
@@ -1489,12 +1665,14 @@
                 const imageFile = this.imageInput.files[0];
 
                 if (!author) {
-                    alert('Please enter an author name');
+                    showToast('Please enter an author name', 'error');
+                    return;
                     return;
                 }
 
                 if (!text.trim() && !imageFile) {
-                    alert('Please enter text or select an image');
+                    showToast('Please enter text or select an image', 'error');
+                    return;
                     return;
                 }
 
@@ -1514,13 +1692,13 @@
                         item.image = e.target.result;
                         this.items.push(item);
                         this.saveToStorage();
-                        this.renderItems();
+                        this.renderItems();`n                        showToast('Item added successfully!', 'success');
                     };
                     reader.readAsDataURL(imageFile);
                 } else {
                     this.items.push(item);
                     this.saveToStorage();
-                    this.renderItems();
+                    this.renderItems();`n                        showToast('Item added successfully!', 'success');
                 }
 
                 this.clearForm();
@@ -1538,7 +1716,7 @@
 
                 this.items = this.items.filter(item => item.id !== id);
                 this.saveToStorage();
-                this.renderItems();
+                this.renderItems();`n                showToast('Item deleted', 'default');
             }
 
             clearForm() {
@@ -1873,7 +2051,7 @@
                     link.click();
                     URL.revokeObjectURL(url);
                 } catch (error) {
-                    alert('Failed to export data: ' + error.message);
+                    showToast('Failed to export: ' + error.message, 'error');
                 }
             }
 
@@ -1887,12 +2065,12 @@
                             this.itemCounter = data.itemCounter || this.items.length + 1;
                             this.saveToStorage();
                             this.renderItems();
-                            alert('Data imported successfully!');
+                            showToast('Data imported successfully!', 'success');
                         } else {
-                            alert('Invalid file format');
+                            showToast('Invalid file format', 'error');
                         }
                     } catch (error) {
-                        alert('Failed to import data: ' + error.message);
+                        showToast('Failed to import: ' + error.message, 'error');
                     }
                 };
                 reader.readAsText(file);
@@ -2943,7 +3121,7 @@
                     await auth.signInWithPopup(provider);
                 } catch (error) {
                     console.error('Auth error:', error);
-                    alert('Failed to sign in: ' + error.message);
+                    showToast('Sign in failed: ' + error.message, 'error');
                 }
             }
         }
@@ -2997,6 +3175,105 @@
                 listBuilder.loadFromStorage();
                 listBuilder.renderItems();
             }
+        });
+
+
+        // Toast Notification System
+        function showToast(message, type = 'default', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Ripple Effect
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.className = 'ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            button.style.position = 'relative';
+            button.style.overflow = 'hidden';
+            button.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        // Add ripple to all buttons and clickable cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.btn, .btn-secondary, .btn-danger, .fab');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', createRipple);
+            });
+        });
+
+        // Scroll to form (for FAB)
+        function scrollToForm() {
+            const form = document.getElementById('itemForm');
+            const authorInput = document.getElementById('authorInput');
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => authorInput.focus(), 500);
+        }
+
+        // Pull to Refresh
+        let touchStartY = 0;
+        let pulling = false;
+        const refreshThreshold = 80;
+
+        document.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0) {
+                touchStartY = e.touches[0].clientY;
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (window.scrollY === 0 && touchStartY > 0) {
+                const touchY = e.touches[0].clientY;
+                const pull = touchY - touchStartY;
+                
+                if (pull > 10 && !pulling) {
+                    pulling = true;
+                }
+                
+                if (pulling && pull < refreshThreshold * 1.5) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        document.addEventListener('touchend', async (e) => {
+            if (pulling && window.scrollY === 0) {
+                const touchY = touchStartY;
+                pulling = false;
+                touchStartY = 0;
+                
+                // Trigger refresh
+                if (currentUser) {
+                    showToast('Syncing...', 'default', 1500);
+                    await listBuilder.loadFromFirebase();
+                    showToast('Synced!', 'success', 2000);
+                } else {
+                    showToast('Sign in to sync', 'error', 2000);
+                }
+            }
+            touchStartY = 0;
         });
         // Initialize theme when page loads
         document.addEventListener('DOMContentLoaded', initializeTheme);
