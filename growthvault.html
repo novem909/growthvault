@@ -3173,10 +3173,12 @@
                 // User signed in, load from Firebase
                 await listBuilder.loadFromFirebase();
             } else {
-                // User signed out, disconnect Firebase and load from localStorage only
+                // User signed out, disconnect Firebase and clear content
                 listBuilder.disconnectFirebase();
-                listBuilder.loadFromStorage();
+                listBuilder.items = [];
+                listBuilder.authorOrder = [];
                 listBuilder.renderItems();
+                showToast('Signed out successfully', 'default');
             }
         });
 
