@@ -1342,8 +1342,7 @@
 <body>
     <div class="container">
         <div class="header">
-                        <button class="auth-button" id="authButton" onclick="handleAuth()">
-                <span id="authIcon">🔒</span>
+            <button class="auth-button" id="authButton" onclick="handleAuth()">
                 <span id="authText">Sign In</span>
             </button>
             <div id="syncStatus">
@@ -2951,17 +2950,14 @@
 
         function updateAuthUI(user) {
             const authButton = document.getElementById('authButton');
-            const authIcon = document.getElementById('authIcon');
             const authText = document.getElementById('authText');
             const syncStatus = document.getElementById('syncStatus');
 
             if (user) {
-                authIcon.textContent = '??';
-                authText.textContent = user.displayName || 'Sign Out';
+                authText.textContent = user.displayName?.split(' ')[0] || 'Sign Out';
                 syncStatus.style.display = 'block';
                 updateSyncStatus('synced');
             } else {
-                authIcon.textContent = '??';
                 authText.textContent = 'Sign In';
                 syncStatus.style.display = 'none';
             }
