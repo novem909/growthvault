@@ -1692,13 +1692,15 @@
                         item.image = e.target.result;
                         this.items.push(item);
                         this.saveToStorage();
-                        this.renderItems();`n                        showToast('Item added successfully!', 'success');
+                        this.renderItems();
+                        showToast('Item added successfully!', 'success');
                     };
                     reader.readAsDataURL(imageFile);
                 } else {
                     this.items.push(item);
                     this.saveToStorage();
-                    this.renderItems();`n                        showToast('Item added successfully!', 'success');
+                    this.renderItems();
+                        showToast('Item added successfully!', 'success');
                 }
 
                 this.clearForm();
@@ -1716,7 +1718,8 @@
 
                 this.items = this.items.filter(item => item.id !== id);
                 this.saveToStorage();
-                this.renderItems();`n                showToast('Item deleted', 'default');
+                this.renderItems();
+                        showToast('Item deleted', 'default');
             }
 
             clearForm() {
