@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual List Builder</title>    
-    <!-- Firebase SDK -->
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GrowthVault">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Visual list builder with cloud sync">
+    
+    <!-- App Manifest & Icons -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiR3Jvd3RoVmF1bHQiLCJzaG9ydF9uYW1lIjoiR3Jvd3RoVmF1bHQiLCJkZXNjcmlwdGlvbiI6IlZpc3VhbCBsaXN0IGJ1aWxkZXIgd2l0aCBjbG91ZCBzeW5jIiwic3RhcnRfdXJsIjoiLi9ncm93dGh2YXVsdC5odG1sIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Y4ZmFmYyIsInRoZW1lX2NvbG9yIjoiIzYzNjZmMSIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQtcHJpbWFyeSIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnJTNFJTNDcmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgZmlsbD0nJTIzNjM2NmYxJy8lM0UlM0N0ZXh0IHg9JzUwJTI1JyB5PSc1MCUyNScgZm9udC1zaXplPSc1MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZHk9Jy4zZW0nIGZpbGw9J3doaXRlJyUzRUclM0MvdGV4dCUzRSUzQy9zdmclM0UiLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9LHsic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIGZpbGw9JyUyMzYzNjZmMScvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNTAlMjUnIGZvbnQtc2l6ZT0nNTAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGR5PScuM2VtJyBmaWxsPSd3aGl0ZSclM0VHJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%236366f1'/%3E%3Ctext x='50%25' y='50%25' font-size='50' text-anchor='middle' dy='.3em' fill='white'%3EG%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%236366f1'/%3E%3Ctext x='50%25' y='50%25' font-size='50' text-anchor='middle' dy='.3em' fill='white'%3EG%3C/text%3E%3C/svg%3E">    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -1089,7 +1101,42 @@
         }
 
 
-        /* Floating Action Button */
+
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9em;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            z-index: 9999;
+            cursor: pointer;
+            animation: slideDown 0.3s ease;
+            transition: transform 0.2s ease;
+        }
+
+        .install-prompt:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+        }
+
+        @keyframes slideDown {
+            from { 
+                transform: translateX(-50%) translateY(-60px); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(-50%) translateY(0); 
+                opacity: 1; 
+            }
+        }        /* Floating Action Button */
         .fab {
             position: fixed;
             bottom: 24px;
@@ -3282,6 +3329,220 @@
             }
             touchStartY = 0;
         });
+
+
+        // ============================================
+        // PWA & STATE PERSISTENCE
+        // ============================================
+
+        // Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+
+        function showInstallButton() {
+            if (document.querySelector('.install-prompt')) return;
+            
+            const installBtn = document.createElement('button');
+            installBtn.className = 'install-prompt';
+            installBtn.innerHTML = '📱 Install App';
+            installBtn.onclick = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        showToast('App installed! Check your home screen', 'success');
+                        installBtn.remove();
+                    }
+                    deferredPrompt = null;
+                }
+            };
+            document.body.appendChild(installBtn);
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (installBtn.parentNode) {
+                    installBtn.style.animation = 'slideDown 0.3s ease reverse';
+                    setTimeout(() => installBtn.remove(), 300);
+                }
+            }, 10000);
+        }
+
+        // Page Visibility API - State Persistence
+        let savedScrollPosition = 0;
+        let savedOpenModal = null;
+        let isPageHidden = false;
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // User switched away - save everything
+                isPageHidden = true;
+                savedScrollPosition = window.scrollY;
+                sessionStorage.setItem('scrollPosition', savedScrollPosition);
+                
+                // Save which modal is open
+                const openModal = document.querySelector('.modal[style*="display: block"]');
+                if (openModal) {
+                    savedOpenModal = openModal.id;
+                    sessionStorage.setItem('openModal', savedOpenModal);
+                }
+                
+                // Force save current state
+                if (listBuilder) {
+                    listBuilder.saveToStorage();
+                }
+                
+                // Pause Firebase sync to save battery
+                if (currentUser && listBuilder) {
+                    listBuilder.pauseSync = true;
+                }
+            } else {
+                // User returned - restore state
+                isPageHidden = false;
+                
+                // Restore scroll position
+                const scrollPos = sessionStorage.getItem('scrollPosition');
+                if (scrollPos) {
+                    setTimeout(() => window.scrollTo(0, parseInt(scrollPos)), 100);
+                }
+                
+                // Resume Firebase sync
+                if (currentUser && listBuilder) {
+                    listBuilder.pauseSync = false;
+                    // Silently check for updates
+                    listBuilder.loadFromFirebase().catch(() => {});
+                }
+            }
+        });
+
+        // Browser Back Button Handling
+        let modalHistory = [];
+
+        window.addEventListener('popstate', (e) => {
+            // Close modals on back button
+            const openModal = document.querySelector('.modal[style*="display: block"]');
+            const openPopup = document.querySelector('.author-popup[style*="display: block"]');
+            
+            if (openModal) {
+                closeModal();
+            } else if (openPopup) {
+                closeAuthorPopup();
+            }
+        });
+
+        // Override modal open to add history
+        const originalOpenModal = typeof openModal !== 'undefined' ? openModal : null;
+        function openModalWithHistory(modalId) {
+            history.pushState({ modal: true, modalId: modalId }, '');
+            if (originalOpenModal) originalOpenModal(modalId);
+        }
+
+        // Form Input Persistence
+        function setupFormPersistence() {
+            const formInputs = ['authorInput', 'titleInput', 'textInput'];
+            
+            formInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (!input) return;
+                
+                // Restore saved value on load
+                const saved = sessionStorage.getItem('form_' + id);
+                if (saved && !input.value) {
+                    input.value = saved;
+                }
+                
+                // Save as user types (debounced)
+                let timeout;
+                input.addEventListener('input', () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        sessionStorage.setItem('form_' + id, input.value);
+                    }, 500);
+                });
+                
+                // Clear on successful submit
+                const form = document.getElementById('itemForm');
+                if (form) {
+                    form.addEventListener('submit', () => {
+                        formInputs.forEach(inputId => {
+                            sessionStorage.removeItem('form_' + inputId);
+                        });
+                    });
+                }
+            });
+        }
+
+        // Scroll Position Memory per Author
+        const authorScrollPositions = {};
+
+        function saveAuthorScrollPosition(author) {
+            if (author) {
+                authorScrollPositions[author] = window.scrollY;
+                sessionStorage.setItem('authorScrollPositions', JSON.stringify(authorScrollPositions));
+            }
+        }
+
+        function restoreAuthorScrollPosition(author) {
+            const saved = sessionStorage.getItem('authorScrollPositions');
+            if (saved) {
+                const positions = JSON.parse(saved);
+                if (positions[author]) {
+                    setTimeout(() => window.scrollTo(0, positions[author]), 100);
+                }
+            }
+        }
+
+        // Swipe Gestures for Modal Navigation
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let swipeEndX = 0;
+        let swipeEndY = 0;
+        let isSwipeOnModal = false;
+
+        document.addEventListener('touchstart', (e) => {
+            swipeStartX = e.changedTouches[0].screenX;
+            swipeStartY = e.changedTouches[0].screenY;
+            
+            // Check if touch is on a modal
+            const target = e.target;
+            isSwipeOnModal = target.closest('.modal-content') || target.closest('.author-popup-content');
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            swipeEndX = e.changedTouches[0].screenX;
+            swipeEndY = e.changedTouches[0].screenY;
+            
+            const swipeDistanceX = swipeEndX - swipeStartX;
+            const swipeDistanceY = swipeEndY - swipeStartY;
+            
+            // Swipe down to close modal (only if swiping on modal header)
+            if (isSwipeOnModal && swipeDistanceY > 100 && Math.abs(swipeDistanceX) < 50) {
+                const openModal = document.querySelector('.modal[style*="display: block"]');
+                const openPopup = document.querySelector('.author-popup[style*="display: block"]');
+                
+                if (openModal) closeModal();
+                if (openPopup) closeAuthorPopup();
+            }
+        }, { passive: true });
+
+        // Initialize PWA features on load
+        window.addEventListener('load', () => {
+            setupFormPersistence();
+            
+            // Restore scroll position if coming back to page
+            const savedScroll = sessionStorage.getItem('scrollPosition');
+            if (savedScroll) {
+                setTimeout(() => window.scrollTo(0, parseInt(savedScroll)), 200);
+            }
+        });
+
+        // Service worker registration (optional, for future offline support)
+        if ('serviceWorker' in navigator) {
+            // Can add service worker here later for offline caching
+        }
         // Initialize theme when page loads
         document.addEventListener('DOMContentLoaded', initializeTheme);
     </script>
