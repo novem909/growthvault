@@ -1554,6 +1554,82 @@
                 height: 60px;
             }
         }
+
+
+        /* Image Zoom Enhancements */
+        .modal-image, .item-image {
+            cursor: pointer !important;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .modal-image:hover, .item-image:hover {
+            transform: scale(1.02);
+            opacity: 0.95;
+        }
+
+        /* Image Zoom Overlay */
+        .image-zoom-overlay {
+            display: none;
+            position: fixed;
+            z-index: 4000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .image-zoom-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoomed-image {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        .image-zoom-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            z-index: 4001;
+        }
+
+        .image-zoom-close:hover {
+            background: rgba(220, 38, 38, 0.9);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -1651,6 +1727,12 @@
 
 
 
+
+    <!-- Image Zoom Overlay -->
+    <div id="imageZoomOverlay" class="image-zoom-overlay" onclick="closeImageZoom(event)">
+        <button class="image-zoom-close" onclick="closeImageZoom(event)" title="Close (ESC)">×</button>
+        <img id="zoomedImage" class="zoomed-image" alt="Zoomed image" onclick="event.stopPropagation()">
+    </div>
     <!-- Floating Action Button -->
     <button class="fab" onclick="scrollToForm()" title="Add new item">
         +
@@ -2472,6 +2554,11 @@
                 img.alt = 'User uploaded image';
                 img.className = 'modal-image';
                 img.style.marginTop = '0';
+                img.style.cursor = 'pointer';
+                img.onclick = function(e) {
+                    e.stopPropagation();
+                    openImageZoom(this.src);
+                };
 
                 imageSection.appendChild(dragHandle);
                 imageSection.appendChild(img);
@@ -2724,6 +2811,11 @@
                     img.src = item.image;
                     img.alt = 'User uploaded image';
                     img.className = 'item-image';
+                    img.style.cursor = 'pointer';
+                    img.onclick = function(e) {
+                        e.stopPropagation();
+                        openImageZoom(this.src);
+                    };
                     itemDiv.appendChild(img);
                 }
 
@@ -3545,6 +3637,47 @@
         }
         // Initialize theme when page loads
         document.addEventListener('DOMContentLoaded', initializeTheme);
+
+
+        // Image Zoom Functions
+        function openImageZoom(imageSrc) {
+            const overlay = document.getElementById('imageZoomOverlay');
+            const zoomedImage = document.getElementById('zoomedImage');
+            zoomedImage.src = imageSrc;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageZoom(event) {
+            if (event) event.stopPropagation();
+            const overlay = document.getElementById('imageZoomOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close zoom overlay on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('imageZoomOverlay');
+                if (overlay && overlay.classList.contains('active')) {
+                    closeImageZoom();
+                }
+            }
+        });
+
+        // Add click handlers to all images when content loads
+        function addImageZoomHandlers() {
+            document.querySelectorAll('.modal-image, .item-image').forEach(img => {
+                img.style.cursor = 'pointer';
+                img.onclick = function(e) {
+                    e.stopPropagation();
+                    openImageZoom(this.src);
+                };
+            });
+        }
+
+        // Call addImageZoomHandlers after images are loaded
+        window.addEventListener('load', addImageZoomHandlers);
     </script>
 </body>
 </html>
