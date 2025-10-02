@@ -1630,6 +1630,14 @@
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
+
+        /* Rich Text Formatting */
+        .format-toolbar { display: flex; gap: 8px; padding: 12px; background: var(--bg-input-section); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; }
+        .format-btn { padding: 8px 12px; background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: all 0.2s ease; color: var(--text-secondary); }
+        .format-btn:hover { background: #6366f1; color: white; }
+        .modal-text strong { font-weight: 600; }
+        .modal-text ul { margin: 12px 0; padding-left: 24px; }
+        .modal-text li { margin: 8px 0; }
     </style>
 </head>
 <body>
@@ -1703,6 +1711,7 @@
                     <button class="modal-delete" onclick="deleteCurrentModalItem()">Delete Content</button>
                 </div>
             </div>
+            <div class="format-toolbar" id="formatToolbar" style="display: none;"><button class="format-btn" onclick="formatText('bold')"><strong>B</strong></button><button class="format-btn" onclick="formatText('insertUnorderedList')">• List</button></div>
             <div class="modal-text" id="modalText"></div>
             <img class="modal-image" id="modalImage" alt="Content image">
             <div class="modal-meta">
@@ -2530,7 +2539,7 @@
                 const modalText = document.createElement('div');
                 modalText.className = 'modal-text';
                 modalText.style.marginBottom = '0';
-                modalText.innerText = item.text;
+                modalText.innerHTML = item.text || "";
 
                 textSection.appendChild(dragHandle);
                 textSection.appendChild(modalText);
@@ -2664,7 +2673,7 @@
             listBuilder.renderItems();
         }
 
-        function closeModal() {
+        function closeModal() { var tb = document.getElementById('formatToolbar'); if (tb) tb.style.display = 'none';
             // Trigger final save for any text changes
             const textElements = document.querySelectorAll('.modal-text');
             textElements.forEach(textEl => {
@@ -3678,6 +3687,23 @@
 
         // Call addImageZoomHandlers after images are loaded
         window.addEventListener('load', addImageZoomHandlers);
+
+
+        // Rich Text Formatting
+        function formatText(cmd) {
+            const editable = document.querySelector('.modal-text[contenteditable="true"]');
+            if (editable) { editable.focus(); document.execCommand(cmd, false, null); }
+        }
+        const origSetup = setupTextEditor;
+        setupTextEditor = function(el, id) {
+            el.contentEditable = 'true';
+            el.spellcheck = true;
+            el.addEventListener('input', () => { const item = listBuilder.items.find(i => i.id === id); if (item) { item.text = el.innerHTML; listBuilder.saveToStorage(); } });
+            el.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+            el.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); document.execCommand('bold'); } });
+            el.addEventListener('mousedown', e => e.stopPropagation());
+            document.getElementById('formatToolbar').style.display = 'flex';
+        };
     </script>
 </body>
 </html>
