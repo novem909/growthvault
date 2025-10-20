@@ -541,7 +541,9 @@
             transition: background 0.3s ease;
             display: flex;
             flex-direction: column;
-
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
             transform: translateZ(0);
             will-change: transform;
         }
@@ -792,6 +794,9 @@
             position: relative;
             animation: popupSlideIn 0.3s ease-out;
             transition: background 0.3s ease;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
         }
 
         @keyframes popupSlideIn {
@@ -897,6 +902,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
 
         .popup-list-item {
@@ -3601,15 +3608,24 @@
         let swipeStartY = 0;
         let swipeEndX = 0;
         let swipeEndY = 0;
-        let isSwipeOnModal = false;
+        let isSwipeOnModalHeader = false;
 
         document.addEventListener('touchstart', (e) => {
             swipeStartX = e.changedTouches[0].screenX;
             swipeStartY = e.changedTouches[0].screenY;
             
-            // Check if touch is on a modal
+            // Check if touch is specifically on modal/popup header or backdrop (not scrollable content)
             const target = e.target;
-            isSwipeOnModal = target.closest('.modal-content') || target.closest('.author-popup-content');
+            const isOnScrollableContent = target.closest('.author-items') || 
+                                         target.closest('.modal-text') || 
+                                         target.closest('.popup-list-item') ||
+                                         target.closest('.list-item');
+            
+            // Only allow swipe-to-close from header areas, not from scrollable content
+            const isOnHeader = target.closest('.modal-header') || 
+                              target.closest('.author-popup-header');
+            
+            isSwipeOnModalHeader = isOnHeader && !isOnScrollableContent;
         }, { passive: true });
 
         document.addEventListener('touchend', (e) => {
@@ -3619,14 +3635,17 @@
             const swipeDistanceX = swipeEndX - swipeStartX;
             const swipeDistanceY = swipeEndY - swipeStartY;
             
-            // Swipe down to close modal (only if swiping on modal header)
-            if (isSwipeOnModal && swipeDistanceY > 100 && Math.abs(swipeDistanceX) < 50) {
+            // Swipe down to close modal (only if swiping on modal header, not scrollable content)
+            if (isSwipeOnModalHeader && swipeDistanceY > 100 && Math.abs(swipeDistanceX) < 50) {
                 const openModal = document.querySelector('.modal[style*="display: block"]');
                 const openPopup = document.querySelector('.author-popup[style*="display: block"]');
                 
                 if (openModal) closeModal();
                 if (openPopup) closeAuthorPopup();
             }
+            
+            // Reset the flag
+            isSwipeOnModalHeader = false;
         }, { passive: true });
 
         // Initialize PWA features on load
