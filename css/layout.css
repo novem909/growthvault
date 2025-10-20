@@ -1,0 +1,138 @@
+/**
+ * Layout Styles
+ * Container, grid systems, and layout structures
+ */
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: var(--bg-container);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px var(--shadow-light);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: background 0.3s ease;
+}
+
+.input-section {
+    padding: 40px 32px;
+    background: var(--bg-input-section);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.input-form {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-group label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.875em;
+    margin-bottom: 8px;
+    letter-spacing: 0.025em;
+    transition: color 0.3s ease;
+}
+
+.list-container {
+    padding: 40px 32px;
+    min-height: 400px;
+    background: var(--bg-list-container);
+    transition: background 0.3s ease;
+}
+
+.list-title {
+    text-align: center;
+    margin-bottom: 32px;
+    color: var(--text-primary);
+    font-size: 1.75em;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    transition: color 0.3s ease;
+}
+
+.visual-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-height: 650px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.visual-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.visual-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.visual-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.visual-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.author-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.data-management {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.data-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.storage-info {
+    text-align: center;
+    font-size: 0.8em;
+    color: #64748b;
+}
+
+.auto-save-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 60px 20px;
+}
+
+.empty-state svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}

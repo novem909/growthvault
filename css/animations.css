@@ -1,0 +1,140 @@
+/**
+ * Animations
+ * Keyframe animations and transition effects
+ */
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-60px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes swapPulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 3px #6366f1, 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 5px #6366f1, 0 0 30px rgba(99, 102, 241, 0.6);
+    }
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply animations */
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.author-popup-content {
+    animation: popupSlideIn 0.3s ease-out;
+}
+
+.install-prompt {
+    animation: slideDown 0.3s ease;
+}
+
+.skeleton {
+    animation: shimmer 1.5s infinite;
+}
+
+.refresh-spinner {
+    animation: spin 0.8s linear infinite;
+}
+
+.image-zoom-overlay {
+    animation: fadeIn 0.3s ease;
+}
+
+.zoomed-image {
+    animation: zoomIn 0.3s ease;
+}
+
+.ripple {
+    animation: ripple-animation 0.6s ease-out;
+}
+
+.author-box.drag-over,
+.list-item.drag-over,
+.popup-list-item.drag-over,
+.modal-content-section.drag-over {
+    animation: swapPulse 0.6s ease infinite;
+}
