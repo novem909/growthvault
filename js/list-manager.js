@@ -56,7 +56,9 @@ export class ListManager {
         if (imageFile) {
             try {
                 item.image = await this.readImageFile(imageFile);
+                console.log('📷 Image loaded, size:', item.image.length, 'bytes');
             } catch (error) {
+                console.error('❌ Failed to read image:', error);
                 return { success: false, error: 'Failed to read image file' };
             }
         }
@@ -64,6 +66,14 @@ export class ListManager {
         // Add to state
         const state = this.stateManager.getState();
         const newItems = [...state.items, item];
+        
+        console.log('➕ Adding item:', {
+            id: item.id,
+            author: item.author,
+            title: item.title,
+            hasText: !!item.text,
+            hasImage: !!item.image
+        });
         
         this.stateManager.setState({ 
             items: newItems,

@@ -224,6 +224,7 @@ export class ModalManager {
 
         // Image (if exists)
         if (item.image) {
+            console.log('🖼️  Rendering image for item:', item.id, 'size:', item.image.length);
             const img = document.createElement('img');
             img.src = item.image;
             img.alt = 'User uploaded image';
@@ -236,6 +237,8 @@ export class ModalManager {
                 }
             };
             itemDiv.appendChild(img);
+        } else {
+            console.log('ℹ️  No image for item:', item.id);
         }
 
         container.appendChild(itemDiv);
