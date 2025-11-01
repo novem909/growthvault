@@ -151,6 +151,9 @@ export class ModalManager {
             items.forEach(item => {
                 this.renderAuthorPopupItem(item, itemsContainer, author);
             });
+
+            // Setup drag & drop for reordering items
+            this.addPopupDragAndDrop(author);
         }
 
         // Show popup
@@ -249,6 +252,119 @@ export class ModalManager {
         }
 
         console.log('👤 Closed author popup');
+    }
+
+    /**
+     * Add drag & drop functionality for items within author popup
+     * @param {string} author - Author name
+     */
+    addPopupDragAndDrop(author) {
+        const itemsContainer = document.getElementById('authorPopupItems');
+        if (!itemsContainer) return;
+
+        const items = itemsContainer.querySelectorAll('.popup-list-item');
+        let draggedItem = null;
+
+        items.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                draggedItem = item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', item.dataset.id);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                items.forEach(i => i.classList.remove('drag-over'));
+                draggedItem = null;
+            });
+
+            item.addEventListener('dragover', (e) => {
+                if (draggedItem && draggedItem !== item) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    item.classList.add('drag-over');
+                }
+            });
+
+            item.addEventListener('dragleave', (e) => {
+                if (!item.contains(e.relatedTarget)) {
+                    item.classList.remove('drag-over');
+                }
+            });
+
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+
+                if (draggedItem && draggedItem !== item) {
+                    const draggedIndex = Array.from(itemsContainer.children).indexOf(draggedItem);
+                    const targetIndex = Array.from(itemsContainer.children).indexOf(item);
+
+                    if (draggedIndex < targetIndex) {
+                        item.parentNode.insertBefore(draggedItem, item.nextSibling);
+                    } else {
+                        item.parentNode.insertBefore(draggedItem, item);
+                    }
+
+                    this.updateAuthorItemsFromDOM(author);
+                }
+            });
+
+            // Prevent drag from interfering with click events
+            let isDragging = false;
+            item.addEventListener('mousedown', () => isDragging = false);
+            item.addEventListener('mousemove', () => isDragging = true);
+
+            const clickableElements = item.querySelectorAll('.item-text, .delete-btn, .item-title, .item-image');
+            clickableElements.forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     * Update item order in state based on DOM order
+     * @param {string} author - Author name
+     */
+    updateAuthorItemsFromDOM(author) {
+        const itemsContainer = document.getElementById('authorPopupItems');
+        if (!itemsContainer) return;
+
+        const domOrder = Array.from(itemsContainer.querySelectorAll('.popup-list-item'))
+            .map(item => parseInt(item.dataset.id));
+
+        const state = this.stateManager.getState();
+        const allItems = [...state.items];
+
+        // Separate items by this author and others
+        const authorItems = allItems.filter(item => item.author === author);
+        const otherItems = allItems.filter(item => item.author !== author);
+
+        // Reorder author's items based on DOM
+        const reorderedAuthorItems = domOrder.map(id => 
+            authorItems.find(item => item.id === id)
+        ).filter(Boolean);
+
+        // Merge back: find position of first author item in original array
+        const firstAuthorIndex = allItems.findIndex(item => item.author === author);
+        
+        // Reconstruct items array
+        const newItems = [
+            ...allItems.slice(0, firstAuthorIndex),
+            ...reorderedAuthorItems,
+            ...allItems.slice(firstAuthorIndex + authorItems.length)
+        ];
+
+        this.stateManager.setState({ items: newItems });
+        this.listManager.save();
+
+        console.log('🔄 Reordered items for author:', author);
     }
 
     /**
