@@ -143,9 +143,14 @@ export class ModalManager {
             title.dataset.author = author;
         }
 
-        // Render items
+        // Clear existing items
         if (itemsContainer) {
-            itemsContainer.innerHTML = items.map(item => this.renderAuthorPopupItem(item)).join('');
+            itemsContainer.innerHTML = '';
+
+            // Create each item using DOM manipulation (matches original)
+            items.forEach(item => {
+                this.renderAuthorPopupItem(item, itemsContainer, author);
+            });
         }
 
         // Show popup
@@ -157,26 +162,80 @@ export class ModalManager {
     }
 
     /**
-     * Render an item in the author popup
+     * Render an item in the author popup using DOM manipulation
      * @param {Object} item - Item object
-     * @returns {string} HTML string
+     * @param {HTMLElement} container - Container element
+     * @param {string} author - Author name
      */
-    renderAuthorPopupItem(item) {
-        const textPreview = item.text ? this.truncateText(item.text, 150) : '';
-        
-        return `
-            <div class="popup-list-item" data-item-id="${item.id}">
-                <div class="popup-item-header">
-                    <h4 class="popup-item-title" data-action="open-item-modal" data-item-id="${item.id}">
-                        ${this.escapeHtml(item.title || 'Untitled')}
-                    </h4>
-                    <button class="popup-item-delete" data-action="delete-item" data-item-id="${item.id}">×</button>
-                </div>
-                ${item.image ? `<img class="popup-item-image" src="${item.image}" alt="Item image" data-action="open-item-modal" data-item-id="${item.id}">` : ''}
-                ${textPreview ? `<p class="popup-item-text" data-action="open-item-modal" data-item-id="${item.id}">${this.escapeHtml(textPreview)}</p>` : ''}
-                <div class="popup-item-date">${this.escapeHtml(item.date)}</div>
-            </div>
-        `;
+    renderAuthorPopupItem(item, container, author) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'popup-list-item';
+        itemDiv.draggable = true;
+        itemDiv.dataset.id = item.id;
+        itemDiv.dataset.author = author;
+
+        // Drag handle
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'popup-drag-handle';
+
+        // Date
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'item-date';
+        dateDiv.textContent = item.date;
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.onclick = () => {
+            const confirmMessage = `Are you sure you want to delete "${item.title || 'Untitled'}"?`;
+            if (confirm(confirmMessage)) {
+                this.listManager.deleteItem(item.id);
+                this.closeAuthorPopup();
+            }
+        };
+
+        // Title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'item-title';
+        titleDiv.textContent = item.title || 'Untitled';
+        titleDiv.onclick = () => {
+            // Future: make editable
+            // For now, just click to open modal
+        };
+
+        // Append base elements
+        itemDiv.appendChild(dragHandle);
+        itemDiv.appendChild(dateDiv);
+        itemDiv.appendChild(deleteBtn);
+        itemDiv.appendChild(titleDiv);
+
+        // Text (if exists)
+        if (item.text) {
+            const textDiv = document.createElement('div');
+            textDiv.className = 'item-text';
+            textDiv.innerText = item.text; // Preserve exact formatting
+            textDiv.onclick = () => this.openContentModal(item.id);
+            itemDiv.appendChild(textDiv);
+        }
+
+        // Image (if exists)
+        if (item.image) {
+            const img = document.createElement('img');
+            img.src = item.image;
+            img.alt = 'User uploaded image';
+            img.className = 'item-image';
+            img.style.cursor = 'pointer';
+            img.onclick = (e) => {
+                e.stopPropagation();
+                if (typeof openImageZoom === 'function') {
+                    openImageZoom(img.src);
+                }
+            };
+            itemDiv.appendChild(img);
+        }
+
+        container.appendChild(itemDiv);
     }
 
     /**
@@ -300,17 +359,6 @@ export class ModalManager {
             .split('\n')
             .map(line => this.escapeHtml(line))
             .join('<br>');
-    }
-
-    /**
-     * Truncate text for preview
-     * @param {string} text
-     * @param {number} maxLength
-     * @returns {string}
-     */
-    truncateText(text, maxLength) {
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
     }
 }
 
