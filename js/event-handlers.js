@@ -19,6 +19,7 @@ export class EventHandlers {
     init() {
         this.setupFormHandler();
         this.setupClickDelegation();
+        this.setupChangeHandlers();
         this.setupModalHandlers();
         this.setupKeyboardShortcuts();
         
@@ -50,6 +51,68 @@ export class EventHandlers {
             const action = target.dataset.action;
             
             switch(action) {
+                case 'auth':
+                    this.handleAuth();
+                    break;
+                    
+                case 'toggle-theme':
+                    if (typeof toggleDarkMode === 'function') {
+                        toggleDarkMode();
+                    }
+                    break;
+                    
+                case 'make-editable':
+                    if (typeof makeEditable === 'function') {
+                        makeEditable(target);
+                    }
+                    break;
+                    
+                case 'export-data':
+                    this.handleExportData();
+                    break;
+                    
+                case 'clear-all':
+                    this.handleClearAllData();
+                    break;
+                    
+                case 'delete-modal-item':
+                    this.handleDeleteCurrentModalItem();
+                    break;
+                    
+                case 'close-modal':
+                    this.modalManager.closeContentModal();
+                    break;
+                    
+                case 'format-text':
+                    if (target.dataset.format && typeof formatText === 'function') {
+                        formatText(target.dataset.format);
+                    }
+                    break;
+                    
+                case 'delete-author-from-popup':
+                    this.handleDeleteAuthorFromPopup();
+                    break;
+                    
+                case 'close-popup':
+                    this.modalManager.closeAuthorPopup();
+                    break;
+                    
+                case 'close-image-zoom':
+                    if (typeof closeImageZoom === 'function') {
+                        closeImageZoom(e);
+                    }
+                    break;
+                    
+                case 'prevent-close':
+                    e.stopPropagation();
+                    break;
+                    
+                case 'scroll-to-form':
+                    if (typeof scrollToForm === 'function') {
+                        scrollToForm();
+                    }
+                    break;
+                    
                 case 'delete-author':
                     e.stopPropagation();
                     this.handleDeleteAuthor(target.dataset.author);
@@ -68,15 +131,40 @@ export class EventHandlers {
                     this.handleOpenItemModal(parseInt(target.dataset.itemId));
                     break;
                     
-                case 'close-modal':
-                    this.modalManager.closeContentModal();
+                case 'zoom-image':
+                    if (target.dataset.imageSrc && typeof openImageZoom === 'function') {
+                        openImageZoom(target.dataset.imageSrc);
+                    }
                     break;
                     
-                case 'close-popup':
-                    this.modalManager.closeAuthorPopup();
+                case 'delete-item-from-popup':
+                    e.stopPropagation();
+                    this.handleDeleteItemFromPopup(parseInt(target.dataset.itemId), target.dataset.itemTitle);
+                    break;
+                    
+                case 'open-item-modal-from-popup':
+                    this.handleOpenItemModal(parseInt(target.dataset.itemId));
                     break;
             }
         });
+    }
+
+    /**
+     * Setup change event handlers
+     */
+    setupChangeHandlers() {
+        // Import file handler
+        const importInput = document.getElementById('importFile');
+        if (importInput) {
+            importInput.addEventListener('change', async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                    await this.handleImportData(file);
+                    // Clear the input so the same file can be imported again
+                    e.target.value = '';
+                }
+            });
+        }
     }
 
     /**
@@ -284,6 +372,98 @@ export class EventHandlers {
         } else {
             if (typeof showToast === 'function') {
                 showToast('Firebase not initialized', 'error');
+            }
+        }
+    }
+
+    /**
+     * Handle delete current modal item
+     */
+    handleDeleteCurrentModalItem() {
+        const currentItemId = this.modalManager.currentItemId;
+        
+        if (!currentItemId) {
+            if (typeof showToast === 'function') {
+                showToast('No item to delete', 'error');
+            }
+            return;
+        }
+        
+        const confirmMessage = 'Delete this content?';
+        
+        if (confirm(confirmMessage)) {
+            this.modalManager.closeContentModal();
+            const result = this.listManager.deleteItem(currentItemId);
+            
+            if (result.success) {
+                this.uiManager.updateStorageInfo();
+                
+                if (typeof showToast === 'function') {
+                    showToast('Item deleted', 'default');
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle delete author from popup
+     */
+    handleDeleteAuthorFromPopup() {
+        const currentAuthor = this.modalManager.currentAuthor;
+        
+        if (!currentAuthor) {
+            if (typeof showToast === 'function') {
+                showToast('No author selected', 'error');
+            }
+            return;
+        }
+        
+        const confirmMessage = `Delete all items by "${currentAuthor}"?`;
+        
+        if (confirm(confirmMessage)) {
+            this.modalManager.closeAuthorPopup();
+            const result = this.listManager.deleteAuthor(currentAuthor);
+            
+            if (result.success) {
+                this.uiManager.updateStorageInfo();
+                
+                if (typeof showToast === 'function') {
+                    showToast(`Deleted ${result.count} items`, 'default');
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle delete item from popup
+     * @param {number} itemId - Item ID
+     * @param {string} itemTitle - Item title for confirmation
+     */
+    handleDeleteItemFromPopup(itemId, itemTitle) {
+        const confirmMessage = `Are you sure you want to delete "${itemTitle}"?`;
+        
+        if (confirm(confirmMessage)) {
+            const result = this.listManager.deleteItem(itemId);
+            
+            if (result.success) {
+                // Check if any items remain for current author
+                const currentAuthor = this.modalManager.currentAuthor;
+                if (currentAuthor) {
+                    const state = this.listManager.stateManager.getState();
+                    const remainingItems = state.items.filter(i => i.author === currentAuthor);
+                    
+                    if (remainingItems.length === 0) {
+                        this.modalManager.closeAuthorPopup();
+                    } else {
+                        this.modalManager.openAuthorPopup(currentAuthor);
+                    }
+                }
+                
+                this.uiManager.updateStorageInfo();
+                
+                if (typeof showToast === 'function') {
+                    showToast('Item deleted', 'default');
+                }
             }
         }
     }

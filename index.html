@@ -34,18 +34,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <button class="auth-button" id="authButton" onclick="handleAuth()">
+            <button class="auth-button" id="authButton" data-action="auth">
                 <span id="authText">Sign In</span>
             </button>
             <div id="syncStatus">
                 <span id="syncIndicator" style="color: #10b981;">●</span> <span id="syncText">Synced</span>
             </div>
-            <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+            <button class="dark-mode-toggle" data-action="toggle-theme">
                 <span id="themeIcon">🌙</span>
                 <span id="themeText">Dark</span>
             </button>
-            <h1 class="editable-header" id="mainTitle" onclick="makeEditable(this)">Visual List Builder</h1>
-            <p class="editable-header" id="subtitle" onclick="makeEditable(this)">Create beautiful visual lists with text and images</p>
+            <h1 class="editable-header" id="mainTitle" data-action="make-editable">Visual List Builder</h1>
+            <p class="editable-header" id="subtitle" data-action="make-editable">Create beautiful visual lists with text and images</p>
         </div>
 
         <div class="input-section">
@@ -71,10 +71,10 @@
 
             <div class="data-management">
                 <div class="data-actions">
-                    <button type="button" class="btn-secondary" onclick="listBuilder.exportData()">Export Data</button>
+                    <button type="button" class="btn-secondary" data-action="export-data">Export Data</button>
                     <label for="importFile" class="btn-secondary">Import Data</label>
-                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(this)">
-                    <button type="button" class="btn-danger" onclick="listBuilder.clearAllData()">Clear All</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" data-action="import-data">
+                    <button type="button" class="btn-danger" data-action="clear-all">Clear All</button>
                 </div>
                 <div class="storage-info" id="storageInfo">
                     <span class="auto-save-indicator">🟢 Auto-saved locally</span>
@@ -83,7 +83,7 @@
         </div>
 
         <div class="list-container">
-            <h2 class="list-title editable-header" id="listTitle" onclick="makeEditable(this)">Your Visual List</h2>
+            <h2 class="list-title editable-header" id="listTitle" data-action="make-editable">Your Visual List</h2>
             <div class="visual-list" id="visualList">
                 <div class="empty-state">
                     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -101,13 +101,13 @@
             <div class="modal-header">
                 <h3 class="modal-title">Content Details</h3>
                 <div>
-                    <button class="modal-delete" onclick="deleteCurrentModalItem()">Delete Content</button>
-                    <button class="modal-close" onclick="closeModal()">×</button>
+                    <button class="modal-delete" data-action="delete-modal-item">Delete Content</button>
+                    <button class="modal-close" data-action="close-modal">×</button>
                 </div>
             </div>
             <div class="format-toolbar" id="formatToolbar" style="display: none;">
-                <button class="format-btn" onclick="formatText('bold')"><strong>B</strong></button>
-                <button class="format-btn" onclick="formatText('insertUnorderedList')">• List</button>
+                <button class="format-btn" data-action="format-text" data-format="bold"><strong>B</strong></button>
+                <button class="format-btn" data-action="format-text" data-format="insertUnorderedList">• List</button>
             </div>
             <div class="modal-text" id="modalText"></div>
             <img class="modal-image" id="modalImage" alt="Content image">
@@ -124,8 +124,8 @@
             <div class="author-popup-header">
                 <h3 class="author-popup-title" id="authorPopupTitle">Author Content</h3>
                 <div>
-                    <button class="author-popup-delete" onclick="deleteAuthorFromPopup()">Delete Author</button>
-                    <button class="author-popup-close" onclick="closeAuthorPopup()">×</button>
+                    <button class="author-popup-delete" data-action="delete-author-from-popup">Delete Author</button>
+                    <button class="author-popup-close" data-action="close-popup">×</button>
                 </div>
             </div>
             <div class="author-items" id="authorPopupItems">
@@ -134,13 +134,13 @@
     </div>
 
     <!-- Image Zoom Overlay -->
-    <div id="imageZoomOverlay" class="image-zoom-overlay" onclick="closeImageZoom(event)">
-        <button class="image-zoom-close" onclick="closeImageZoom(event)" title="Close (ESC)">×</button>
-        <img id="zoomedImage" class="zoomed-image" alt="Zoomed image" onclick="event.stopPropagation()">
+    <div id="imageZoomOverlay" class="image-zoom-overlay" data-action="close-image-zoom">
+        <button class="image-zoom-close" data-action="close-image-zoom" title="Close (ESC)">×</button>
+        <img id="zoomedImage" class="zoomed-image" alt="Zoomed image" data-action="prevent-close">
     </div>
 
     <!-- Floating Action Button -->
-    <button class="fab" onclick="scrollToForm()" title="Add new item">+</button>
+    <button class="fab" data-action="scroll-to-form" title="Add new item">+</button>
 
     <!-- External JavaScript -->
     <script src="./js/firebase-config.js"></script>

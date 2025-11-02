@@ -10,8 +10,8 @@ export class ModalManager {
         this.stateManager = stateManager;
         this.listManager = listManager;
         
-        this.currentItemInModal = null;
-        this.currentAuthorInPopup = null;
+        this.currentItemId = null; // ID of item currently in content modal
+        this.currentAuthor = null; // Author currently in author popup
         
         // Get modal elements
         this.contentModal = document.querySelector(CONFIG.SELECTORS.CONTENT_MODAL);
@@ -33,7 +33,7 @@ export class ModalManager {
             return;
         }
 
-        this.currentItemInModal = itemId;
+        this.currentItemId = itemId;
 
         // Populate modal
         const modalText = document.getElementById('modalText');
@@ -62,15 +62,12 @@ export class ModalManager {
 
         // Set image
         if (modalImage) {
-            if (item.image) {
-                modalImage.src = item.image;
-                modalImage.style.display = 'block';
-                modalImage.onclick = (e) => {
-                    e.stopPropagation();
-                    if (typeof openImageZoom === 'function') {
-                        openImageZoom(item.image);
-                    }
-                };
+        if (item.image) {
+            modalImage.src = item.image;
+            modalImage.style.display = 'block';
+            modalImage.style.cursor = 'pointer';
+            modalImage.dataset.action = 'zoom-image';
+            modalImage.dataset.imageSrc = item.image;
             } else {
                 modalImage.style.display = 'none';
             }
@@ -131,7 +128,7 @@ export class ModalManager {
             return;
         }
 
-        this.currentAuthorInPopup = author;
+        this.currentAuthor = author;
 
         const popup = document.getElementById('authorPopup');
         const title = document.getElementById('authorPopupTitle');
@@ -190,22 +187,15 @@ export class ModalManager {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.textContent = '×';
-        deleteBtn.onclick = () => {
-            const confirmMessage = `Are you sure you want to delete "${item.title || 'Untitled'}"?`;
-            if (confirm(confirmMessage)) {
-                this.listManager.deleteItem(item.id);
-                this.closeAuthorPopup();
-            }
-        };
+        deleteBtn.dataset.action = 'delete-item-from-popup';
+        deleteBtn.dataset.itemId = item.id;
+        deleteBtn.dataset.itemTitle = item.title || 'Untitled';
 
         // Title
         const titleDiv = document.createElement('div');
         titleDiv.className = 'item-title';
         titleDiv.textContent = item.title || 'Untitled';
-        titleDiv.onclick = () => {
-            // Future: make editable
-            // For now, just click to open modal
-        };
+        // Future: make editable via data-action="make-editable"
 
         // Append base elements
         itemDiv.appendChild(dragHandle);
@@ -218,7 +208,9 @@ export class ModalManager {
             const textDiv = document.createElement('div');
             textDiv.className = 'item-text';
             textDiv.innerText = item.text; // Preserve exact formatting
-            textDiv.onclick = () => this.openContentModal(item.id);
+            textDiv.style.cursor = 'pointer';
+            textDiv.dataset.action = 'open-item-modal-from-popup';
+            textDiv.dataset.itemId = item.id;
             itemDiv.appendChild(textDiv);
         }
 
@@ -230,12 +222,8 @@ export class ModalManager {
             img.alt = 'User uploaded image';
             img.className = 'item-image';
             img.style.cursor = 'pointer';
-            img.onclick = (e) => {
-                e.stopPropagation();
-                if (typeof openImageZoom === 'function') {
-                    openImageZoom(img.src);
-                }
-            };
+            img.dataset.action = 'zoom-image';
+            img.dataset.imageSrc = img.src;
             itemDiv.appendChild(img);
         } else {
             console.log('ℹ️  No image for item:', item.id);
@@ -248,7 +236,7 @@ export class ModalManager {
      * Close author popup
      */
     closeAuthorPopup() {
-        this.currentAuthorInPopup = null;
+        this.currentAuthor = null;
         
         if (this.authorPopup) {
             this.authorPopup.style.display = 'none';
@@ -390,14 +378,14 @@ export class ModalManager {
         const confirmMessage = `Are you sure you want to delete "${item.title || 'Untitled'}"?`;
         
         if (confirm(confirmMessage)) {
-            this.listManager.deleteItem(this.currentItemInModal);
+            this.listManager.deleteItem(this.currentItemId);
             this.closeContentModal();
 
             // If in author popup, refresh or close if no items left
-            if (this.currentAuthorInPopup) {
-                const remainingItems = state.items.filter(i => i.author === this.currentAuthorInPopup);
+            if (this.currentAuthor) {
+                const remainingItems = state.items.filter(i => i.author === this.currentAuthor);
                 if (remainingItems.length > 0) {
-                    this.openAuthorPopup(this.currentAuthorInPopup);
+                    this.openAuthorPopup(this.currentAuthor);
                 } else {
                     this.closeAuthorPopup();
                 }
@@ -413,18 +401,18 @@ export class ModalManager {
      * Delete all items by author (from popup)
      */
     deleteAuthorFromPopup() {
-        if (!this.currentAuthorInPopup) {
+        if (!this.currentAuthor) {
             console.warn('No author in popup to delete');
             return;
         }
 
         const state = this.stateManager.getState();
-        const items = state.items.filter(i => i.author === this.currentAuthorInPopup);
+        const items = state.items.filter(i => i.author === this.currentAuthor);
         
-        const confirmMessage = `Delete all ${items.length} items by "${this.currentAuthorInPopup}"?`;
+        const confirmMessage = `Delete all ${items.length} items by "${this.currentAuthor}"?`;
         
         if (confirm(confirmMessage)) {
-            const result = this.listManager.deleteAuthor(this.currentAuthorInPopup);
+            const result = this.listManager.deleteAuthor(this.currentAuthor);
             
             if (result.success) {
                 this.closeAuthorPopup();
