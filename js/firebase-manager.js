@@ -108,6 +108,18 @@ export class FirebaseManager {
             // Disconnect Firebase listener
             this.disconnectFirebase();
             
+            // Clear all content when signing out
+            this.stateManager.setState({
+                items: [],
+                itemCounter: 1,
+                authorOrder: [],
+                undoStack: [],
+                authorTitles: {}
+            });
+            
+            // Clear localStorage
+            this.listManager.storageManager.clear();
+            
             // Hide sync status
             const syncStatus = document.getElementById('syncStatus');
             if (syncStatus) {

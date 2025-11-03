@@ -181,7 +181,9 @@ function showSaveIndicator() {
     }
 }
 
-// PWA Install Prompt
+// PWA Install Prompt (Disabled)
+// Uncomment to re-enable the install app button
+/*
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -213,6 +215,7 @@ function showInstallPrompt() {
         }
     }, 10000);
 }
+*/
 
 // Format Text (for rich text editing)
 function formatText(command) {
