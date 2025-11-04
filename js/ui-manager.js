@@ -4,6 +4,7 @@
  */
 
 import { CONFIG } from './config.js';
+import { Validators } from './validators.js';
 
 export class UIManager {
     constructor(stateManager, listManager) {
@@ -17,6 +18,7 @@ export class UIManager {
         this.titleInput = document.querySelector(CONFIG.SELECTORS.TITLE_INPUT);
         this.textInput = document.querySelector(CONFIG.SELECTORS.TEXT_INPUT);
         this.imageInput = document.querySelector(CONFIG.SELECTORS.IMAGE_INPUT);
+        this.setupRichTextInput();
         
         // Subscribe to state changes
         this.stateManager.subscribe('items-changed', (newState, oldState) => {
@@ -191,8 +193,80 @@ export class UIManager {
     clearForm() {
         if (this.authorInput) this.authorInput.value = '';
         if (this.titleInput) this.titleInput.value = '';
-        if (this.textInput) this.textInput.value = '';
+        if (this.textInput) {
+            this.textInput.innerHTML = '';
+        }
         if (this.imageInput) this.imageInput.value = '';
+    }
+
+    /**
+     * Setup rich text input behavior for the content field
+     */
+    setupRichTextInput() {
+        if (!this.textInput) return;
+
+        const editor = this.textInput;
+
+        const ensurePlaceholder = () => {
+            const plain = Validators.extractTextFromHtml(editor.innerHTML || '').trim();
+            if (!plain && editor.innerHTML && editor.innerHTML !== '') {
+                editor.innerHTML = '';
+            }
+        };
+
+        editor.addEventListener('paste', (event) => {
+            event.preventDefault();
+            const clipboard = event.clipboardData || window.clipboardData;
+            const htmlData = clipboard?.getData('text/html');
+            const textData = clipboard?.getData('text/plain') || '';
+            const source = htmlData && htmlData.trim().length > 0
+                ? htmlData
+                : this.convertPlainTextToHtml(textData);
+            const sanitized = Validators.sanitizeRichText(source);
+            editor.innerHTML = sanitized || '';
+            this.placeCaretAtEnd(editor);
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        editor.addEventListener('input', () => {
+            if (editor.innerHTML === '<br>') {
+                editor.innerHTML = '';
+            }
+            ensurePlaceholder();
+        });
+
+        editor.addEventListener('blur', () => {
+            const sanitized = Validators.sanitizeRichText(editor.innerHTML || '');
+            editor.innerHTML = sanitized;
+            ensurePlaceholder();
+        });
+    }
+
+    /**
+     * Convert plain text (with newlines) to minimal HTML preserving breaks
+     * @param {string} text
+     * @returns {string}
+     */
+    convertPlainTextToHtml(text) {
+        if (!text) return '';
+        return text
+            .split(/\r?\n/)
+            .map(line => this.escapeHtml(line))
+            .join('<br>');
+    }
+
+    /**
+     * Position the caret at the end of a contenteditable element
+     * @param {HTMLElement} element
+     */
+    placeCaretAtEnd(element) {
+        if (!element) return;
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
     }
 
     /**
@@ -307,6 +381,10 @@ export class UIManager {
      * @returns {string} Formatted HTML
      */
     preserveText(text) {
+        if (!text) return '';
+        if (/<\/?[a-z][\s\S]*>/i.test(text)) {
+            return Validators.sanitizeRichText(text);
+        }
         return text
             .split('\n')
             .map(line => this.escapeHtml(line))

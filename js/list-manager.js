@@ -22,6 +22,9 @@ export class ListManager {
     async addItem(itemData) {
         const { author, title, text, imageFile } = itemData;
 
+        const sanitizedText = text ? Validators.sanitizeRichText(text) : '';
+        const plainText = Validators.extractTextFromHtml(sanitizedText).trim();
+
         // Validate author
         const authorCheck = Validators.validateAuthor(author);
         if (!authorCheck.valid) {
@@ -29,8 +32,15 @@ export class ListManager {
         }
 
         // Validate text or image exists
-        if ((!text || text.trim().length === 0) && !imageFile) {
+        if ((!plainText || plainText.length === 0) && !imageFile) {
             return { success: false, error: 'Please enter text or select an image' };
+        }
+
+        if (sanitizedText) {
+            const textCheck = Validators.validateText(sanitizedText, 0, 50000);
+            if (!textCheck.valid) {
+                return { success: false, error: textCheck.error };
+            }
         }
 
         // Validate image if provided
@@ -48,7 +58,7 @@ export class ListManager {
             date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             author: author.trim(),
             title: title?.trim() || 'Untitled',
-            text: text, // Preserve formatting
+            text: sanitizedText,
             image: null
         };
 
@@ -71,7 +81,7 @@ export class ListManager {
             id: item.id,
             author: item.author,
             title: item.title,
-            hasText: !!item.text,
+            hasText: plainText.length > 0,
             hasImage: !!item.image
         });
         

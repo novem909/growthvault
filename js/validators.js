@@ -18,7 +18,9 @@ export class Validators {
             return { valid: false, error: 'Text is required' };
         }
 
-        const trimmed = text.trim();
+        const value = typeof text === 'string' ? text : String(text ?? '');
+        const plain = this.extractTextFromHtml(value);
+        const trimmed = plain.trim();
         
         if (trimmed.length < minLength) {
             return { 
@@ -27,7 +29,7 @@ export class Validators {
             };
         }
 
-        if (text.length > maxLength) {
+        if (plain.length > maxLength) {
             return { 
                 valid: false, 
                 error: `Text must be less than ${maxLength} characters` 
@@ -99,7 +101,7 @@ export class Validators {
         }
 
         // Validate text (if provided)
-        if (item.text && item.text.trim().length > 0) {
+        if (item.text && this.extractTextFromHtml(item.text).trim().length > 0) {
             const textCheck = this.validateText(item.text, 0, 50000);
             if (!textCheck.valid) {
                 errors.push(textCheck.error);
@@ -107,7 +109,8 @@ export class Validators {
         }
 
         // Either text or image must be provided
-        if ((!item.text || item.text.trim().length === 0) && !item.image) {
+        const hasText = this.extractTextFromHtml(item.text || '').trim().length > 0;
+        if (!hasText && !item.image) {
             errors.push('Either text or image must be provided');
         }
 
@@ -123,9 +126,213 @@ export class Validators {
      * @returns {string} Sanitized HTML
      */
     static sanitizeHtml(html) {
-        const div = document.createElement('div');
-        div.textContent = html;
-        return div.innerHTML;
+        return this.sanitizeRichText(html);
+    }
+
+    /**
+     * Sanitize rich text content, preserving allowed formatting
+     * @param {string} html
+     * @returns {string}
+     */
+    static sanitizeRichText(html) {
+        if (html === null || html === undefined) return '';
+        if (typeof html !== 'string') {
+            html = String(html);
+        }
+        if (!html.trim()) {
+            return '';
+        }
+
+        let content = html;
+        const containsHtml = /<\/?[a-z][\s\S]*>/i.test(content);
+
+        if (!containsHtml) {
+            content = this.convertMarkdownToHtml(content);
+        }
+
+        const template = document.createElement('template');
+        template.innerHTML = content;
+        const allowedTags = new Set(CONFIG.ALLOWED_HTML_TAGS.map(tag => tag.toUpperCase()));
+        const allowedAttributes = new Set(CONFIG.ALLOWED_HTML_ATTRIBUTES.map(attr => attr.toLowerCase()));
+
+        const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT, null, false);
+        const nodesToRemove = [];
+
+        while (walker.nextNode()) {
+            const element = walker.currentNode;
+            const tagName = element.tagName.toUpperCase();
+
+            if (!allowedTags.has(tagName)) {
+                if (tagName === 'DIV') {
+                    const paragraph = document.createElement('p');
+                    while (element.firstChild) {
+                        paragraph.appendChild(element.firstChild);
+                    }
+                    element.parentNode?.replaceChild(paragraph, element);
+                } else {
+                    nodesToRemove.push(element);
+                }
+                continue;
+            }
+
+            // Remove all attributes that are not explicitly allowed
+            Array.from(element.attributes).forEach(attr => {
+                if (!allowedAttributes.has(attr.name.toLowerCase())) {
+                    element.removeAttribute(attr.name);
+                }
+            });
+        }
+
+        nodesToRemove.forEach(node => {
+            const parent = node.parentNode;
+            if (!parent) return;
+            while (node.firstChild) {
+                parent.insertBefore(node.firstChild, node);
+            }
+            parent.removeChild(node);
+        });
+
+        let sanitized = template.innerHTML
+            .replace(/<p>\s*<\/p>/gi, '')
+            .replace(/\u200B/g, '')
+            .trim();
+
+        if (!sanitized) {
+            return '';
+        }
+
+        const hasHtml = /<\/?[a-z][\s\S]*>/i.test(sanitized);
+        if (!hasHtml) {
+            sanitized = sanitized.replace(/\r?\n/g, '<br>').trim();
+        }
+
+        return this.applyInlineMarkdown(sanitized);
+    }
+
+    /**
+     * Extract plain text content from HTML
+     * @param {string} html
+     * @returns {string}
+     */
+    static extractTextFromHtml(html) {
+        if (html === null || html === undefined) return '';
+        if (typeof html !== 'string') {
+            html = String(html);
+        }
+        if (!html.trim()) {
+            return '';
+        }
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        return template.content.textContent || '';
+    }
+
+    /**
+     * Convert basic Markdown formatting to HTML
+     * Supports bold (**, __), italics (*, _), and inline code (`)
+     * @param {string} text
+     * @returns {string}
+     */
+    static convertMarkdownToHtml(text) {
+        if (!text) return '';
+
+        const escaped = this.escapeHtml(text);
+        const converted = this.convertInlineMarkdownText(escaped);
+        return converted.replace(/\r?\n/g, '<br>');
+    }
+
+    /**
+     * Escape HTML entities in plain text
+     * @param {string} text
+     * @returns {string}
+     */
+    static escapeHtml(text) {
+        return text.replace(/[&<>"']/g, (char) => {
+            switch (char) {
+                case '&': return '&amp;';
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '"': return '&quot;';
+                case "'": return '&#39;';
+                default: return char;
+            }
+        });
+    }
+
+    /**
+     * Apply inline markdown transformations to existing HTML content
+     * @param {string} html
+     * @returns {string}
+     */
+    static applyInlineMarkdown(html) {
+        if (!html) return '';
+
+        const template = document.createElement('template');
+        template.innerHTML = html;
+
+        const disallowedParents = new Set(['CODE', 'PRE', 'SCRIPT', 'STYLE']);
+        const walker = document.createTreeWalker(
+            template.content,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: (node) => {
+                    if (!node?.nodeValue) return NodeFilter.FILTER_REJECT;
+                    if (!/[\*_`]/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+                    let parent = node.parentElement;
+                    while (parent) {
+                        if (disallowedParents.has(parent.tagName)) {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+                        parent = parent.parentElement;
+                    }
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            },
+            false
+        );
+
+        const nodes = [];
+        while (walker.nextNode()) {
+            nodes.push(walker.currentNode);
+        }
+
+        nodes.forEach((node) => {
+            const original = node.textContent;
+            const converted = this.convertInlineMarkdownText(original);
+            if (converted !== original) {
+                const fragment = document.createElement('template');
+                fragment.innerHTML = converted;
+                node.replaceWith(fragment.content);
+            }
+        });
+
+        return template.innerHTML;
+    }
+
+    /**
+     * Convert inline markdown markers within a string to HTML tags
+     * @param {string} text
+     * @returns {string}
+     */
+    static convertInlineMarkdownText(text) {
+        if (!text || (text.indexOf('*') === -1 && text.indexOf('_') === -1 && text.indexOf('`') === -1)) {
+            return text;
+        }
+
+        let result = text;
+
+        // Bold **text** or __text__
+        result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        result = result.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+        // Italic *text* or _text_
+        result = result.replace(/\*(?!\*)([^*\r\n]+?)\*/g, '<em>$1</em>');
+        result = result.replace(/_(?!_)([^_\r\n]+?)_/g, '<em>$1</em>');
+
+        // Inline code `text`
+        result = result.replace(/`([^`\r\n]+)`/g, '<code>$1</code>');
+
+        return result;
     }
 
     /**

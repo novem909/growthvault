@@ -23,7 +23,8 @@ body {
 /* Form Elements */
 input[type="text"],
 input[type="file"],
-textarea {
+textarea,
+.rich-text-input {
     padding: 14px 16px;
     border: 1.5px solid #d1d5db;
     border-radius: 12px;
@@ -35,22 +36,75 @@ textarea {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-textarea {
+.rich-text-input {
     resize: vertical;
     min-height: 100px;
     height: 100px;
-    white-space: pre-wrap;
+    white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.6;
     tab-size: 4;
     font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+    overflow-y: auto;
 }
 
 input[type="text"]:focus,
 input[type="file"]:focus,
-textarea:focus {
+textarea:focus,
+.rich-text-input:focus {
     outline: none;
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.rich-text-input:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.rich-text-input:empty:before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.rich-text-input p {
+    margin-bottom: 0.75em;
+}
+
+.rich-text-input p:last-child {
+    margin-bottom: 0;
+}
+
+.rich-text-input ul,
+.rich-text-input ol {
+    margin: 0 0 0.75em 0;
+    padding-left: 1.5rem;
+}
+
+.rich-text-input li {
+    margin: 0.35em 0;
+}
+
+.rich-text-input h1,
+.rich-text-input h2,
+.rich-text-input h3,
+.rich-text-input h4,
+.rich-text-input h5,
+.rich-text-input h6 {
+    margin: 0.85em 0 0.45em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.rich-text-input strong,
+.rich-text-input b {
+    font-weight: 600;
+}
+
+.rich-text-input em,
+.rich-text-input i {
+    font-style: italic;
 }

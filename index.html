@@ -60,7 +60,12 @@
                 </div>
                 <div class="input-group">
                     <label for="textInput">Text Content</label>
-                    <textarea id="textInput" placeholder="Paste your text here with full formatting..." rows="4"></textarea>
+                    <div id="textInput"
+                         class="rich-text-input"
+                         role="textbox"
+                         contenteditable="true"
+                         aria-multiline="true"
+                         data-placeholder="Paste your text here with full formatting..."></div>
                 </div>
                 <div class="input-group">
                     <label for="imageInput">Image (optional)</label>
@@ -109,7 +114,7 @@
                 <button class="format-btn" data-action="format-text" data-format="bold"><strong>B</strong></button>
                 <button class="format-btn" data-action="format-text" data-format="insertUnorderedList">• List</button>
             </div>
-            <div class="modal-text" id="modalText"></div>
+            <div class="modal-text" id="modalText" data-placeholder="Type or paste to edit..."></div>
             <img class="modal-image" id="modalImage" alt="Content image">
             <div class="modal-meta">
                 <span><strong>Author:</strong> <span id="modalAuthor"></span></span>

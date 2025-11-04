@@ -4,6 +4,7 @@
  */
 
 import { CONFIG } from './config.js';
+import { Validators } from './validators.js';
 
 export class ModalManager {
     constructor(stateManager, listManager) {
@@ -34,6 +35,7 @@ export class ModalManager {
         }
 
         this.currentItemId = itemId;
+        this.currentItemInModal = itemId;
 
         // Populate modal
         const modalText = document.getElementById('modalText');
@@ -48,15 +50,24 @@ export class ModalManager {
 
         // Set text content
         if (modalText) {
-            modalText.innerHTML = this.preserveText(item.text || '');
+            modalText.innerHTML = Validators.sanitizeRichText(item.text || '');
             modalText.contentEditable = true;
             
             // Save on blur
             modalText.onblur = () => {
-                const newText = modalText.innerText;
-                if (item.text !== newText) {
-                    this.updateItemText(itemId, newText);
+                const newHtml = Validators.sanitizeRichText(modalText.innerHTML || '');
+                if (item.text !== newHtml) {
+                    this.updateItemText(itemId, newHtml);
                 }
+            };
+            modalText.onpaste = (event) => {
+                event.preventDefault();
+                const clipboard = event.clipboardData || window.clipboardData;
+                const htmlData = clipboard?.getData('text/html');
+                const textData = clipboard?.getData('text/plain') || '';
+                const source = htmlData && htmlData.trim().length > 0 ? htmlData : textData;
+                const sanitized = Validators.sanitizeRichText(source);
+                document.execCommand('insertHTML', false, sanitized);
             };
         }
 
@@ -80,7 +91,7 @@ export class ModalManager {
 
         // Show format toolbar if text exists
         const formatToolbar = document.getElementById('formatToolbar');
-        if (formatToolbar && item.text) {
+        if (formatToolbar) {
             formatToolbar.style.display = 'flex';
         }
 
@@ -95,8 +106,8 @@ export class ModalManager {
         if (this.currentItemInModal) {
             const modalText = document.getElementById('modalText');
             if (modalText && modalText.isContentEditable) {
-                const newText = modalText.innerText;
-                this.updateItemText(this.currentItemInModal, newText);
+                const newHtml = Validators.sanitizeRichText(modalText.innerHTML || '');
+                this.updateItemText(this.currentItemInModal, newHtml);
             }
         }
 
@@ -112,6 +123,7 @@ export class ModalManager {
             formatToolbar.style.display = 'none';
         }
 
+        this.currentItemId = null;
         console.log('📄 Closed content modal');
     }
 
@@ -207,7 +219,7 @@ export class ModalManager {
         if (item.text) {
             const textDiv = document.createElement('div');
             textDiv.className = 'item-text';
-            textDiv.innerText = item.text; // Preserve exact formatting
+            textDiv.innerHTML = Validators.sanitizeRichText(item.text);
             textDiv.style.cursor = 'pointer';
             textDiv.dataset.action = 'open-item-modal-from-popup';
             textDiv.dataset.itemId = item.id;
@@ -433,9 +445,10 @@ export class ModalManager {
         const state = this.stateManager.getState();
         const item = state.items.find(i => i.id === itemId);
         
-        if (item && item.text !== newText) {
+        const sanitized = Validators.sanitizeRichText(newText || '');
+        if (item && item.text !== sanitized) {
             const updatedItems = state.items.map(i => 
-                i.id === itemId ? { ...i, text: newText } : i
+                i.id === itemId ? { ...i, text: sanitized } : i
             );
             
             this.stateManager.setState({ items: updatedItems });
@@ -462,10 +475,7 @@ export class ModalManager {
      * @returns {string}
      */
     preserveText(text) {
-        return text
-            .split('\n')
-            .map(line => this.escapeHtml(line))
-            .join('<br>');
+        return Validators.sanitizeRichText(text);
     }
 }
 

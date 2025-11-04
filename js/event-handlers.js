@@ -3,6 +3,8 @@
  * Central event delegation and handling
  */
 
+import { Validators } from './validators.js';
+
 export class EventHandlers {
     constructor(managers) {
         this.listManager = managers.listManager;
@@ -226,10 +228,13 @@ export class EventHandlers {
         const textInput = document.getElementById('textInput');
         const imageInput = document.getElementById('imageInput');
 
+        const rawHtml = textInput?.innerHTML || '';
+        const sanitizedText = Validators.sanitizeRichText(rawHtml);
+
         const itemData = {
             author: authorInput?.value.trim() || '',
             title: titleInput?.value.trim() || '',
-            text: textInput?.value || '',
+            text: sanitizedText,
             imageFile: imageInput?.files?.[0] || null
         };
 
