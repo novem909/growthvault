@@ -24,6 +24,9 @@ class GrowthVaultApp {
         this.modalManager = new ModalManager(this.stateManager, this.listManager);
         this.firebaseManager = new FirebaseManager(this.stateManager, this.listManager);
         
+        // Link Firebase Manager to List Manager for auto-sync
+        this.listManager.setFirebaseManager(this.firebaseManager);
+        
         // Initialize event handlers
         this.eventHandlers = new EventHandlers({
             listManager: this.listManager,

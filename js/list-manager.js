@@ -7,11 +7,20 @@ import { CONFIG } from './config.js';
 import { Validators } from './validators.js';
 
 export class ListManager {
-    constructor(stateManager, storageManager) {
+    constructor(stateManager, storageManager, firebaseManager = null) {
         this.stateManager = stateManager;
         this.storageManager = storageManager;
+        this.firebaseManager = firebaseManager;
         
         console.log('📋 ListManager initialized');
+    }
+    
+    /**
+     * Set Firebase Manager (called after initialization)
+     * @param {FirebaseManager} firebaseManager
+     */
+    setFirebaseManager(firebaseManager) {
+        this.firebaseManager = firebaseManager;
     }
 
     /**
@@ -385,6 +394,13 @@ export class ListManager {
         
         if (result.success) {
             this.stateManager.setState({ lastSaveTimestamp: new Date(result.timestamp).getTime() });
+            
+            // Sync to Firebase if user is logged in
+            if (this.firebaseManager && this.firebaseManager.currentUser) {
+                this.firebaseManager.sync().catch(error => {
+                    console.error('❌ Firebase sync failed:', error);
+                });
+            }
         }
         
         return result;
