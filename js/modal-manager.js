@@ -46,7 +46,12 @@ export class ModalManager {
 
         if (modalAuthor) modalAuthor.textContent = item.author;
         if (modalDate) modalDate.textContent = item.date;
-        if (modalTitle) modalTitle.textContent = item.title || 'Untitled';
+        if (modalTitle) {
+            // Make modal title reflect the item's title and allow inline editing
+            modalTitle.textContent = item.title || 'Untitled';
+            modalTitle.dataset.itemId = item.id;
+            modalTitle.dataset.action = 'make-editable';
+        }
 
         // Set text content
         if (modalText) {
@@ -207,7 +212,9 @@ export class ModalManager {
         const titleDiv = document.createElement('div');
         titleDiv.className = 'item-title';
         titleDiv.textContent = item.title || 'Untitled';
-        // Future: make editable via data-action="make-editable"
+        // Allow editing of item titles directly from the author popup
+        titleDiv.dataset.action = 'make-editable';
+        titleDiv.dataset.itemId = item.id;
 
         // Append base elements
         itemDiv.appendChild(dragHandle);
@@ -319,7 +326,7 @@ export class ModalManager {
             item.addEventListener('mousedown', () => isDragging = false);
             item.addEventListener('mousemove', () => isDragging = true);
 
-            const clickableElements = item.querySelectorAll('.item-text, .delete-btn, .item-title, .item-image');
+            const clickableElements = item.querySelectorAll('.item-text, .delete-btn, .item-image');
             clickableElements.forEach(el => {
                 el.addEventListener('click', (e) => {
                     if (isDragging) {
@@ -328,6 +335,18 @@ export class ModalManager {
                     }
                 });
             });
+            
+            // .item-title should allow event bubbling for data-action="make-editable"
+            const titleElement = item.querySelector('.item-title');
+            if (titleElement) {
+                titleElement.addEventListener('click', (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    // Otherwise let the event bubble up to document-level event delegation
+                });
+            }
         });
     }
 
