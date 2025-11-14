@@ -106,6 +106,8 @@ function makeEditable(element) {
     if (element.classList.contains('editing')) return;
 
     const originalText = element.textContent;
+    const itemId = element.dataset.itemId ? parseInt(element.dataset.itemId) : null;
+    
     element.classList.add('editing');
     element.contentEditable = true;
     element.focus();
@@ -121,10 +123,31 @@ function makeEditable(element) {
         element.contentEditable = false;
         element.blur();
 
-        // Save titles to storage when edited
-        if (window.listBuilder) {
+        const newText = element.textContent.trim();
+
+        // If editing an item title (has itemId), update the item
+        if (itemId && window.app) {
+            const state = window.app.stateManager.getState();
+            const item = state.items.find(i => i.id === itemId);
+            
+            if (item && item.title !== newText) {
+                const updatedItems = state.items.map(i => 
+                    i.id === itemId ? { ...i, title: newText || 'Untitled' } : i
+                );
+                
+                window.app.stateManager.setState({ items: updatedItems });
+                window.app.listManager.save();
+                console.log('✏️  Updated item title:', itemId, newText);
+            }
+        } 
+        // Otherwise, save page titles
+        else if (window.listBuilder) {
             window.listBuilder.saveToStorage();
         }
+
+        // Clean up event listeners
+        element.removeEventListener('keydown', handleKeydown);
+        element.removeEventListener('input', handleInput);
     }
 
     function handleKeydown(e) {
@@ -153,7 +176,7 @@ function makeEditable(element) {
     }
 
     element.addEventListener('blur', finishEditing, { once: true });
-    element.addEventListener('keydown', handleKeydown, { once: true });
+    element.addEventListener('keydown', handleKeydown);
     element.addEventListener('input', handleInput);
 }
 

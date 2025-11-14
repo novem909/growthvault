@@ -126,6 +126,11 @@ class GrowthVaultApp {
             clearAllData: () => {
                 this.eventHandlers.handleClearAllData();
             },
+            saveToStorage: () => {
+                this.uiManager.saveTitles();
+                this.listManager.save();
+                console.log('💾 Titles saved to storage');
+            },
             // Expose managers for debugging
             _managers: {
                 state: this.stateManager,
