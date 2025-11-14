@@ -170,8 +170,8 @@ export class FirebaseManager {
                 // Load into state
                 this.stateManager.loadState(data);
                 
-                // Also save to localStorage as cache
-                this.listManager.save();
+                // Also save to localStorage as cache (skip Firebase sync to avoid circular save)
+                this.listManager.save(true);
                 
                 this.updateSyncStatus('synced');
                 console.log('☁️  Loaded from Firebase');
@@ -211,7 +211,7 @@ export class FirebaseManager {
                 if (remoteTimestamp > localTimestamp) {
                     console.log('☁️  Remote data newer, updating...');
                     this.stateManager.loadState(data);
-                    this.listManager.save();
+                    this.listManager.save(true); // Skip Firebase sync
                 }
             }
         });

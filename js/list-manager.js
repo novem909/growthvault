@@ -386,17 +386,18 @@ export class ListManager {
     }
 
     /**
-     * Save current state to storage
+     * Save current state to storage and sync to Firebase if logged in
+     * @param {boolean} skipFirebaseSync - Skip Firebase sync (used when loading from Firebase)
      */
-    save() {
+    save(skipFirebaseSync = false) {
         const state = this.stateManager.getStateForSaving();
         const result = this.storageManager.save(state);
         
         if (result.success) {
             this.stateManager.setState({ lastSaveTimestamp: new Date(result.timestamp).getTime() });
             
-            // Sync to Firebase if user is logged in
-            if (this.firebaseManager && this.firebaseManager.currentUser) {
+            // Sync to Firebase if user is logged in (unless we're loading from Firebase)
+            if (!skipFirebaseSync && this.firebaseManager && this.firebaseManager.currentUser) {
                 this.firebaseManager.sync().catch(error => {
                     console.error('❌ Firebase sync failed:', error);
                 });
