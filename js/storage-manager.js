@@ -7,7 +7,25 @@ import { CONFIG } from './config.js';
 
 export class StorageManager {
     constructor(storageKey = CONFIG.STORAGE_KEY) {
-        this.storageKey = storageKey;
+        this.baseStorageKey = storageKey;
+        this.storageKey = storageKey; // Will be updated when user signs in/out
+        this.currentUserId = null;
+    }
+
+    /**
+     * Update storage key based on user authentication
+     * @param {string|null} userId - User ID (email) or null for anonymous
+     */
+    setUser(userId) {
+        this.currentUserId = userId;
+        if (userId) {
+            // User-specific storage key
+            this.storageKey = `${this.baseStorageKey}_${userId}`;
+        } else {
+            // Anonymous storage key
+            this.storageKey = this.baseStorageKey;
+        }
+        console.log('🔑 Storage key set to:', this.storageKey);
     }
 
     /**

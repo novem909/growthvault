@@ -85,6 +85,7 @@ export class FirebaseManager {
      * @param {Object} user - Firebase user object
      */
     async handleAuthStateChange(user) {
+        const previousUser = this.currentUser;
         this.currentUser = user;
         this.stateManager.setState({ currentUser: user });
 
@@ -93,7 +94,13 @@ export class FirebaseManager {
         if (user) {
             console.log('👤 User signed in:', user.email);
             
-            // Load data from Firebase
+            // Switch to user-specific storage
+            this.listManager.storageManager.setUser(user.email);
+            
+            // Load user's data from their localStorage first
+            const localData = this.listManager.load();
+            
+            // Then load/sync from Firebase (Firebase data takes precedence)
             await this.loadFromFirebase();
             
             // Setup real-time listener
@@ -108,17 +115,20 @@ export class FirebaseManager {
             // Disconnect Firebase listener
             this.disconnectFirebase();
             
-            // Clear all content when signing out
-            this.stateManager.setState({
-                items: [],
-                itemCounter: 1,
-                authorOrder: [],
-                undoStack: [],
-                authorTitles: {}
-            });
+            // Switch back to anonymous storage
+            this.listManager.storageManager.setUser(null);
             
-            // Clear localStorage
-            this.listManager.storageManager.clear();
+            // Load anonymous/local data if it exists
+            const anonymousData = this.listManager.load();
+            if (!anonymousData.success || !anonymousData) {
+                // If no anonymous data, start fresh
+                this.stateManager.setState({
+                    items: [],
+                    itemCounter: 1,
+                    authorOrder: [],
+                    undoStack: []
+                });
+            }
             
             // Hide sync status
             const syncStatus = document.getElementById('syncStatus');
