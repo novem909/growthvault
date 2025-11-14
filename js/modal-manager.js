@@ -58,12 +58,10 @@ export class ModalManager {
             modalText.innerHTML = Validators.sanitizeRichText(item.text || '');
             modalText.contentEditable = true;
             
-            // Save on blur
+            // Save on blur - always try to save, updateItemText will check if changed
             modalText.onblur = () => {
                 const newHtml = Validators.sanitizeRichText(modalText.innerHTML || '');
-                if (item.text !== newHtml) {
-                    this.updateItemText(itemId, newHtml);
-                }
+                this.updateItemText(itemId, newHtml);
             };
             modalText.onpaste = (event) => {
                 event.preventDefault();
