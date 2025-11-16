@@ -608,12 +608,12 @@
 
 .author-popup-content {
     background: var(--bg-container);
-    margin: 3% auto;
-    padding: 40px;
+    margin: 2.5vh auto;
+    padding: 32px;
     border-radius: 20px;
-    width: 90%;
-    max-width: 1200px;
-    max-height: 85vh;
+    width: 95%;
+    max-width: 1600px;
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 25px 50px var(--shadow-medium);
     position: relative;
