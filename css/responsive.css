@@ -132,7 +132,7 @@
         width: 95vw;
         height: 90vh;
         margin: 5vh auto;
-        padding: 12px 8px 6px 8px;
+        padding: 12px 8px 12px 8px;
         border-radius: 12px;
     }
 
@@ -171,7 +171,7 @@
 
     .modal-text {
         font-size: 0.9em;
-        padding: 16px;
+        padding: 16px 16px 16px 24px;
         min-height: 300px;
     }
 
