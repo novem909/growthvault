@@ -480,11 +480,11 @@
 .modal-text {
     color: var(--text-secondary);
     font-size: 0.95em;
-    line-height: 1.6;
+    line-height: 1.7;
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    word-break: break-word;
+    word-break: normal;
     margin-bottom: 0;
     font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
     background: var(--bg-input-section);
@@ -499,6 +499,7 @@
     tab-size: 4;
     unicode-bidi: embed;
     text-rendering: optimizeLegibility;
+    text-align: left;
     min-height: 400px;
     flex: 1;
     max-width: 100%;
@@ -534,12 +535,25 @@
 }
 
 .modal-text ul {
-    margin: 12px 0;
-    padding-left: 24px;
+    margin: 16px 0;
+    padding-left: 32px;
+    list-style-position: outside;
 }
 
 .modal-text li {
-    margin: 8px 0;
+    margin: 10px 0;
+    padding-left: 8px;
+}
+
+.modal-text p {
+    margin: 12px 0;
+}
+
+.modal-text h1, 
+.modal-text h2, 
+.modal-text h3 {
+    margin: 20px 0 12px 0;
+    line-height: 1.4;
 }
 
 .modal-image {
