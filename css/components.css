@@ -393,13 +393,20 @@
 
 .modal-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 0;
     border-bottom: none;
     flex-shrink: 0;
     gap: 12px;
+}
+
+.modal-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
 }
 
 .modal-actions {
@@ -416,8 +423,17 @@
     margin: 0;
     letter-spacing: -0.025em;
     transition: color 0.3s ease;
-    position: absolute;
-    left: 40px;
+}
+
+.modal-meta-inline {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.modal-author,
+.modal-date {
+    color: var(--text-muted);
 }
 
 .modal-close {
@@ -543,20 +559,7 @@
     opacity: 0.95;
 }
 
-.modal-meta {
-    background: var(--bg-input-section);
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-top: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8em;
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
-    flex-shrink: 0;
-    transition: background 0.3s ease;
-}
+
 
 .modal-content-section {
     margin-bottom: 20px;

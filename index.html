@@ -104,7 +104,12 @@
     <div id="contentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Content Details</h3>
+                <div class="modal-info">
+                    <h3 class="modal-title">Content Details</h3>
+                    <span class="modal-meta-inline">
+                        <span class="modal-author" id="modalAuthor"></span> • <span class="modal-date" id="modalDate"></span>
+                    </span>
+                </div>
                 <div class="modal-actions">
                     <button class="modal-delete" data-action="delete-modal-item">Delete Content</button>
                     <button class="modal-close" data-action="close-modal">×</button>
@@ -123,10 +128,6 @@
             </div>
             <div class="modal-text" id="modalText" data-placeholder="Type or paste to edit..."></div>
             <img class="modal-image" id="modalImage" alt="Content image">
-            <div class="modal-meta">
-                <span><strong>Author:</strong> <span id="modalAuthor"></span></span>
-                <span><strong>Date:</strong> <span id="modalDate"></span></span>
-            </div>
         </div>
     </div>
 
