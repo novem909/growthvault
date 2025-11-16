@@ -235,8 +235,24 @@ function showInstallPrompt() {
 */
 
 // Format Text (for rich text editing)
-function formatText(command) {
-    document.execCommand(command, false, null);
+function formatText(command, value = null) {
+    document.execCommand(command, false, value);
+}
+
+// Font size management for Google Docs style toolbar
+let currentFontSize = 3; // Default font size (1-7 scale)
+
+function changeFontSize(delta) {
+    currentFontSize = Math.max(1, Math.min(7, currentFontSize + delta));
+    
+    // Update the display
+    const display = document.getElementById('fontSizeDisplay');
+    if (display) {
+        display.textContent = currentFontSize;
+    }
+    
+    // Apply font size to selected text
+    document.execCommand('fontSize', false, currentFontSize);
 }
 
 // HTML Escape utility

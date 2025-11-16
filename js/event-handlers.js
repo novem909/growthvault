@@ -87,7 +87,20 @@ export class EventHandlers {
                     
                 case 'format-text':
                     if (target.dataset.format && typeof formatText === 'function') {
-                        formatText(target.dataset.format);
+                        const value = target.dataset.value || null;
+                        formatText(target.dataset.format, value);
+                    }
+                    break;
+                    
+                case 'increase-font-size':
+                    if (typeof changeFontSize === 'function') {
+                        changeFontSize(1);
+                    }
+                    break;
+                    
+                case 'decrease-font-size':
+                    if (typeof changeFontSize === 'function') {
+                        changeFontSize(-1);
                     }
                     break;
                     

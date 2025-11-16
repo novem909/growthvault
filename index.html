@@ -111,8 +111,15 @@
                 </div>
             </div>
             <div class="format-toolbar" id="formatToolbar" style="display: none;">
-                <button class="format-btn" data-action="format-text" data-format="bold"><strong>B</strong></button>
-                <button class="format-btn" data-action="format-text" data-format="insertUnorderedList">• List</button>
+                <button class="format-btn" data-action="decrease-font-size" title="Decrease font size">−</button>
+                <span class="font-size-display" id="fontSizeDisplay">3</span>
+                <button class="format-btn" data-action="increase-font-size" title="Increase font size">+</button>
+                <div class="format-divider"></div>
+                <button class="format-btn" data-action="format-text" data-format="bold" title="Bold"><strong>B</strong></button>
+                <button class="format-btn" data-action="format-text" data-format="italic" title="Italic"><em>I</em></button>
+                <button class="format-btn" data-action="format-text" data-format="underline" title="Underline"><u>U</u></button>
+                <div class="format-divider"></div>
+                <button class="format-btn" data-action="format-text" data-format="insertUnorderedList" title="Bullet list">• List</button>
             </div>
             <div class="modal-text" id="modalText" data-placeholder="Type or paste to edit..."></div>
             <img class="modal-image" id="modalImage" alt="Content image">

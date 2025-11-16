@@ -822,28 +822,63 @@
 /* Format Toolbar */
 .format-toolbar {
     display: flex;
-    gap: 8px;
-    padding: 12px;
-    background: var(--bg-input-section);
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: var(--bg-container);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     margin-bottom: 12px;
 }
 
 .format-btn {
-    padding: 8px 12px;
-    background: var(--bg-container);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .format-btn:hover {
-    background: #6366f1;
-    color: white;
+    background: var(--bg-input-section);
+    border-color: var(--border-color);
+}
+
+.format-btn:active {
+    background: var(--bg-input-section);
+    transform: scale(0.95);
+}
+
+.font-size-display {
+    min-width: 28px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    padding: 0 4px;
+    background: var(--bg-input-section);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    user-select: none;
+}
+
+.format-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 6px;
 }
 
 /* Toast Notifications */
