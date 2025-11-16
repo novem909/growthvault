@@ -45,7 +45,7 @@ textarea,
     overflow-wrap: break-word;
     line-height: 1.6;
     tab-size: 4;
-    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-family: 'Inter', sans-serif;
     overflow-y: auto;
 }
 
