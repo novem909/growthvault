@@ -624,9 +624,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
     border-bottom: 2px solid var(--border-color);
+    gap: 12px;
+}
+
+.author-popup-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
 }
 
 .author-popup-title {
@@ -684,11 +692,10 @@
     border-radius: 8px;
     padding: 8px 16px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.85em;
     font-weight: 500;
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    margin-right: 12px;
 }
 
 .author-popup-delete:hover {

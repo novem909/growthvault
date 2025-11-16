@@ -184,10 +184,15 @@
     }
 
     .author-popup-header {
-        margin-bottom: 20px;
-        padding-bottom: 16px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 8px;
+    }
+    
+    .author-popup-actions {
+        width: 100%;
+        justify-content: flex-end;
     }
 
     .author-popup-title {
@@ -203,8 +208,8 @@
     }
 
     .author-popup-delete {
-        padding: 8px 14px;
-        font-size: 0.85em;
+        padding: 6px 12px;
+        font-size: 0.8em;
     }
 
     .author-items {
