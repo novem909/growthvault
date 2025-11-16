@@ -121,9 +121,26 @@ function makeEditable(element) {
         element.contentEditable = false;
         element.blur();
 
-        // Save titles to storage when edited
-        if (window.listBuilder) {
-            window.listBuilder.saveToStorage();
+        // Check if this is an item title (has data-item-id attribute)
+        if (element.dataset.itemId) {
+            const itemId = parseInt(element.dataset.itemId);
+            const newTitle = element.textContent.trim();
+            
+            // Update the item title through the app's list manager
+            if (window.app && window.app.listManager) {
+                const state = window.app.stateManager.getState();
+                const updatedItems = state.items.map(item => 
+                    item.id === itemId ? { ...item, title: newTitle } : item
+                );
+                window.app.stateManager.setState({ items: updatedItems });
+                window.app.listManager.save();
+                console.log('✏️  Updated item title:', itemId, newTitle);
+            }
+        } else {
+            // Save page titles to storage when edited
+            if (window.listBuilder) {
+                window.listBuilder.saveToStorage();
+            }
         }
     }
 

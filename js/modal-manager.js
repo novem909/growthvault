@@ -207,7 +207,8 @@ export class ModalManager {
         const titleDiv = document.createElement('div');
         titleDiv.className = 'item-title';
         titleDiv.textContent = item.title || 'Untitled';
-        // Future: make editable via data-action="make-editable"
+        titleDiv.dataset.action = 'make-editable';
+        titleDiv.dataset.itemId = item.id;
 
         // Append base elements
         itemDiv.appendChild(dragHandle);
