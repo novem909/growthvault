@@ -13,7 +13,7 @@
     }
 
     .header {
-        padding: 80px 20px 32px 20px;
+        padding: 80px 16px 32px 16px;
     }
 
     .header h1 {
@@ -72,9 +72,11 @@
     input[type="text"],
     input[type="file"],
     textarea {
-        min-width: 100%;
+        width: 100%;
+        max-width: 100%;
         font-size: 16px;
         padding: 12px 14px;
+        box-sizing: border-box;
     }
 
     textarea {
@@ -120,6 +122,7 @@
         grid-template-columns: 1fr;
         gap: 16px;
         max-height: none;
+        padding-right: 0;
     }
 
     .author-box {
