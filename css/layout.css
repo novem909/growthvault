@@ -73,12 +73,16 @@
 }
 
 .input-group:nth-child(4) {
-    grid-column: 4 / 10;
+    grid-column: 3 / 11;
     width: 100%;
 }
 
+.input-group:nth-child(4) label {
+    text-align: center;
+}
+
 .input-form .btn {
-    grid-column: 4 / 10;
+    grid-column: 5 / 9;
 }
 
 .list-container {
