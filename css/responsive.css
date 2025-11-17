@@ -54,12 +54,19 @@
     }
 
     .input-form {
+        display: flex;
         flex-direction: column;
         gap: 16px;
+        grid-template-columns: unset;
     }
 
     .input-group {
         width: 100%;
+        grid-column: unset !important;
+    }
+    
+    .input-form .btn {
+        grid-column: unset !important;
     }
 
     input[type="text"],
