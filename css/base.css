@@ -47,6 +47,7 @@ textarea,
     tab-size: 4;
     font-family: 'Inter', sans-serif;
     overflow-y: auto;
+    text-align: center;
 }
 
 input[type="text"]:focus,
