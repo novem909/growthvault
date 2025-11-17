@@ -86,7 +86,7 @@
 }
 
 .list-container {
-    padding: 40px 32px;
+    padding: 0px 32px 40px 32px;
     min-height: 400px;
     background: var(--bg-list-container);
     transition: background 0.3s ease;
@@ -94,6 +94,7 @@
 
 .list-title {
     text-align: center;
+    margin-top: 0px;
     margin-bottom: 32px;
     color: var(--text-primary);
     font-size: 1.75em;
@@ -138,6 +139,7 @@
 .data-management {
     margin-top: 20px;
     padding-top: 20px;
+    margin-bottom: 0;
     border-top: 1px solid #e2e8f0;
 }
 
@@ -153,6 +155,7 @@
     text-align: center;
     font-size: 0.8em;
     color: #64748b;
+    margin-bottom: 0;
 }
 
 .auto-save-indicator {

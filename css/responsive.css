@@ -93,6 +93,7 @@
     .data-management {
         margin-top: 16px;
         padding-top: 16px;
+        margin-bottom: 0;
     }
 
     .data-actions {
@@ -110,7 +111,7 @@
     }
 
     .list-container {
-        padding: 24px 16px;
+        padding: 12px 16px 24px 16px;
     }
 
     .list-title {
