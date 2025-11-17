@@ -22,8 +22,8 @@ export const CONFIG = {
     // File Upload Limits
     MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
     SUPPORTED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-    ALLOWED_HTML_TAGS: ['P', 'BR', 'STRONG', 'EM', 'B', 'I', 'U', 'UL', 'OL', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'PRE', 'CODE'],
-    ALLOWED_HTML_ATTRIBUTES: [],
+    ALLOWED_HTML_TAGS: ['P', 'BR', 'STRONG', 'EM', 'B', 'I', 'U', 'UL', 'OL', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'PRE', 'CODE', 'FONT'],
+    ALLOWED_HTML_ATTRIBUTES: ['size'],
     
     // UI Settings
     DEBOUNCE_DELAY: 500,
