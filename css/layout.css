@@ -15,7 +15,7 @@
 }
 
 .input-section {
-    padding: 40px 32px;
+    padding: 20px 32px 40px 32px;
     background: var(--bg-input-section);
     border-bottom: 1px solid var(--border-color);
     position: relative;
@@ -40,7 +40,7 @@
     font-weight: 500;
     color: var(--text-secondary);
     font-size: 0.875em;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
     letter-spacing: 0.025em;
     transition: color 0.3s ease;
 }
