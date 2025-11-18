@@ -210,6 +210,40 @@ export class Validators {
     }
 
     /**
+     * Normalize spacing in HTML content
+     * Removes empty paragraphs and excessive line breaks
+     * @param {string} html
+     * @returns {string}
+     */
+    static normalizeSpacing(html) {
+        if (!html) return '';
+        
+        let normalized = html
+            // Remove empty paragraphs
+            .replace(/<p>\s*<\/p>/gi, '')
+            .replace(/<p>\s*<br\s*\/?>\s*<\/p>/gi, '')
+            .replace(/<p>&nbsp;<\/p>/gi, '')
+            // Remove empty list items
+            .replace(/<li>\s*<\/li>/gi, '')
+            .replace(/<li>\s*<br\s*\/?>\s*<\/li>/gi, '')
+            .replace(/<li>&nbsp;<\/li>/gi, '')
+            .replace(/<li>\s*<p>\s*<\/p>\s*<\/li>/gi, '')
+            // Unwrap paragraphs inside list items (li>p becomes li with text only)
+            .replace(/<li>\s*<p>(.*?)<\/p>\s*<\/li>/gi, '<li>$1</li>')
+            // Collapse multiple consecutive <br> (3+ → 1)
+            .replace(/(<br\s*\/?>\s*){3,}/gi, '<br>')
+            // Remove <br> at start/end of <p>
+            .replace(/<p>\s*<br\s*\/?>/gi, '<p>')
+            .replace(/<br\s*\/?>\s*<\/p>/gi, '</p>')
+            // Remove <br> at start/end of <li>
+            .replace(/<li>\s*<br\s*\/?>/gi, '<li>')
+            .replace(/<br\s*\/?>\s*<\/li>/gi, '</li>')
+            .trim();
+        
+        return normalized;
+    }
+
+    /**
      * Extract plain text content from HTML
      * @param {string} html
      * @returns {string}

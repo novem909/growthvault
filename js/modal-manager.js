@@ -67,7 +67,8 @@ export class ModalManager {
                 const textData = clipboard?.getData('text/plain') || '';
                 const source = htmlData && htmlData.trim().length > 0 ? htmlData : textData;
                 const sanitized = Validators.sanitizeRichText(source);
-                document.execCommand('insertHTML', false, sanitized);
+                const normalized = Validators.normalizeSpacing(sanitized);
+                document.execCommand('insertHTML', false, normalized);
             };
         }
 

@@ -535,25 +535,53 @@
 }
 
 .modal-text ul {
-    margin: 16px 0;
+    margin: 0 0 8px 0;
     padding-left: 32px;
     list-style-position: outside;
 }
 
 .modal-text li {
-    margin: 10px 0;
+    margin: 3px 0;
     padding-left: 8px;
 }
 
 .modal-text p {
-    margin: 12px 0;
+    margin: 4px 0;
 }
 
 .modal-text h1, 
 .modal-text h2, 
 .modal-text h3 {
-    margin: 20px 0 12px 0;
+    margin: 12px 0 4px 0;
     line-height: 1.4;
+}
+
+/* Remove cumulative margins between adjacent elements */
+.modal-text h1 + h2,
+.modal-text h1 + h3,
+.modal-text h2 + h3,
+.modal-text h3 + h3 {
+    margin-top: 6px;
+}
+
+.modal-text h1 + ul,
+.modal-text h2 + ul,
+.modal-text h3 + ul,
+.modal-text h1 + ol,
+.modal-text h2 + ol,
+.modal-text h3 + ol {
+    margin-top: 0;
+}
+
+.modal-text p + h1,
+.modal-text p + h2,
+.modal-text p + h3 {
+    margin-top: 8px;
+}
+
+.modal-text p + ul,
+.modal-text p + ol {
+    margin-top: 4px;
 }
 
 .modal-image {
@@ -792,7 +820,7 @@
 }
 
 .item-text p {
-    margin: 0 0 0.75em;
+    margin: 0 0 0.3em;
 }
 
 .item-text p:last-child {
@@ -801,12 +829,18 @@
 
 .item-text ul,
 .item-text ol {
-    margin: 12px 0;
+    margin: 0 0 8px 0;
     padding-left: 24px;
 }
 
 .item-text li {
-    margin: 6px 0;
+    margin: 3px 0;
+}
+
+/* Remove cumulative margins between adjacent elements */
+.item-text p + ul,
+.item-text p + ol {
+    margin-top: 4px;
 }
 
 .item-text strong,

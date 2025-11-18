@@ -223,7 +223,8 @@ export class UIManager {
                 ? htmlData
                 : this.convertPlainTextToHtml(textData);
             const sanitized = Validators.sanitizeRichText(source);
-            editor.innerHTML = sanitized || '';
+            const normalized = Validators.normalizeSpacing(sanitized);
+            editor.innerHTML = normalized || '';
             this.placeCaretAtEnd(editor);
             editor.dispatchEvent(new Event('input', { bubbles: true }));
         });
