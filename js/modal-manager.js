@@ -186,6 +186,9 @@ export class ModalManager {
         itemDiv.draggable = true;
         itemDiv.dataset.id = item.id;
         itemDiv.dataset.author = author;
+        // Make the whole card clickable to open modal
+        itemDiv.dataset.action = 'open-item-modal-from-popup';
+        itemDiv.dataset.itemId = item.id;
 
         // Drag handle
         const dragHandle = document.createElement('div');
@@ -222,25 +225,23 @@ export class ModalManager {
             const textDiv = document.createElement('div');
             textDiv.className = 'item-text';
             textDiv.innerHTML = Validators.sanitizeRichText(item.text);
-            textDiv.style.cursor = 'pointer';
-            textDiv.dataset.action = 'open-item-modal-from-popup';
-            textDiv.dataset.itemId = item.id;
+            // Text div doesn't need separate action now, as parent has it
+            // and CSS sets pointer-events: none for preview
             itemDiv.appendChild(textDiv);
         }
 
         // Image (if exists)
         if (item.image) {
-            console.log('🖼️  Rendering image for item:', item.id, 'size:', item.image.length);
             const img = document.createElement('img');
             img.src = item.image;
             img.alt = 'User uploaded image';
             img.className = 'item-image';
-            img.style.cursor = 'pointer';
+            // Image can still be zoomed separately if needed, or let it open modal
+            // For now, let's allow zoom on click, which stops propagation
+            img.style.cursor = 'zoom-in';
             img.dataset.action = 'zoom-image';
             img.dataset.imageSrc = img.src;
             itemDiv.appendChild(img);
-        } else {
-            console.log('ℹ️  No image for item:', item.id);
         }
 
         container.appendChild(itemDiv);
