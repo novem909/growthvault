@@ -37,72 +37,104 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <button class="auth-button" id="authButton" data-action="auth">
-                <span id="authText">Sign In</span>
-            </button>
-            <div id="syncStatus">
-                <span id="syncIndicator" style="color: #10b981;">●</span> <span id="syncText">Synced</span>
-            </div>
-            <button class="dark-mode-toggle" data-action="toggle-theme">
-                <span id="themeIcon">🌙</span>
-                <span id="themeText">Dark</span>
-            </button>
-            <h1 class="editable-header" id="mainTitle" data-action="make-editable">Visual List Builder</h1>
-            <p class="editable-header" id="subtitle" data-action="make-editable">Create beautiful visual lists with text and images</p>
-        </div>
-
-        <div class="input-section">
-            <form class="input-form" id="itemForm">
-                <div class="input-group">
-                    <label for="authorInput">Author</label>
-                    <input type="text" id="authorInput" placeholder="Enter author name..." required>
-                </div>
-                <div class="input-group">
-                    <label for="titleInput">Title (optional)</label>
-                    <input type="text" id="titleInput" placeholder="Enter a title for this content...">
-                </div>
-                <div class="input-group">
-                    <label for="textInput">Text Content</label>
-                    <div id="textInput"
-                         class="rich-text-input"
-                         role="textbox"
-                         contenteditable="true"
-                         aria-multiline="true"
-                         data-placeholder="Paste your text here with full formatting..."></div>
-                </div>
-                <div class="input-group">
-                    <label for="imageInput">Image (optional)</label>
-                    <input type="file" id="imageInput" accept="image/*">
-                </div>
-                <button type="submit" class="btn">Add Item</button>
-            </form>
-
-            <div class="data-management">
-                <div class="data-actions">
-                    <button type="button" class="btn-secondary" data-action="export-data">Export Data</button>
-                    <label for="importFile" class="btn-secondary">Import Data</label>
-                    <input type="file" id="importFile" accept=".json" style="display: none;" data-action="import-data">
-                    <button type="button" class="btn-danger" data-action="clear-all">Clear All</button>
-                </div>
-                <div class="storage-info" id="storageInfo">
-                    <span class="auto-save-indicator">🟢 Auto-saved locally</span>
+    <div class="app-shell">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="workspace-switcher">
+                    <div class="workspace-icon">G</div>
+                    <span class="workspace-name">GrowthVault</span>
                 </div>
             </div>
-        </div>
 
-        <div class="list-container">
-            <h2 class="list-title editable-header" id="listTitle" data-action="make-editable">Your Visual List</h2>
-            <div class="visual-list" id="visualList">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                    </svg>
-                    <p>No items yet. Add your first item above!</p>
+            <div class="sidebar-nav">
+                <!-- Existing Functional Elements Moved Here -->
+                
+                <div class="nav-item" id="authButton" data-action="auth">
+                    <span class="icon">👤</span>
+                    <span id="authText">Sign In</span>
+                </div>
+                
+                <div class="nav-item" data-action="toggle-theme">
+                    <span class="icon" id="themeIcon">🌙</span>
+                    <span id="themeText">Dark Mode</span>
+                </div>
+                
+                <div class="nav-item">
+                    <span class="icon" id="syncIndicator" style="color: #10b981;">●</span>
+                    <span id="syncText">Synced</span>
+                </div>
+
+                <div class="nav-item danger" data-action="clear-all">
+                    <span class="icon">🗑️</span>
+                    <span>Trash (Clear All)</span>
+                </div>
+
+                <!-- Hidden but functional for existing JS logic -->
+                <div id="syncStatus" style="display: none;"></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-container">
+                <!-- Header -->
+                <div class="page-header">
+                    <div class="cover-image-placeholder"></div>
+                    <div class="page-icon">📝</div>
+                    <h1 class="editable-header" id="mainTitle" data-action="make-editable">Visual List Builder</h1>
+                    <p class="editable-header" id="subtitle" data-action="make-editable">Create beautiful visual lists with text and images</p>
+                </div>
+
+                <!-- Input Section (Quick Capture) -->
+                <div class="input-section">
+                    <form class="input-form" id="itemForm">
+                        <div class="input-block">
+                            <input type="text" id="authorInput" placeholder="Author" required class="minimal-input">
+                        </div>
+                        <div class="input-block">
+                            <input type="text" id="titleInput" placeholder="Page Title" class="minimal-input">
+                        </div>
+                        <div class="input-block full-width">
+                            <div id="textInput"
+                                 class="rich-text-input minimal-input"
+                                 role="textbox"
+                                 contenteditable="true"
+                                 aria-multiline="true"
+                                 data-placeholder="Type something or paste content..."></div>
+                        </div>
+                        <div class="input-block">
+                            <label for="imageInput" class="file-upload-label">
+                                <span class="icon">🖼️</span> Add Cover
+                            </label>
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="input-actions">
+                            <button type="submit" class="btn-primary">Create Page</button>
+                        </div>
+                    </form>
+
+                    <!-- Hidden Data Management (actions moved or hidden) -->
+                    <div class="data-management" style="display: none;">
+                         <button type="button" data-action="export-data">Export</button>
+                         <input type="file" id="importFile" data-action="import-data">
+                    </div>
+                     <div class="storage-info" id="storageInfo" style="opacity: 0.5; font-size: 0.7rem; margin-top: 10px;">
+                        <span class="auto-save-indicator">Saved locally</span>
+                    </div>
+                </div>
+
+                <!-- List Container -->
+                <div class="list-container">
+                    <h2 class="list-title editable-header" id="listTitle" data-action="make-editable">Your Visual List</h2>
+                    <div class="visual-list" id="visualList">
+                        <div class="empty-state">
+                             <p>No items yet. Add your first item above!</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Content Modal -->

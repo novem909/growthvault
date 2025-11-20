@@ -4,43 +4,54 @@
  */
 
 :root {
-    /* Background Gradients */
-    --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    --bg-container: white;
-    --bg-input-section: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    --bg-list-container: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    /* Notion Light Mode */
+    --bg-primary: #FFFFFF;
+    --bg-sidebar: #F7F7F5;
+    --bg-card: #FFFFFF;
+    --bg-hover: #EFEFEF;
     
     /* Text Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #374151;
-    --text-muted: #64748b;
+    --text-primary: #37352F;
+    --text-secondary: #787774;
+    --text-muted: #9B9A97;
     
-    /* Border and Shadows */
-    --border-color: #e2e8f0;
-    --shadow-light: rgba(0, 0, 0, 0.1);
-    --shadow-medium: rgba(0, 0, 0, 0.2);
+    /* Borders & Shadows */
+    --border-color: #E9E9E9;
+    --shadow-card: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    --shadow-hover: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.2) 0px 4px 8px;
+    
+    /* Sidebar Specific */
+    --sidebar-width: 240px;
+    --sidebar-text: #5F5E5B;
+    --sidebar-hover: #E8E7E4;
 }
 
 /* Dark Theme */
 [data-theme="dark"] {
-    --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --bg-container: #1e293b;
-    --bg-input-section: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    --bg-list-container: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    --text-primary: #f8fafc;
-    --text-secondary: #e2e8f0;
-    --text-muted: #94a3b8;
-    --border-color: #475569;
-    --shadow-light: rgba(0, 0, 0, 0.3);
-    --shadow-medium: rgba(0, 0, 0, 0.5);
+    /* Notion Dark Mode */
+    --bg-primary: #191919;
+    --bg-sidebar: #202020;
+    --bg-card: #252525;
+    --bg-hover: #2C2C2C;
+    
+    --text-primary: #D4D4D4;
+    --text-secondary: #9B9B9B;
+    --text-muted: #686868;
+    
+    --border-color: #2F2F2F;
+    --shadow-card: rgba(255, 255, 255, 0.03) 0px 0px 0px 1px, rgba(0, 0, 0, 0.2) 0px 2px 4px;
+    --shadow-hover: rgba(255, 255, 255, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.4) 0px 4px 8px;
+    
+    --sidebar-text: #9B9B9B;
+    --sidebar-hover: #2C2C2C;
 }
 
 [data-theme="dark"] .skeleton {
     background: linear-gradient(
         90deg,
-        #334155 25%,
-        #475569 50%,
-        #334155 75%
+        #2C2C2C 25%,
+        #363636 50%,
+        #2C2C2C 75%
     );
     background-size: 200% 100%;
 }

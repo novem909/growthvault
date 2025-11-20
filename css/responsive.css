@@ -1,294 +1,110 @@
 /**
  * Responsive Styles
- * Mobile and tablet breakpoints
+ * Mobile and tablet breakpoints for Notion-style Layout
  */
 
 @media (max-width: 768px) {
-    body {
-        padding: 12px;
-    }
-
-    .container {
-        border-radius: 16px;
-    }
-
-    .header {
-        padding: 80px 16px 32px 16px;
-    }
-
-    .header h1 {
-        font-size: 1.75em;
-        margin-bottom: 8px;
-    }
-
-    .header p {
-        font-size: 0.95em;
-    }
-
-    .auth-button {
-        top: 12px;
-        left: 12px;
-        padding: 6px 12px;
-        font-size: 0.8em;
-        gap: 6px;
-        min-height: 36px;
-    }
-
-    #syncStatus {
-        top: 52px;
-        left: 12px;
-        font-size: 0.7em;
-    }
-
-    .dark-mode-toggle {
-        top: 12px;
-        right: 12px;
-        padding: 6px 12px;
-        font-size: 0.8em;
-        gap: 6px;
-        min-height: 36px;
-    }
-
-    .input-section {
-        padding: 24px 16px;
-    }
-
-    .input-form {
+    /* Sidebar Drawer (Stacked on Mobile for access without JS) */
+    .sidebar {
         display: flex;
-        flex-direction: column;
-        gap: 16px;
-        grid-template-columns: unset;
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 8px;
+        box-shadow: none;
+        z-index: 10;
     }
 
-    .input-group {
-        width: 100%;
-        grid-column: unset !important;
+    .sidebar-header {
+        display: none; /* Save space */
+    }
+
+    .sidebar-nav {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        padding: 0;
+    }
+
+    .nav-item {
+        white-space: nowrap;
+        padding: 6px 10px;
+        background: var(--bg-input-section);
+        border-radius: 6px;
+    }
+
+    /* Show Top Bar (Breadcrumbs only) */
+    .top-bar {
+        display: flex;
     }
     
-    .input-form .btn {
-        grid-column: unset !important;
+    .top-actions {
+        display: none; /* Hide hamburger since we stack nav */
     }
 
-    input[type="text"],
-    input[type="file"],
-    textarea {
-        width: 100%;
+    /* Main Content Adjustments */
+    .content-container {
+        padding: 24px 16px; /* Smaller padding */
         max-width: 100%;
-        font-size: 16px;
-        padding: 12px 14px;
-        box-sizing: border-box;
     }
 
-    textarea {
-        min-height: 120px;
-    }
-
-    .btn {
-        width: 100%;
-        padding: 14px 24px;
-        font-size: 1em;
-        min-height: 48px;
-    }
-
-    .data-management {
-        margin-top: 16px;
-        padding-top: 16px;
-        margin-bottom: 0;
-    }
-
-    .data-actions {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .btn-secondary,
-    .btn-danger {
-        width: 100%;
-        padding: 10px 16px;
-        font-size: 0.9em;
-        text-align: center;
-        min-height: 44px;
-    }
-
-    .list-container {
-        padding: 12px 16px 24px 16px;
-    }
-
-    .list-title {
-        font-size: 1.5em;
+    .page-header {
         margin-bottom: 24px;
     }
 
-    .visual-list {
-        grid-template-columns: 1fr;
+    .cover-image-placeholder {
+        height: 20vh;
+        margin: -24px -16px 24px -16px;
+    }
+
+    #mainTitle {
+        font-size: 32px;
+    }
+
+    .page-icon {
+        font-size: 48px;
+    }
+
+    /* Form Adjustments */
+    .input-form {
         gap: 16px;
-        max-height: none;
-        padding-right: 0;
+    }
+
+    .input-block {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rich-text-input, 
+    input[type="text"] {
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    /* List Adjustments */
+    .visual-list {
+        grid-template-columns: 1fr; /* Single column */
+        gap: 12px;
     }
 
     .author-box {
-        min-height: 140px;
-        padding: 20px;
+        min-height: auto;
     }
 
-    .author-title {
-        font-size: 1.3em;
-    }
-
-    .author-subtitle {
-        font-size: 0.9em;
-    }
-
+    /* Modal Mobile */
     .modal-content {
-        width: 95vw;
-        height: 90vh;
-        margin: 5vh auto;
-        padding: 12px 8px 12px 8px;
-        border-radius: 12px;
-    }
-
-    .modal-header {
-        margin-bottom: 10px;
-        padding-bottom: 0;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    
-    .modal-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
         width: 100%;
-    }
-    
-    .modal-title {
-        font-size: 1em;
-    }
-    
-    .modal-meta-inline {
-        font-size: 0.7em;
-    }
-
-    .modal-close {
-        width: 36px;
-        height: 36px;
-        font-size: 1.2em;
-    }
-
-    .modal-delete {
-        padding: 6px 12px;
-        font-size: 0.8em;
-    }
-
-    .modal-text {
-        font-size: 16px;
-        padding: 16px 16px 16px 24px;
-        min-height: 300px;
-    }
-
-    .author-popup-content {
-        width: 98vw;
-        max-height: 92vh;
-        margin: 4vh auto;
-        padding: 20px 12px;
-        border-radius: 12px;
-    }
-
-    .author-popup-header {
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    
-    .author-popup-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .author-popup-title {
-        font-size: 1.5em;
-        width: 100%;
-        padding: 6px 10px;
-    }
-
-    .author-popup-close {
-        width: 36px;
-        height: 36px;
-        font-size: 1.2em;
-    }
-
-    .author-popup-delete {
-        padding: 6px 12px;
-        font-size: 0.8em;
-    }
-
-    .author-items {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .popup-list-item {
+        height: 100%;
+        margin: 0;
+        border-radius: 0;
         padding: 16px;
     }
 
-    .item-title {
-        font-size: 1em;
-        margin-top: 32px;
-        padding: 6px 10px;
-    }
-
-    .item-text {
-        font-size: 0.85em;
-        padding: 10px;
-        max-height: 100px;
-    }
-
-    .item-date {
-        top: 8px;
-        right: 44px;
-        font-size: 0.7em;
-        padding: 3px 6px;
-    }
-
-    .delete-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 0.9em;
-    }
-
-    .author-delete-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 0.85em;
-    }
-
-    .drag-handle,
-    .popup-drag-handle,
-    .author-drag-handle {
-        opacity: 1;
-    }
-
-    .fab {
-        bottom: 16px;
-        right: 16px;
-        width: 48px;
-        height: 48px;
-        font-size: 20px;
-    }
-
-    .toast {
-        bottom: 80px;
-        font-size: 0.85em;
-        padding: 10px 20px;
-    }
-
-    .empty-state {
-        padding: 40px 16px;
-    }
-
-    .empty-state svg {
-        width: 60px;
-        height: 60px;
+    .modal-image {
+        max-height: 40vh;
     }
 }
