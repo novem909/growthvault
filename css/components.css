@@ -252,10 +252,122 @@
 .fab { display: none; } /* Don't need FAB in desktop-first Notion UI */
 .toast { background: var(--bg-sidebar); color: var(--text-primary); border: 1px solid var(--border-color); }
 
-/* Author Popup (if used) */
-.author-popup-content {
-    background: var(--bg-container);
-    border-radius: 4px;
+/* Author Popup (Grid Layout) */
+.author-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding-top: 20px;
+}
+
+.popup-list-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    cursor: default;
+    position: relative;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-list-item:hover {
     box-shadow: var(--shadow-hover);
-    padding: 32px;
+    background: var(--bg-hover);
+}
+
+.popup-list-item .item-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 24px 0 12px 0; /* Space for date/delete top row */
+    padding: 0;
+    background: transparent;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popup-list-item .item-date {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.05);
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    right: auto; /* Override default */
+}
+
+.popup-list-item .delete-btn {
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    box-shadow: none;
+}
+
+.popup-list-item .delete-btn:hover {
+    background: #EB5757;
+    color: white;
+}
+
+.popup-list-item .item-text {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex-grow: 1;
+    max-height: 100px; /* Limit preview height */
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    pointer-events: none; /* Let click pass to item for opening modal? */
+}
+
+/* Ensure we can click to open modal */
+.popup-list-item {
+    cursor: pointer;
+}
+
+.popup-list-item .item-text {
+    /* If text is clicked, we want it to trigger the item opening */
+    pointer-events: none;
+}
+
+/* Drag handle in popup */
+.popup-drag-handle {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    border-radius: 3px;
+    font-size: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+}
+
+.popup-drag-handle::before {
+    content: '⋮⋮';
+    font-size: 14px;
+    letter-spacing: -1px;
+}
+
+.popup-drag-handle:hover {
+    background: rgba(0,0,0,0.05);
+    color: var(--text-primary);
 }
