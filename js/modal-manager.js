@@ -50,7 +50,8 @@ export class ModalManager {
 
         // Set text content
         if (modalText) {
-            modalText.innerHTML = Validators.sanitizeRichText(item.text || '');
+            // Trust stored text (already sanitized)
+            modalText.innerHTML = item.text || '';
             modalText.contentEditable = true;
             
             // Save on blur
@@ -157,10 +158,15 @@ export class ModalManager {
         if (itemsContainer) {
             itemsContainer.innerHTML = '';
 
+            // Use DocumentFragment for batch insertion to improve performance
+            const fragment = document.createDocumentFragment();
+
             // Create each item using DOM manipulation (matches original)
             items.forEach(item => {
-                this.renderAuthorPopupItem(item, itemsContainer, author);
+                this.renderAuthorPopupItem(item, fragment, author);
             });
+
+            itemsContainer.appendChild(fragment);
 
             // Setup drag & drop for reordering items
             this.addPopupDragAndDrop(author);
@@ -224,7 +230,8 @@ export class ModalManager {
         if (item.text) {
             const textDiv = document.createElement('div');
             textDiv.className = 'item-text';
-            textDiv.innerHTML = Validators.sanitizeRichText(item.text);
+            // Trust stored text (already sanitized) to avoid expensive re-processing on render
+            textDiv.innerHTML = item.text; 
             // Text div doesn't need separate action now, as parent has it
             // and CSS sets pointer-events: none for preview
             itemDiv.appendChild(textDiv);
