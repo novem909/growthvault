@@ -6,6 +6,7 @@
 :root {
     /* Notion Light Mode */
     --bg-primary: #FFFFFF;
+    --bg-container: #FFFFFF;
     --bg-sidebar: #F7F7F5;
     --bg-card: #FFFFFF;
     --bg-hover: #EFEFEF;
@@ -30,6 +31,7 @@
 [data-theme="dark"] {
     /* Notion Dark Mode */
     --bg-primary: #191919;
+    --bg-container: #202020;
     --bg-sidebar: #202020;
     --bg-card: #252525;
     --bg-hover: #2C2C2C;
