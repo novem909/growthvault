@@ -144,13 +144,19 @@ export class StateManager {
      * @returns {Object} Serializable state
      */
     getStateForSaving() {
-        return {
+        const data = {
             items: this.state.items,
             itemCounter: this.state.itemCounter,
             authorOrder: this.state.authorOrder,
             undoStack: this.state.undoStack,
             titles: this.state.titles
         };
+
+        if (this.state.lastSaveTimestamp) {
+            data.timestamp = new Date(this.state.lastSaveTimestamp).toISOString();
+        }
+        
+        return data;
     }
 }
 

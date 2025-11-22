@@ -284,11 +284,7 @@ export class FirebaseManager {
                 break;
             case 'synced':
                 syncIndicator.style.color = '#10b981';
-                if (this.currentUser && this.currentUser.email) {
-                    syncText.textContent = this.currentUser.email;
-                } else {
-                    syncText.textContent = 'Synced';
-                }
+                syncText.textContent = 'Synced';
                 break;
             case 'error':
                 syncIndicator.style.color = '#ef4444';
