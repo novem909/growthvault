@@ -64,6 +64,17 @@ export class FirebaseManager {
             if (this.currentUser) {
                 // Sign out
                 await this.auth.signOut();
+                
+                // Clear local data on explicit sign out
+                this.stateManager.setState({
+                    items: [],
+                    itemCounter: 1,
+                    authorOrder: [],
+                    undoStack: [],
+                    authorTitles: {}
+                });
+                this.listManager.storageManager.clear();
+                
                 if (typeof showToast === 'function') {
                     showToast('Signed out', 'default');
                 }
@@ -107,18 +118,6 @@ export class FirebaseManager {
             
             // Disconnect Firebase listener
             this.disconnectFirebase();
-            
-            // Clear all content when signing out
-            this.stateManager.setState({
-                items: [],
-                itemCounter: 1,
-                authorOrder: [],
-                undoStack: [],
-                authorTitles: {}
-            });
-            
-            // Clear localStorage
-            this.listManager.storageManager.clear();
             
             // Hide sync status
             const syncStatus = document.getElementById('syncStatus');
