@@ -100,7 +100,21 @@ export class ListManager {
         });
 
         // Save to storage
-        this.save();
+        const saveResult = this.save();
+
+        if (!saveResult.success) {
+            // Revert state if save failed
+            this.stateManager.setState({
+                items: state.items,
+                itemCounter: state.itemCounter
+            });
+            console.error('❌ Failed to save item:', saveResult.error);
+            return { success: false, error: 'Storage full! ' + saveResult.error };
+        }
+
+        if (saveResult.syncPromise) {
+            await saveResult.syncPromise;
+        }
 
         console.log('✅ Item added:', item.id);
         return { success: true, item };
@@ -239,7 +253,10 @@ export class ListManager {
             this.stateManager.loadState(data);
             
             // Save to storage
-            this.save();
+            const saveResult = this.save();
+            if (saveResult.syncPromise) {
+                await saveResult.syncPromise;
+            }
             
             console.log('📥 Data imported:', data.items.length, 'items');
             return { success: true, itemCount: data.items.length };
@@ -392,19 +409,20 @@ export class ListManager {
     save(skipFirebaseSync = false) {
         const state = this.stateManager.getStateForSaving();
         const result = this.storageManager.save(state);
+        let syncPromise = Promise.resolve();
         
         if (result.success) {
             this.stateManager.setState({ lastSaveTimestamp: new Date(result.timestamp).getTime() });
             
             // Sync to Firebase if user is logged in (unless we're loading from Firebase)
             if (!skipFirebaseSync && this.firebaseManager && this.firebaseManager.currentUser) {
-                this.firebaseManager.sync().catch(error => {
+                syncPromise = this.firebaseManager.sync().catch(error => {
                     console.error('❌ Firebase sync failed:', error);
                 });
             }
         }
         
-        return result;
+        return { ...result, syncPromise };
     }
 
     /**

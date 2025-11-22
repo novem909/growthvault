@@ -167,14 +167,26 @@ export class FirebaseManager {
             const data = snapshot.val();
 
             if (data) {
-                // Load into state
-                this.stateManager.loadState(data);
-                
-                // Also save to localStorage as cache (skip Firebase sync to avoid circular save)
-                this.listManager.save(true);
+                // Check timestamps to resolve conflicts
+                const state = this.stateManager.getState();
+                const localTimestamp = state.lastSaveTimestamp || 0;
+                const remoteTimestamp = data.timestamp ? new Date(data.timestamp).getTime() : 0;
+
+                if (remoteTimestamp > localTimestamp) {
+                    // Remote is newer
+                    this.stateManager.loadState(data);
+                    this.listManager.save(true);
+                    console.log('☁️  Loaded newer data from Firebase');
+                } else if (localTimestamp > remoteTimestamp) {
+                    // Local is newer, push to Firebase
+                    console.log('☁️  Local data is newer, syncing to Firebase...');
+                    const localState = this.stateManager.getStateForSaving();
+                    await this.saveToFirebase(localState);
+                } else {
+                     console.log('☁️  Data is up to date');
+                }
                 
                 this.updateSyncStatus('synced');
-                console.log('☁️  Loaded from Firebase');
             } else {
                 // No data in Firebase, upload local data
                 const state = this.stateManager.getStateForSaving();

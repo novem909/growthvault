@@ -137,9 +137,23 @@ function makeEditable(element) {
                 console.log('✏️  Updated item title:', itemId, newTitle);
             }
         } else {
-            // Save page titles to storage when edited
-            if (window.listBuilder) {
-                window.listBuilder.saveToStorage();
+            // Save page titles to state and storage
+            if (window.app && window.app.stateManager && window.app.listManager) {
+                const elementId = element.id;
+                const newText = element.textContent.trim();
+                const state = window.app.stateManager.getState();
+                const titles = { ...state.titles };
+                
+                let changed = false;
+                if (elementId === 'mainTitle') { titles.mainTitle = newText; changed = true; }
+                else if (elementId === 'subtitle') { titles.subtitle = newText; changed = true; }
+                else if (elementId === 'listTitle') { titles.listTitle = newText; changed = true; }
+                
+                if (changed) {
+                    window.app.stateManager.setState({ titles });
+                    window.app.listManager.save();
+                    console.log('✏️  Updated page title:', elementId, newText);
+                }
             }
         }
     }
