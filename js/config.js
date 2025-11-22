@@ -9,7 +9,7 @@ export const CONFIG = {
     
     // Firebase Configuration
     FIREBASE_CONFIG: {
-        apiKey: "AIzaSyA8Kqj3h5o8DrdxwQPWL9-MjkUnHQX7dMI",
+        apiKey: "AIzaSyC3-B0RlrOS3Keaa8Mvtf18Y2sxR1BPRew",
         authDomain: "growthvault-df6c5.firebaseapp.com",
         databaseURL: "https://growthvault-df6c5-default-rtdb.firebaseio.com",
         projectId: "growthvault-df6c5",
