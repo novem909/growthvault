@@ -63,10 +63,15 @@ export class FirebaseManager {
         try {
             if (this.currentUser) {
                 // Sync current state to Firebase before signing out
-                console.log('☁️  Syncing data before sign out...');
                 const state = this.stateManager.getStateForSaving();
+                console.log('🔐 Signing out. Current state:', {
+                    itemCount: state.items?.length || 0,
+                    timestamp: state.timestamp,
+                    user: this.currentUser.email
+                });
+                
                 await this.saveToFirebase(state);
-                console.log('✅ Data synced successfully');
+                console.log('✅ Data synced successfully before sign out');
                 
                 // Sign out
                 await this.auth.signOut();
@@ -140,6 +145,7 @@ export class FirebaseManager {
      */
     async saveToFirebase(data) {
         if (!this.currentUser || !this.database) {
+            console.warn('⚠️  Cannot save to Firebase: user or database not initialized');
             return;
         }
 
@@ -147,10 +153,16 @@ export class FirebaseManager {
             this.updateSyncStatus('syncing');
             
             const userId = this.currentUser.uid;
+            console.log('☁️  Saving to Firebase:', {
+                userId,
+                itemCount: data.items?.length || 0,
+                timestamp: data.timestamp
+            });
+            
             await this.database.ref(`users/${userId}/data`).set(data);
             
             this.updateSyncStatus('synced');
-            console.log('☁️  Saved to Firebase');
+            console.log('✅ Saved to Firebase successfully');
         } catch (error) {
             console.error('❌ Firebase save failed:', error);
             this.updateSyncStatus('error');
@@ -162,6 +174,7 @@ export class FirebaseManager {
      */
     async loadFromFirebase() {
         if (!this.currentUser || !this.database) {
+            console.warn('⚠️  Cannot load from Firebase: user or database not initialized');
             return;
         }
 
@@ -169,8 +182,16 @@ export class FirebaseManager {
             this.updateSyncStatus('syncing');
             
             const userId = this.currentUser.uid;
+            console.log('☁️  Loading from Firebase for user:', userId);
+            
             const snapshot = await this.database.ref(`users/${userId}/data`).once('value');
             const data = snapshot.val();
+
+            console.log('📥 Firebase data retrieved:', {
+                hasData: !!data,
+                itemCount: data?.items?.length || 0,
+                remoteTimestamp: data?.timestamp
+            });
 
             if (data) {
                 // Check timestamps to resolve conflicts
@@ -178,29 +199,39 @@ export class FirebaseManager {
                 const localTimestamp = state.lastSaveTimestamp || 0;
                 const remoteTimestamp = data.timestamp ? new Date(data.timestamp).getTime() : 0;
 
+                console.log('⚖️  Comparing timestamps:', {
+                    local: localTimestamp,
+                    remote: remoteTimestamp,
+                    localDate: localTimestamp ? new Date(localTimestamp).toISOString() : 'none',
+                    remoteDate: data.timestamp || 'none'
+                });
+
                 if (remoteTimestamp > localTimestamp) {
                     // Remote is newer
+                    console.log('☁️  Remote is newer, loading...');
                     this.stateManager.loadState(data);
                     this.listManager.save(true);
-                    console.log('☁️  Loaded newer data from Firebase');
+                    console.log('✅ Loaded newer data from Firebase');
                 } else if (localTimestamp > remoteTimestamp) {
                     // Local is newer, push to Firebase
-                    console.log('☁️  Local data is newer, syncing to Firebase...');
+                    console.log('📤 Local data is newer, syncing to Firebase...');
                     const localState = this.stateManager.getStateForSaving();
                     await this.saveToFirebase(localState);
                 } else {
-                     console.log('☁️  Data is up to date');
+                     console.log('✅ Data is up to date');
                 }
                 
                 this.updateSyncStatus('synced');
             } else {
                 // No data in Firebase, upload local data if it's not empty
                 const state = this.stateManager.getStateForSaving();
+                console.log('📭 No data in Firebase. Local items:', state.items?.length || 0);
+                
                 if (state.items && state.items.length > 0) {
-                    console.log('☁️  No remote data, uploading local data...');
+                    console.log('📤 Uploading local data to Firebase...');
                     await this.saveToFirebase(state);
                 } else {
-                    console.log('☁️  No data in Firebase or locally');
+                    console.log('✅ No data in Firebase or locally');
                     this.updateSyncStatus('synced');
                 }
             }
@@ -315,7 +346,10 @@ export class FirebaseManager {
     async sync() {
         if (this.currentUser) {
             const state = this.stateManager.getStateForSaving();
+            console.log('🔄 Manual sync triggered. Items:', state.items?.length || 0);
             await this.saveToFirebase(state);
+        } else {
+            console.log('⚠️  Sync skipped: no user logged in');
         }
     }
 }
