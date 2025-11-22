@@ -50,8 +50,7 @@ export class ModalManager {
 
         // Set text content
         if (modalText) {
-            // Trust stored text (already sanitized)
-            modalText.innerHTML = item.text || '';
+            modalText.innerHTML = Validators.sanitizeRichText(item.text || '');
             modalText.contentEditable = true;
             
             // Save on blur
@@ -158,15 +157,10 @@ export class ModalManager {
         if (itemsContainer) {
             itemsContainer.innerHTML = '';
 
-            // Use DocumentFragment for batch insertion to improve performance
-            const fragment = document.createDocumentFragment();
-
             // Create each item using DOM manipulation (matches original)
             items.forEach(item => {
-                this.renderAuthorPopupItem(item, fragment, author);
+                this.renderAuthorPopupItem(item, itemsContainer, author);
             });
-
-            itemsContainer.appendChild(fragment);
 
             // Setup drag & drop for reordering items
             this.addPopupDragAndDrop(author);
@@ -192,9 +186,6 @@ export class ModalManager {
         itemDiv.draggable = true;
         itemDiv.dataset.id = item.id;
         itemDiv.dataset.author = author;
-        // Make the whole card clickable to open modal
-        itemDiv.dataset.action = 'open-item-modal-from-popup';
-        itemDiv.dataset.itemId = item.id;
 
         // Drag handle
         const dragHandle = document.createElement('div');
@@ -230,25 +221,26 @@ export class ModalManager {
         if (item.text) {
             const textDiv = document.createElement('div');
             textDiv.className = 'item-text';
-            // Trust stored text (already sanitized) to avoid expensive re-processing on render
-            textDiv.innerHTML = item.text; 
-            // Text div doesn't need separate action now, as parent has it
-            // and CSS sets pointer-events: none for preview
+            textDiv.innerHTML = Validators.sanitizeRichText(item.text);
+            textDiv.style.cursor = 'pointer';
+            textDiv.dataset.action = 'open-item-modal-from-popup';
+            textDiv.dataset.itemId = item.id;
             itemDiv.appendChild(textDiv);
         }
 
         // Image (if exists)
         if (item.image) {
+            console.log('🖼️  Rendering image for item:', item.id, 'size:', item.image.length);
             const img = document.createElement('img');
             img.src = item.image;
             img.alt = 'User uploaded image';
             img.className = 'item-image';
-            // Image can still be zoomed separately if needed, or let it open modal
-            // For now, let's allow zoom on click, which stops propagation
-            img.style.cursor = 'zoom-in';
+            img.style.cursor = 'pointer';
             img.dataset.action = 'zoom-image';
             img.dataset.imageSrc = img.src;
             itemDiv.appendChild(img);
+        } else {
+            console.log('ℹ️  No image for item:', item.id);
         }
 
         container.appendChild(itemDiv);
@@ -275,78 +267,70 @@ export class ModalManager {
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
+        const items = itemsContainer.querySelectorAll('.popup-list-item');
         let draggedItem = null;
 
-        // Use event delegation on the container instead of individual listeners
-        // Remove old listeners first to prevent duplicates if called multiple times
-        const newContainer = itemsContainer.cloneNode(true);
-        itemsContainer.parentNode.replaceChild(newContainer, itemsContainer);
-        const container = newContainer;
+        items.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                draggedItem = item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', item.dataset.id);
+            });
 
-        container.addEventListener('dragstart', (e) => {
-            const item = e.target.closest('.popup-list-item');
-            if (!item) return;
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                items.forEach(i => i.classList.remove('drag-over'));
+                draggedItem = null;
+            });
 
-            draggedItem = item;
-            item.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', item.dataset.id);
-        });
+            item.addEventListener('dragover', (e) => {
+                if (draggedItem && draggedItem !== item) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    item.classList.add('drag-over');
+                }
+            });
 
-        container.addEventListener('dragend', (e) => {
-            const item = e.target.closest('.popup-list-item');
-            if (item) item.classList.remove('dragging');
-            
-            container.querySelectorAll('.popup-list-item').forEach(i => i.classList.remove('drag-over'));
-            draggedItem = null;
-        });
+            item.addEventListener('dragleave', (e) => {
+                if (!item.contains(e.relatedTarget)) {
+                    item.classList.remove('drag-over');
+                }
+            });
 
-        container.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Essential to allow dropping
-            const item = e.target.closest('.popup-list-item');
-            if (!item || !draggedItem || item === draggedItem) return;
-
-            e.dataTransfer.dropEffect = 'move';
-            
-            // Only add class if we're actually over a valid drop target
-            container.querySelectorAll('.popup-list-item').forEach(i => i.classList.remove('drag-over'));
-            item.classList.add('drag-over');
-        });
-
-        container.addEventListener('dragleave', (e) => {
-            const item = e.target.closest('.popup-list-item');
-            // Only remove if we're leaving the item itself, not entering a child
-            if (item && !item.contains(e.relatedTarget)) {
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
                 item.classList.remove('drag-over');
-            }
+
+                if (draggedItem && draggedItem !== item) {
+                    const draggedIndex = Array.from(itemsContainer.children).indexOf(draggedItem);
+                    const targetIndex = Array.from(itemsContainer.children).indexOf(item);
+
+                    if (draggedIndex < targetIndex) {
+                        item.parentNode.insertBefore(draggedItem, item.nextSibling);
+                    } else {
+                        item.parentNode.insertBefore(draggedItem, item);
+                    }
+
+                    this.updateAuthorItemsFromDOM(author);
+                }
+            });
+
+            // Prevent drag from interfering with click events
+            let isDragging = false;
+            item.addEventListener('mousedown', () => isDragging = false);
+            item.addEventListener('mousemove', () => isDragging = true);
+
+            const clickableElements = item.querySelectorAll('.item-text, .delete-btn, .item-title, .item-image');
+            clickableElements.forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
         });
-
-        container.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const item = e.target.closest('.popup-list-item');
-            
-            // Cleanup visual state
-            container.querySelectorAll('.popup-list-item').forEach(i => i.classList.remove('drag-over'));
-
-            if (!item || !draggedItem || item === draggedItem) return;
-
-            const items = Array.from(container.children);
-            const draggedIndex = items.indexOf(draggedItem);
-            const targetIndex = items.indexOf(item);
-
-            if (draggedIndex < targetIndex) {
-                item.parentNode.insertBefore(draggedItem, item.nextSibling);
-            } else {
-                item.parentNode.insertBefore(draggedItem, item);
-            }
-
-            // Re-bind click events/references might be needed if relying on closures, 
-            // but since we rely on delegation for clicks too (in EventHandlers), we are good.
-            
-            this.updateAuthorItemsFromDOM(author);
-        });
-        
-        // Note: Click events are already handled by EventHandlers via delegation on document
     }
 
     /**

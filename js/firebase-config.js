@@ -39,7 +39,11 @@ function updateSyncStatus(status) {
             break;
         case 'synced':
             syncIndicator.style.color = '#10b981';
-            syncText.textContent = 'Synced';
+            if (currentUser && currentUser.email) {
+                syncText.textContent = currentUser.email;
+            } else {
+                syncText.textContent = 'Synced';
+            }
             syncStatus.style.display = 'block';
             break;
         case 'error':
@@ -81,7 +85,8 @@ async function handleAuth() {
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         currentUser = user;
-        document.getElementById('authText').textContent = 'Sign Out';
+        const authText = document.getElementById('authText');
+        if (authText) authText.textContent = 'Sign Out';
         showToast(`Signed in as ${user.displayName || user.email}`, 'success');
         // Load data from Firebase
         if (window.listBuilder) {
@@ -89,9 +94,25 @@ auth.onAuthStateChanged(async (user) => {
         }
     } else {
         currentUser = null;
-        document.getElementById('authText').textContent = 'Sign In';
+        const authText = document.getElementById('authText');
+        if (authText) authText.textContent = 'Sign In';
         if (window.listBuilder) {
             window.listBuilder.disconnectFirebase();
         }
     }
 });
+
+// MOCK AUTH FOR TESTING - UNCOMMENT TO ENABLE
+setTimeout(() => {
+    const mockUser = {
+        uid: 'test-user-123',
+        email: 'test@local.dev',
+        displayName: 'Test User'
+    };
+    // Trigger auth state change manually for testing
+    currentUser = mockUser;
+    const authText = document.getElementById('authText');
+    if (authText) authText.textContent = 'Sign Out';
+    updateSyncStatus('synced'); // This triggers the email display logic
+    showToast('Mock login successful', 'success');
+}, 2000);
