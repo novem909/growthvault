@@ -113,7 +113,13 @@ export class ListManager {
         }
 
         if (saveResult.syncPromise) {
-            await saveResult.syncPromise;
+            try {
+                await saveResult.syncPromise;
+            } catch (error) {
+                console.error('❌ Sync failed during add item:', error);
+                // Return success true because it IS saved locally, but warn about sync
+                // The UI might want to know this, but for now we keep it simple
+            }
         }
 
         console.log('✅ Item added:', item.id);
