@@ -62,6 +62,12 @@ export class FirebaseManager {
 
         try {
             if (this.currentUser) {
+                // Sync current state to Firebase before signing out
+                console.log('☁️  Syncing data before sign out...');
+                const state = this.stateManager.getStateForSaving();
+                await this.saveToFirebase(state);
+                console.log('✅ Data synced successfully');
+                
                 // Sign out
                 await this.auth.signOut();
                 
@@ -71,7 +77,8 @@ export class FirebaseManager {
                     itemCounter: 1,
                     authorOrder: [],
                     undoStack: [],
-                    authorTitles: {}
+                    authorTitles: {},
+                    lastSaveTimestamp: 0
                 });
                 this.listManager.storageManager.clear();
                 
@@ -187,9 +194,15 @@ export class FirebaseManager {
                 
                 this.updateSyncStatus('synced');
             } else {
-                // No data in Firebase, upload local data
+                // No data in Firebase, upload local data if it's not empty
                 const state = this.stateManager.getStateForSaving();
-                await this.saveToFirebase(state);
+                if (state.items && state.items.length > 0) {
+                    console.log('☁️  No remote data, uploading local data...');
+                    await this.saveToFirebase(state);
+                } else {
+                    console.log('☁️  No data in Firebase or locally');
+                    this.updateSyncStatus('synced');
+                }
             }
         } catch (error) {
             console.error('❌ Firebase load failed:', error);

@@ -279,13 +279,15 @@ export class UIManager {
         const subtitle = document.getElementById('subtitle');
         const listTitle = document.getElementById('listTitle');
 
-        if (mainTitle && titles.mainTitle) {
+        // Only update text content if the element is NOT currently focused (editing)
+        // This prevents the cursor from resetting while the user is typing
+        if (mainTitle && titles.mainTitle && document.activeElement !== mainTitle) {
             mainTitle.textContent = titles.mainTitle;
         }
-        if (subtitle && titles.subtitle) {
+        if (subtitle && titles.subtitle && document.activeElement !== subtitle) {
             subtitle.textContent = titles.subtitle;
         }
-        if (listTitle && titles.listTitle) {
+        if (listTitle && titles.listTitle && document.activeElement !== listTitle) {
             listTitle.textContent = titles.listTitle;
         }
     }

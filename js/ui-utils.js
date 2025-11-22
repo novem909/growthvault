@@ -116,15 +116,16 @@ function makeEditable(element) {
     selection.removeAllRanges();
     selection.addRange(range);
 
-    function finishEditing() {
-        element.classList.remove('editing');
-        element.contentEditable = false;
-        element.blur();
-
+    // Shared save logic
+    function saveContent(isFinal = false) {
+        const text = element.textContent; // Don't trim yet if editing is ongoing
+        
         // Check if this is an item title (has data-item-id attribute)
         if (element.dataset.itemId) {
+            if (!isFinal) return; // Don't auto-save item titles yet to avoid re-render issues
+            
             const itemId = parseInt(element.dataset.itemId);
-            const newTitle = element.textContent.trim();
+            const newTitle = text.trim();
             
             // Update the item title through the app's list manager
             if (window.app && window.app.listManager) {
@@ -140,14 +141,20 @@ function makeEditable(element) {
             // Save page titles to state and storage
             if (window.app && window.app.stateManager && window.app.listManager) {
                 const elementId = element.id;
-                const newText = element.textContent.trim();
+                const newText = isFinal ? text.trim() : text;
                 const state = window.app.stateManager.getState();
                 const titles = { ...state.titles };
                 
                 let changed = false;
-                if (elementId === 'mainTitle') { titles.mainTitle = newText; changed = true; }
-                else if (elementId === 'subtitle') { titles.subtitle = newText; changed = true; }
-                else if (elementId === 'listTitle') { titles.listTitle = newText; changed = true; }
+                if (elementId === 'mainTitle' && titles.mainTitle !== newText) { 
+                    titles.mainTitle = newText; changed = true; 
+                }
+                else if (elementId === 'subtitle' && titles.subtitle !== newText) { 
+                    titles.subtitle = newText; changed = true; 
+                }
+                else if (elementId === 'listTitle' && titles.listTitle !== newText) { 
+                    titles.listTitle = newText; changed = true; 
+                }
                 
                 if (changed) {
                     window.app.stateManager.setState({ titles });
@@ -156,6 +163,13 @@ function makeEditable(element) {
                 }
             }
         }
+    }
+
+    function finishEditing() {
+        element.classList.remove('editing');
+        element.contentEditable = false;
+        element.blur();
+        saveContent(true);
     }
 
     function handleKeydown(e) {
@@ -167,6 +181,13 @@ function makeEditable(element) {
             finishEditing();
         }
     }
+
+    // Debounced save for auto-saving titles
+    const debouncedSave = debounce(() => {
+        if (document.activeElement === element) {
+            saveContent(false);
+        }
+    }, 1000);
 
     function handleInput(e) {
         // Remove any line breaks
@@ -180,6 +201,11 @@ function makeEditable(element) {
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
+        }
+        
+        // Auto-save page titles
+        if (!element.dataset.itemId) {
+            debouncedSave();
         }
     }
 
