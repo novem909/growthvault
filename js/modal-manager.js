@@ -275,70 +275,78 @@ export class ModalManager {
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
-        const items = itemsContainer.querySelectorAll('.popup-list-item');
         let draggedItem = null;
 
-        items.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                draggedItem = item;
-                item.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', item.dataset.id);
-            });
+        // Use event delegation on the container instead of individual listeners
+        // Remove old listeners first to prevent duplicates if called multiple times
+        const newContainer = itemsContainer.cloneNode(true);
+        itemsContainer.parentNode.replaceChild(newContainer, itemsContainer);
+        const container = newContainer;
 
-            item.addEventListener('dragend', () => {
-                item.classList.remove('dragging');
-                items.forEach(i => i.classList.remove('drag-over'));
-                draggedItem = null;
-            });
+        container.addEventListener('dragstart', (e) => {
+            const item = e.target.closest('.popup-list-item');
+            if (!item) return;
 
-            item.addEventListener('dragover', (e) => {
-                if (draggedItem && draggedItem !== item) {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    item.classList.add('drag-over');
-                }
-            });
-
-            item.addEventListener('dragleave', (e) => {
-                if (!item.contains(e.relatedTarget)) {
-                    item.classList.remove('drag-over');
-                }
-            });
-
-            item.addEventListener('drop', (e) => {
-                e.preventDefault();
-                item.classList.remove('drag-over');
-
-                if (draggedItem && draggedItem !== item) {
-                    const draggedIndex = Array.from(itemsContainer.children).indexOf(draggedItem);
-                    const targetIndex = Array.from(itemsContainer.children).indexOf(item);
-
-                    if (draggedIndex < targetIndex) {
-                        item.parentNode.insertBefore(draggedItem, item.nextSibling);
-                    } else {
-                        item.parentNode.insertBefore(draggedItem, item);
-                    }
-
-                    this.updateAuthorItemsFromDOM(author);
-                }
-            });
-
-            // Prevent drag from interfering with click events
-            let isDragging = false;
-            item.addEventListener('mousedown', () => isDragging = false);
-            item.addEventListener('mousemove', () => isDragging = true);
-
-            const clickableElements = item.querySelectorAll('.item-text, .delete-btn, .item-title, .item-image');
-            clickableElements.forEach(el => {
-                el.addEventListener('click', (e) => {
-                    if (isDragging) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                });
-            });
+            draggedItem = item;
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', item.dataset.id);
         });
+
+        container.addEventListener('dragend', (e) => {
+            const item = e.target.closest('.popup-list-item');
+            if (item) item.classList.remove('dragging');
+            
+            container.querySelectorAll('.popup-list-item').forEach(i => i.classList.remove('drag-over'));
+            draggedItem = null;
+        });
+
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Essential to allow dropping
+            const item = e.target.closest('.popup-list-item');
+            if (!item || !draggedItem || item === draggedItem) return;
+
+            e.dataTransfer.dropEffect = 'move';
+            
+            // Only add class if we're actually over a valid drop target
+            container.querySelectorAll('.popup-list-item').forEach(i => i.classList.remove('drag-over'));
+            item.classList.add('drag-over');
+        });
+
+        container.addEventListener('dragleave', (e) => {
+            const item = e.target.closest('.popup-list-item');
+            // Only remove if we're leaving the item itself, not entering a child
+            if (item && !item.contains(e.relatedTarget)) {
+                item.classList.remove('drag-over');
+            }
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const item = e.target.closest('.popup-list-item');
+            
+            // Cleanup visual state
+            container.querySelectorAll('.popup-list-item').forEach(i => i.classList.remove('drag-over'));
+
+            if (!item || !draggedItem || item === draggedItem) return;
+
+            const items = Array.from(container.children);
+            const draggedIndex = items.indexOf(draggedItem);
+            const targetIndex = items.indexOf(item);
+
+            if (draggedIndex < targetIndex) {
+                item.parentNode.insertBefore(draggedItem, item.nextSibling);
+            } else {
+                item.parentNode.insertBefore(draggedItem, item);
+            }
+
+            // Re-bind click events/references might be needed if relying on closures, 
+            // but since we rely on delegation for clicks too (in EventHandlers), we are good.
+            
+            this.updateAuthorItemsFromDOM(author);
+        });
+        
+        // Note: Click events are already handled by EventHandlers via delegation on document
     }
 
     /**
