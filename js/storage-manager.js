@@ -17,14 +17,17 @@ export class StorageManager {
      */
     save(data) {
         try {
+            // Preserve existing timestamp if present (from Firebase), otherwise create new one
+            const timestamp = data.timestamp || new Date().toISOString();
+            
             const dataToSave = {
                 ...data,
-                timestamp: new Date().toISOString()
+                timestamp: timestamp
             };
             
             localStorage.setItem(this.storageKey, JSON.stringify(dataToSave));
-            console.log('✅ Saved to localStorage:', this.storageKey);
-            return { success: true, timestamp: dataToSave.timestamp };
+            console.log('✅ Saved to localStorage:', this.storageKey, timestamp === data.timestamp ? '(preserved timestamp)' : '(new timestamp)');
+            return { success: true, timestamp: timestamp };
         } catch (error) {
             console.error('❌ Failed to save to localStorage:', error);
             return { success: false, error: error.message };

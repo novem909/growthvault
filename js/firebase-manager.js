@@ -211,7 +211,10 @@ export class FirebaseManager {
                     // Remote is newer
                     console.log('☁️  Remote is newer, loading...');
                     this.stateManager.loadState(data);
-                    this.listManager.save(true);
+                    
+                    // Save to localStorage with preserved Firebase timestamp
+                    const saveResult = this.listManager.save(true);
+                    console.log('💾 Saved Firebase data to localStorage, preserving timestamp:', data.timestamp);
                     
                     // Force UI update
                     if (this.uiManager) {
@@ -270,6 +273,13 @@ export class FirebaseManager {
                 const localTimestamp = state.lastSaveTimestamp || 0;
                 const remoteTimestamp = new Date(data.timestamp).getTime();
 
+                console.log('🔔 Real-time listener fired. Comparing timestamps:', {
+                    local: localTimestamp,
+                    remote: remoteTimestamp,
+                    localNewer: localTimestamp > remoteTimestamp,
+                    remoteNewer: remoteTimestamp > localTimestamp
+                });
+
                 // Only update if remote is strictly newer
                 // This prevents a loop where saving updates timestamp, triggering listener, which saves again
                 // Also ensures we don't overwrite newer local changes if sync was delayed
@@ -286,7 +296,7 @@ export class FirebaseManager {
                     }
                 } else {
                     // Debug log to trace potential sync issues
-                    console.log('☁️  Remote data received but not newer. Local:', localTimestamp, 'Remote:', remoteTimestamp);
+                    console.log('⏭️  Skipping update - local data is same or newer');
                 }
             }
         });
