@@ -39,11 +39,7 @@ function updateSyncStatus(status) {
             break;
         case 'synced':
             syncIndicator.style.color = '#10b981';
-            if (currentUser && currentUser.email) {
-                syncText.textContent = currentUser.email;
-            } else {
-                syncText.textContent = 'Synced';
-            }
+            syncText.textContent = 'Synced';
             syncStatus.style.display = 'block';
             break;
         case 'error':
@@ -103,6 +99,7 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 // MOCK AUTH FOR TESTING - UNCOMMENT TO ENABLE
+/*
 setTimeout(() => {
     const mockUser = {
         uid: 'test-user-123',
@@ -116,3 +113,4 @@ setTimeout(() => {
     updateSyncStatus('synced'); // This triggers the email display logic
     showToast('Mock login successful', 'success');
 }, 2000);
+*/
