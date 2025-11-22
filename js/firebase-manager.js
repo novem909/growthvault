@@ -6,9 +6,10 @@
 import { CONFIG } from './config.js';
 
 export class FirebaseManager {
-    constructor(stateManager, listManager) {
+    constructor(stateManager, listManager, uiManager = null) {
         this.stateManager = stateManager;
         this.listManager = listManager;
+        this.uiManager = uiManager;
         
         this.auth = null;
         this.database = null;
@@ -211,6 +212,13 @@ export class FirebaseManager {
                     console.log('☁️  Remote is newer, loading...');
                     this.stateManager.loadState(data);
                     this.listManager.save(true);
+                    
+                    // Force UI update
+                    if (this.uiManager) {
+                        this.uiManager.renderItems();
+                        console.log('🎨 UI refreshed with Firebase data');
+                    }
+                    
                     console.log('✅ Loaded newer data from Firebase');
                 } else if (localTimestamp > remoteTimestamp) {
                     // Local is newer, push to Firebase
@@ -269,7 +277,13 @@ export class FirebaseManager {
                     console.log('☁️  Remote data newer, updating...');
                     this.stateManager.loadState(data);
                     // Update local storage but skip Firebase sync to prevent loop
-                    this.listManager.save(true); 
+                    this.listManager.save(true);
+                    
+                    // Force UI update
+                    if (this.uiManager) {
+                        this.uiManager.renderItems();
+                        console.log('🎨 UI refreshed from real-time update');
+                    }
                 } else {
                     // Debug log to trace potential sync issues
                     console.log('☁️  Remote data received but not newer. Local:', localTimestamp, 'Remote:', remoteTimestamp);
