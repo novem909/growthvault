@@ -207,11 +207,17 @@ export class FirebaseManager {
                 const localTimestamp = state.lastSaveTimestamp || 0;
                 const remoteTimestamp = new Date(data.timestamp).getTime();
 
-                // Only update if remote is newer
+                // Only update if remote is strictly newer
+                // This prevents a loop where saving updates timestamp, triggering listener, which saves again
+                // Also ensures we don't overwrite newer local changes if sync was delayed
                 if (remoteTimestamp > localTimestamp) {
                     console.log('☁️  Remote data newer, updating...');
                     this.stateManager.loadState(data);
-                    this.listManager.save(true); // Skip Firebase sync
+                    // Update local storage but skip Firebase sync to prevent loop
+                    this.listManager.save(true); 
+                } else {
+                    // Debug log to trace potential sync issues
+                    console.log('☁️  Remote data received but not newer. Local:', localTimestamp, 'Remote:', remoteTimestamp);
                 }
             }
         });
