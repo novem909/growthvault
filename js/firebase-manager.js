@@ -213,9 +213,9 @@ export class FirebaseManager {
                     console.log('☁️  Remote is newer or local has no timestamp, loading from Firebase...');
                     this.stateManager.loadState(data);
                     
-                    // Save to localStorage with preserved Firebase timestamp
-                    const saveResult = this.listManager.save(true);
-                    console.log('💾 Saved Firebase data to localStorage, preserving timestamp:', data.timestamp);
+                    // Save to storage with preserved Firebase timestamp
+                    const saveResult = await this.listManager.save(true);
+                    console.log('💾 Saved Firebase data to storage, preserving timestamp:', data.timestamp);
                     
                     // Force UI update
                     if (this.uiManager) {
@@ -251,8 +251,8 @@ export class FirebaseManager {
             console.error('❌ Firebase load failed:', error);
             this.updateSyncStatus('error');
             
-            // Fall back to localStorage
-            this.listManager.load();
+            // Fall back to storage (IndexedDB or localStorage)
+            await this.listManager.load();
         }
     }
 

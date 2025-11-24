@@ -100,7 +100,7 @@ export class ListManager {
         });
 
         // Save to storage
-        const saveResult = this.save();
+        const saveResult = await this.save();
 
         if (!saveResult.success) {
             // Revert state if save failed
@@ -146,9 +146,9 @@ export class ListManager {
      * Delete an item by ID
      * @param {number} id - Item ID
      * @param {boolean} saveUndo - Whether to save undo state (default true)
-     * @returns {Object} {success: boolean, item?: Object}
+     * @returns {Promise<Object>} {success: boolean, item?: Object}
      */
-    deleteItem(id, saveUndo = true) {
+    async deleteItem(id, saveUndo = true) {
         const state = this.stateManager.getState();
         const item = state.items.find(item => item.id === id);
         
@@ -169,7 +169,7 @@ export class ListManager {
         const newItems = state.items.filter(item => item.id !== id);
         this.stateManager.setState({ items: newItems });
         
-        this.save();
+        await this.save();
 
         console.log('🗑️  Item deleted:', id);
         return { success: true, item };
@@ -178,9 +178,9 @@ export class ListManager {
     /**
      * Delete all items by author
      * @param {string} author - Author name
-     * @returns {Object} {success: boolean, count: number}
+     * @returns {Promise<Object>} {success: boolean, count: number}
      */
-    deleteAuthor(author) {
+    async deleteAuthor(author) {
         const state = this.stateManager.getState();
         const itemsToDelete = state.items.filter(item => item.author === author);
         
@@ -203,7 +203,7 @@ export class ListManager {
             authorOrder: newAuthorOrder
         });
         
-        this.save();
+        await this.save();
 
         console.log(`🗑️  Deleted ${itemsToDelete.length} items by author:`, author);
         return { success: true, count: itemsToDelete.length };
@@ -211,9 +211,9 @@ export class ListManager {
 
     /**
      * Clear all data
-     * @returns {Object} {success: boolean}
+     * @returns {Promise<Object>} {success: boolean}
      */
-    clearAllData() {
+    async clearAllData() {
         const state = this.stateManager.getState();
         
         if (state.items.length === 0) {
@@ -229,7 +229,7 @@ export class ListManager {
         });
 
         // Clear storage
-        this.storageManager.clear();
+        await this.storageManager.clear();
 
         console.log('🗑️  All data cleared');
         return { success: true };
@@ -276,7 +276,7 @@ export class ListManager {
             this.stateManager.loadState(data);
             
             // Save to storage
-            const saveResult = this.save();
+            const saveResult = await this.save();
             if (saveResult.syncPromise) {
                 await saveResult.syncPromise;
             }
@@ -335,7 +335,7 @@ export class ListManager {
      * @param {number} draggedId - ID of dragged item
      * @param {number} targetId - ID of target item
      */
-    reorderItems(draggedId, targetId) {
+    async reorderItems(draggedId, targetId) {
         const state = this.stateManager.getState();
         const items = [...state.items];
         
@@ -351,7 +351,7 @@ export class ListManager {
         items.splice(targetIndex, 0, draggedItem);
         
         this.stateManager.setState({ items });
-        this.save();
+        await this.save();
         
         console.log('🔄 Items reordered');
         return { success: true };
@@ -361,9 +361,9 @@ export class ListManager {
      * Update author order
      * @param {Array} newOrder - New author order array
      */
-    updateAuthorOrder(newOrder) {
+    async updateAuthorOrder(newOrder) {
         this.stateManager.setState({ authorOrder: newOrder });
-        this.save();
+        await this.save();
         console.log('🔄 Author order updated:', newOrder);
     }
 
@@ -405,9 +405,9 @@ export class ListManager {
 
     /**
      * Undo last action
-     * @returns {Object} {success: boolean, action?: string}
+     * @returns {Promise<Object>} {success: boolean, action?: string}
      */
-    undo() {
+    async undo() {
         const state = this.stateManager.getState();
         
         if (state.undoStack.length === 0) {
@@ -438,7 +438,7 @@ export class ListManager {
             undoStack: newUndoStack
         });
         
-        this.save();
+        await this.save();
         
         const itemCount = lastState.deletedItems?.length || '?';
         console.log('↩️  Undone action:', lastState.action, `(restored ${itemCount} items)`);
@@ -453,9 +453,9 @@ export class ListManager {
      * Save current state to storage and sync to Firebase if logged in
      * @param {boolean} skipFirebaseSync - Skip Firebase sync (used when loading from Firebase)
      */
-    save(skipFirebaseSync = false) {
+    async save(skipFirebaseSync = false) {
         const state = this.stateManager.getStateForSaving();
-        const result = this.storageManager.save(state);
+        const result = await this.storageManager.save(state);
         let syncPromise = Promise.resolve();
         
         if (result.success) {
@@ -475,8 +475,8 @@ export class ListManager {
     /**
      * Load state from storage
      */
-    load() {
-        const data = this.storageManager.load();
+    async load() {
+        const data = await this.storageManager.load();
         if (data) {
             this.stateManager.loadState(data);
             console.log('📥 State loaded from storage');
@@ -565,12 +565,12 @@ export class ListManager {
 
     /**
      * Get storage usage info
-     * @returns {Object} Storage info
+     * @returns {Promise<Object>} Storage info
      */
-    getStorageInfo() {
+    async getStorageInfo() {
         return {
-            size: this.storageManager.getSize(),
-            formattedSize: this.storageManager.getFormattedSize(),
+            size: await this.storageManager.getSize(),
+            formattedSize: await this.storageManager.getFormattedSize(),
             isAvailable: this.storageManager.isAvailable()
         };
     }

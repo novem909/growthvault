@@ -44,10 +44,10 @@ class GrowthVaultApp {
     async init() {
         console.log('🔧 Initializing application...');
         
-        // Load saved data from localStorage
-        const loadResult = this.listManager.load();
+        // Load saved data from storage (IndexedDB or localStorage)
+        const loadResult = await this.listManager.load();
         if (loadResult.success) {
-            console.log('📥 Loaded data from localStorage');
+            console.log('📥 Loaded data from storage');
         }
 
         // Initialize event handlers
