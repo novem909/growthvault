@@ -1170,6 +1170,15 @@
     align-self: flex-end;
 }
 
+.form-buttons .btn,
+.form-buttons .btn-folder {
+    flex: 1;
+    min-width: 140px;
+    white-space: nowrap;
+    justify-content: center;
+    padding: 14px 20px;
+}
+
 /* Outlined Secondary Button - "Add to Folder" */
 .btn-folder {
     background: transparent;
@@ -1191,6 +1200,7 @@
 
 .btn-folder .icon {
     fill: currentColor;
+    flex-shrink: 0;
 }
 
 /* ==================== FOLDER MODALS ==================== */
@@ -1737,14 +1747,17 @@
 
 @media (max-width: 480px) {
     .form-buttons {
-        flex-direction: column;
+        flex-direction: row;
         width: 100%;
+        gap: var(--space-sm);
     }
     
     .form-buttons .btn,
     .form-buttons .btn-folder {
-        width: 100%;
-        justify-content: center;
+        flex: 1;
+        min-width: 0;
+        padding: 12px 16px;
+        font-size: 0.9em;
     }
     
     .folder-modal .folder-modal-content {
