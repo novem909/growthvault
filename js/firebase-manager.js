@@ -80,17 +80,23 @@ export class FirebaseManager {
                     user: this.currentUser.email
                 });
                 
-                await this.saveToFirebase(state);
-                console.log('✅ Data synced successfully before sign out');
+                try {
+                    await this.saveToFirebase(state);
+                    console.log('✅ Data synced successfully before sign out');
+                } catch (syncError) {
+                    console.error('❌ Failed to sync before sign out:', syncError);
+                    if (typeof showToast === 'function') {
+                        showToast('Failed to sync data before signing out. Please try again.', 'error');
+                    }
+                    return; // Abort sign-out to prevent data loss
+                }
                 
                 // Sign out
                 await this.auth.signOut();
-                
-                // Keep local data as backup - it will be synced when signing back in
-                console.log('💾 Local data preserved for next sign-in');
+                // Note: Data clearing happens in handleAuthStateChange when user becomes null
                 
                 if (typeof showToast === 'function') {
-                    showToast('Signed out', 'default');
+                    showToast('Signed out. Your data is safely stored in the cloud.', 'default');
                 }
             } else {
                 // Sign in with Google
@@ -130,8 +136,11 @@ export class FirebaseManager {
         } else {
             console.log('👤 User signed out');
             
-            // Disconnect Firebase listener
+            // Disconnect Firebase listener FIRST to prevent any incoming data
             this.disconnectFirebase();
+            
+            // Clear local data so another account's data doesn't persist
+            await this.clearLocalDataOnSignOut();
             
             // Hide sync status
             const syncStatus = document.getElementById('syncStatus');
@@ -139,6 +148,30 @@ export class FirebaseManager {
                 syncStatus.style.display = 'none';
             }
         }
+    }
+
+    /**
+     * Clear local data when user signs out
+     * This prevents data from one account appearing for another account
+     */
+    async clearLocalDataOnSignOut() {
+        console.log('🧹 Clearing local data after sign out...');
+        
+        // Reset in-memory state
+        this.stateManager.reset();
+        
+        // Clear local storage (IndexedDB + localStorage)
+        if (this.listManager && this.listManager.persistenceManager) {
+            await this.listManager.persistenceManager.clear();
+        }
+        
+        // Force UI to re-render with empty state
+        if (this.uiManager) {
+            this.uiManager.renderItems();
+            await this.uiManager.updateStorageInfo();
+        }
+        
+        console.log('✅ Local data cleared');
     }
 
     /**
