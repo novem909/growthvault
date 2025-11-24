@@ -214,7 +214,7 @@ export class FirebaseManager {
                     this.stateManager.loadState(data);
                     
                     // Save to storage with preserved Firebase timestamp
-                    const saveResult = await this.listManager.save(true);
+                    const saveResult = await this.listManager.save(true, { preserveTimestamp: true });
                     console.log('💾 Saved Firebase data to storage, preserving timestamp:', data.timestamp);
                     
                     // Force UI update
@@ -289,7 +289,7 @@ export class FirebaseManager {
                     console.log('☁️  Remote data newer, updating...');
                     this.stateManager.loadState(data);
                     // Update local storage but skip Firebase sync to prevent loop
-                    await this.listManager.save(true);
+                    await this.listManager.save(true, { preserveTimestamp: true });
                     
                     // Force UI update
                     if (this.uiManager) {

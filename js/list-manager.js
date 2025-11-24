@@ -452,10 +452,12 @@ export class ListManager {
     /**
      * Save current state to storage and sync to Firebase if logged in
      * @param {boolean} skipFirebaseSync - Skip Firebase sync (used when loading from Firebase)
+     * @param {Object} options - Save options
+     * @param {boolean} options.preserveTimestamp - Whether to preserve existing timestamp (default: false)
      */
-    async save(skipFirebaseSync = false) {
+    async save(skipFirebaseSync = false, options = {}) {
         const state = this.stateManager.getStateForSaving();
-        const result = await this.storageManager.save(state);
+        const result = await this.storageManager.save(state, options);
         let syncPromise = Promise.resolve();
         
         if (result.success) {

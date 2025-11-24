@@ -74,16 +74,18 @@ export class StorageManager {
     /**
      * Save complete application state to storage (IndexedDB or localStorage)
      * @param {Object} data - Data to save (items, counter, order, undo, titles, etc.)
+     * @param {Object} options - Save options
+     * @param {boolean} options.preserveTimestamp - Whether to preserve existing timestamp
      * @returns {Promise<Object>} {success: boolean, error?: string, attemptedSize?: number}
      */
-    async save(data) {
+    async save(data, options = {}) {
         // Ensure storage is initialized
         await this.initPromise;
 
         // Try IndexedDB first (much higher capacity)
         if (this.useIndexedDB) {
             try {
-                const result = await this.indexedDB.save(data);
+                const result = await this.indexedDB.save(data, options);
                 return { 
                     success: true, 
                     timestamp: result.timestamp,
@@ -98,13 +100,13 @@ export class StorageManager {
         }
 
         // Fall back to localStorage (or use directly if IndexedDB not available)
-        return this.saveToLocalStorage(data);
+        return this.saveToLocalStorage(data, options);
     }
 
     /**
      * Save to localStorage (fallback method)
      */
-    saveToLocalStorage(data) {
+    saveToLocalStorage(data, options = {}) {
         try {
             // Check if localStorage is available
             if (!this.isAvailable()) {
@@ -116,8 +118,13 @@ export class StorageManager {
                 };
             }
 
-            // Preserve existing timestamp if present (from Firebase), otherwise create new one
-            const timestamp = data.timestamp || new Date().toISOString();
+            // Preserve existing timestamp if requested and present, otherwise create new one
+            let timestamp;
+            if (options.preserveTimestamp && data.timestamp) {
+                timestamp = data.timestamp;
+            } else {
+                timestamp = new Date().toISOString();
+            }
             
             const dataToSave = {
                 ...data,

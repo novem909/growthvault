@@ -52,9 +52,11 @@ export class IndexedDBManager {
     /**
      * Save data to IndexedDB
      * @param {Object} data - Data to save
+     * @param {Object} options - Save options
+     * @param {boolean} options.preserveTimestamp - Whether to preserve existing timestamp
      * @returns {Promise<Object>} Result with success status
      */
-    async save(data) {
+    async save(data, options = {}) {
         if (!this.db) {
             await this.init();
         }
@@ -62,7 +64,13 @@ export class IndexedDBManager {
         return new Promise((resolve, reject) => {
             try {
                 // Add metadata
-                const timestamp = data.timestamp || new Date().toISOString();
+                let timestamp;
+                if (options.preserveTimestamp && data.timestamp) {
+                    timestamp = data.timestamp;
+                } else {
+                    timestamp = new Date().toISOString();
+                }
+
                 const dataToSave = {
                     id: 'visualListBuilder_data', // Single document approach
                     ...data,
@@ -75,7 +83,8 @@ export class IndexedDBManager {
                 console.log('💾 Saving to IndexedDB:', {
                     size: this.formatBytes(size),
                     items: data.items?.length || 0,
-                    timestamp: timestamp
+                    timestamp: timestamp,
+                    mode: options.preserveTimestamp ? 'preserved' : 'new'
                 });
 
                 const transaction = this.db.transaction([this.storeName], 'readwrite');
