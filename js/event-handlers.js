@@ -204,8 +204,39 @@ export class EventHandlers {
                 case 'create-folder-in-popup':
                     this.handleCreateFolderInPopup();
                     break;
+                    
+                case 'add-content-for-author':
+                    this.handleAddContentForAuthor(target.dataset.author);
+                    break;
             }
         });
+    }
+    
+    /**
+     * Handle adding content for a specific author
+     * @param {string} author - Author name
+     */
+    handleAddContentForAuthor(author) {
+        // Close the author popup
+        this.modalManager.closeAuthorPopup();
+        
+        // Pre-fill the author field and scroll to form
+        const authorInput = document.getElementById('authorInput');
+        if (authorInput) {
+            authorInput.value = author;
+        }
+        
+        // Focus on title input
+        const titleInput = document.getElementById('titleInput');
+        if (titleInput) {
+            titleInput.focus();
+        }
+        
+        // Scroll to form
+        const form = document.getElementById('itemForm');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     /**

@@ -767,17 +767,37 @@ export class ModalManager {
         if (itemsContainer) {
             itemsContainer.innerHTML = '';
 
+            // Action buttons container
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'author-popup-buttons';
+
+            // Add content button
+            const addContentBtn = document.createElement('button');
+            addContentBtn.className = 'add-content-btn';
+            addContentBtn.dataset.action = 'add-content-for-author';
+            addContentBtn.dataset.author = author;
+            addContentBtn.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add Content
+            `;
+            buttonsDiv.appendChild(addContentBtn);
+
             // Create folder button
             const createBtn = document.createElement('button');
             createBtn.className = 'create-folder-btn';
             createBtn.dataset.action = 'create-folder-in-popup';
             createBtn.innerHTML = `
                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                    <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
                 </svg>
-                Create New Folder
+                New Folder
             `;
-            itemsContainer.appendChild(createBtn);
+            buttonsDiv.appendChild(createBtn);
+
+            itemsContainer.appendChild(buttonsDiv);
 
             // Render folders
             folders.forEach(folder => {
