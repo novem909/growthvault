@@ -7,22 +7,17 @@ import { CONFIG } from './config.js';
 import { Validators } from './validators.js';
 
 export class ListManager {
-    constructor(stateManager, storageManager, firebaseManager = null) {
+    constructor(stateManager, persistenceManager) {
         this.stateManager = stateManager;
-        this.storageManager = storageManager;
-        this.firebaseManager = firebaseManager;
+        this.persistenceManager = persistenceManager;
         
-        console.log('📋 ListManager initialized');
+        // Backward compatibility proxies
+        this.storageManager = persistenceManager.storage;
+        this.firebaseManager = persistenceManager.firebase;
+        
+        console.log('📋 ListManager initialized with PersistenceManager');
     }
     
-    /**
-     * Set Firebase Manager (called after initialization)
-     * @param {FirebaseManager} firebaseManager
-     */
-    setFirebaseManager(firebaseManager) {
-        this.firebaseManager = firebaseManager;
-    }
-
     /**
      * Add a new item to the list
      * @param {Object} itemData - {author, title, text, imageFile?}
@@ -228,8 +223,8 @@ export class ListManager {
             undoStack: []
         });
 
-        // Clear storage
-        await this.storageManager.clear();
+        // Clear persistence (both local and remote)
+        await this.persistenceManager.clear();
 
         console.log('🗑️  All data cleared');
         return { success: true };
@@ -483,31 +478,32 @@ export class ListManager {
             options.preserveTimestamp = true;
         }
 
-        const result = await this.storageManager.save(state, options);
-        let syncPromise = Promise.resolve();
+        // Delegate to PersistenceManager
+        // map skipFirebaseSync to localOnly option
+        const saveOptions = {
+            ...options,
+            localOnly: skipFirebaseSync
+        };
+        
+        const result = await this.persistenceManager.save(state, saveOptions);
         
         if (result.success) {
-            this.stateManager.setState({ lastSaveTimestamp: new Date(result.timestamp).getTime() });
-            
-            // Sync to Firebase if user is logged in (unless we're loading from Firebase)
-            if (!skipFirebaseSync && this.firebaseManager && this.firebaseManager.currentUser) {
-                syncPromise = this.firebaseManager.sync().catch(error => {
-                    console.error('❌ Firebase sync failed:', error);
-                });
-            }
+            // Update timestamp tracking
+            const newTimestamp = state.timestamp ? new Date(state.timestamp).getTime() : Date.now();
+            this.stateManager.setState({ lastSaveTimestamp: newTimestamp });
         }
         
-        return { ...result, syncPromise };
+        return result;
     }
 
     /**
      * Load state from storage
      */
     async load() {
-        const data = await this.storageManager.load();
-        if (data) {
-            this.stateManager.loadState(data);
-            console.log('📥 State loaded from storage');
+        const result = await this.persistenceManager.load();
+        // persistenceManager handles loading state if found
+        if (result.success) {
+            console.log(`📥 State loaded from ${result.source}`);
             return { success: true };
         }
         return { success: false };
@@ -596,11 +592,7 @@ export class ListManager {
      * @returns {Promise<Object>} Storage info
      */
     async getStorageInfo() {
-        return {
-            size: await this.storageManager.getSize(),
-            formattedSize: await this.storageManager.getFormattedSize(),
-            isAvailable: this.storageManager.isAvailable()
-        };
+        return this.persistenceManager.getStorageInfo();
     }
 }
 

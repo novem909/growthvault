@@ -11,6 +11,7 @@ import { UIManager } from './ui-manager.js';
 import { ModalManager } from './modal-manager.js';
 import { EventHandlers } from './event-handlers.js';
 import { FirebaseManager } from './firebase-manager.js';
+import { PersistenceManager } from './persistence-manager.js';
 
 console.log('🚀 GrowthVault loading...');
 
@@ -19,13 +20,23 @@ class GrowthVaultApp {
         // Initialize core managers
         this.stateManager = new StateManager();
         this.storageManager = new StorageManager(CONFIG.STORAGE_KEY);
-        this.listManager = new ListManager(this.stateManager, this.storageManager);
+        
+        // Initialize Firebase Manager (dependencies injected later to resolve cycles)
+        this.firebaseManager = new FirebaseManager(this.stateManager, null, null);
+        
+        // Initialize Persistence Manager (Orchestrator)
+        this.persistenceManager = new PersistenceManager(this.storageManager, this.firebaseManager, this.stateManager);
+        
+        // Initialize List Manager with Persistence Manager
+        this.listManager = new ListManager(this.stateManager, this.persistenceManager);
+        
+        // Initialize UI Managers
         this.uiManager = new UIManager(this.stateManager, this.listManager);
         this.modalManager = new ModalManager(this.stateManager, this.listManager);
-        this.firebaseManager = new FirebaseManager(this.stateManager, this.listManager, this.uiManager);
         
-        // Link Firebase Manager to List Manager for auto-sync
-        this.listManager.setFirebaseManager(this.firebaseManager);
+        // Complete dependency injection
+        this.firebaseManager.setListManager(this.listManager);
+        this.firebaseManager.uiManager = this.uiManager;
         
         // Initialize event handlers
         this.eventHandlers = new EventHandlers({

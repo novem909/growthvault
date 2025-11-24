@@ -6,7 +6,7 @@
 import { CONFIG } from './config.js';
 
 export class FirebaseManager {
-    constructor(stateManager, listManager, uiManager = null) {
+    constructor(stateManager, listManager = null, uiManager = null) {
         this.stateManager = stateManager;
         this.listManager = listManager;
         this.uiManager = uiManager;
@@ -20,6 +20,15 @@ export class FirebaseManager {
         
         console.log('🔥 FirebaseManager initialized');
     }
+
+    /**
+     * Set List Manager (called after initialization to resolve circular dependency)
+     * @param {ListManager} listManager
+     */
+    setListManager(listManager) {
+        this.listManager = listManager;
+    }
+
 
     /**
      * Initialize Firebase
