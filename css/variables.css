@@ -19,6 +19,29 @@
     --border-color: #e2e8f0;
     --shadow-light: rgba(0, 0, 0, 0.1);
     --shadow-medium: rgba(0, 0, 0, 0.2);
+    
+    /* Spacing System (8px grid) */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    
+    /* Brand Colors */
+    --color-primary: #6366f1;
+    --color-primary-hover: #5855f6;
+    --color-primary-light: #e0e7ff;
+    --color-primary-border: #c7d2fe;
+    
+    /* Folder-specific */
+    --folder-surface: #f8fafc;
+    --folder-surface-hover: #f1f5f9;
+    --folder-header-bg: #f1f5f9;
+    --folder-header-hover: #e2e8f0;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
 }
 
 /* Dark Theme */
@@ -33,6 +56,14 @@
     --border-color: #475569;
     --shadow-light: rgba(0, 0, 0, 0.3);
     --shadow-medium: rgba(0, 0, 0, 0.5);
+    
+    /* Dark mode folder colors */
+    --color-primary-light: #312e81;
+    --color-primary-border: #4338ca;
+    --folder-surface: #334155;
+    --folder-surface-hover: #475569;
+    --folder-header-bg: #334155;
+    --folder-header-hover: #475569;
 }
 
 [data-theme="dark"] .skeleton {

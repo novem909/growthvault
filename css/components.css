@@ -1143,196 +1143,455 @@
     pointer-events: none;
 }
 
-/* ==================== FOLDER STYLES ==================== */
+/* ==================== FOLDER STYLES (Steve Jobs Edition) ==================== */
+
+/* SVG Icon Styles */
+.icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: currentColor;
+}
+
+.icon-sm {
+    width: 14px;
+    height: 14px;
+}
+
+.icon-lg {
+    width: 20px;
+    height: 20px;
+}
 
 /* Form Buttons Container */
 .form-buttons {
     display: flex;
-    gap: 12px;
+    gap: var(--space-sm);
     align-self: flex-end;
 }
 
+/* Outlined Secondary Button - "Add to Folder" */
 .btn-folder {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
 }
 
 .btn-folder:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    background: var(--color-primary-light);
+    border-color: var(--color-primary-hover);
+    color: var(--color-primary-hover);
+    box-shadow: none;
+    transform: translateY(-2px);
 }
 
-/* Folder Modal */
+.btn-folder .icon {
+    fill: currentColor;
+}
+
+/* ==================== FOLDER MODALS ==================== */
+
 .folder-modal .folder-modal-content {
     background: var(--bg-container);
-    margin: 10vh auto;
-    padding: 24px;
+    margin: 8vh auto;
+    padding: var(--space-lg);
     border-radius: 16px;
     width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
+    max-width: 420px;
+    max-height: 84vh;
     overflow-y: auto;
-    box-shadow: 0 20px 40px var(--shadow-medium);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalFadeIn var(--transition-normal) ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .folder-modal-small {
-    max-width: 400px !important;
+    max-width: 360px !important;
 }
 
 .folder-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--space-lg);
+    padding: 0;
+    border: none;
 }
 
 .folder-modal-header h3 {
     margin: 0;
-    font-size: 1.3em;
+    font-size: 1.25em;
     font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.folder-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--folder-surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.folder-modal-close:hover {
+    background: var(--folder-surface-hover);
     color: var(--text-primary);
 }
 
+/* Author Select in Modal */
 .folder-author-select {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-md);
 }
 
 .folder-author-select label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: var(--space-xs);
+    font-size: 0.8em;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .folder-author-select select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px var(--space-md);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1em;
-    background: var(--bg-input-section);
+    border-radius: 10px;
+    font-size: 0.95em;
+    font-weight: 500;
+    background: var(--bg-container);
     color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
 }
 
-/* Folder List in Select Modal */
+.folder-author-select select:hover {
+    border-color: var(--color-primary-border);
+}
+
+.folder-author-select select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Folder List */
 .folder-list {
-    max-height: 300px;
+    max-height: 280px;
     overflow-y: auto;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-md);
+    padding: var(--space-xs) 0;
 }
 
 .folder-list-item {
     display: flex;
     align-items: center;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    background: var(--bg-input-section);
+    padding: 14px var(--space-md);
+    margin-bottom: var(--space-sm);
+    background: var(--bg-container);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
+}
+
+.folder-list-item:last-child {
+    margin-bottom: 0;
 }
 
 .folder-list-item:hover {
-    background: #e0e7ff;
-    border-color: #6366f1;
-    transform: translateX(4px);
+    background: var(--color-primary-light);
+    border-color: var(--color-primary-border);
 }
 
-.folder-list-item.selected {
-    background: #e0e7ff;
-    border-color: #6366f1;
+.folder-list-item:active {
+    transform: scale(0.98);
 }
 
 .folder-list-item .folder-icon {
-    font-size: 1.2em;
-    margin-right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--folder-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-md);
+    color: var(--color-primary);
+}
+
+.folder-list-item:hover .folder-icon {
+    background: var(--color-primary);
+    color: white;
 }
 
 .folder-list-item .folder-name {
     flex: 1;
     font-weight: 500;
+    font-size: 0.95em;
     color: var(--text-primary);
 }
 
 .folder-list-item .folder-count {
-    font-size: 0.85em;
+    font-size: 0.8em;
+    font-weight: 500;
     color: var(--text-muted);
-    background: var(--bg-container);
-    padding: 2px 8px;
-    border-radius: 12px;
+    background: var(--folder-surface);
+    padding: 4px 10px;
+    border-radius: 20px;
+    min-width: 28px;
+    text-align: center;
 }
 
 .folder-list-empty {
     text-align: center;
-    padding: 24px;
+    padding: var(--space-xl) var(--space-md);
     color: var(--text-muted);
-    font-style: italic;
+    font-size: 0.9em;
 }
 
+/* Create New Folder Button (in modal) */
+.folder-create-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: 14px var(--space-md);
+    margin-bottom: var(--space-md);
+    background: transparent;
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.folder-create-inline:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Modal Actions */
 .folder-modal-actions {
     display: flex;
-    gap: 12px;
+    gap: var(--space-sm);
     justify-content: flex-end;
-    padding-top: 12px;
+    padding-top: var(--space-md);
+    margin-top: var(--space-md);
     border-top: 1px solid var(--border-color);
 }
 
-/* Folder Section in Author Popup */
+.folder-modal-actions .btn {
+    padding: 10px 20px;
+    font-size: 0.9em;
+}
+
+.folder-modal-actions .btn-text {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    box-shadow: none;
+    padding: 10px 16px;
+}
+
+.folder-modal-actions .btn-text:hover {
+    color: var(--text-primary);
+    background: var(--folder-surface);
+}
+
+/* ==================== CREATE FOLDER MODAL ==================== */
+
+.folder-modal .input-group {
+    margin-bottom: var(--space-md);
+}
+
+.folder-modal .input-group label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.folder-modal .input-group input {
+    width: 100%;
+    padding: 14px var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 500;
+    background: var(--bg-container);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.folder-modal .input-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.folder-modal .input-group input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* ==================== AUTHOR POPUP FOLDER SECTIONS ==================== */
+
+/* Create Folder Button in Popup */
+.create-folder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    background: transparent;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.create-folder-btn:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.create-folder-btn .icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Folder Section Container */
 .folder-section {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-md);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
     background: var(--bg-container);
+    transition: box-shadow var(--transition-fast);
 }
 
+.folder-section:hover {
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+/* Folder Header - Clean, Minimal */
 .folder-header {
     display: flex;
     align-items: center;
-    padding: 14px 16px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
+    padding: var(--space-md);
+    background: var(--folder-header-bg);
+    color: var(--text-primary);
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
+    border-bottom: 1px solid transparent;
 }
 
 .folder-header:hover {
-    background: linear-gradient(135deg, #5855f6 0%, #7c3aed 100%);
+    background: var(--folder-header-hover);
 }
 
-.folder-header .folder-icon {
-    font-size: 1.1em;
-    margin-right: 10px;
-    transition: transform 0.2s ease;
+/* Chevron Icon */
+.folder-header .folder-chevron {
+    width: 20px;
+    height: 20px;
+    margin-right: var(--space-sm);
+    color: var(--text-muted);
+    transition: transform var(--transition-normal);
+    flex-shrink: 0;
 }
 
-.folder-header.collapsed .folder-icon {
+.folder-header.collapsed .folder-chevron {
     transform: rotate(-90deg);
 }
 
+/* Folder Icon */
+.folder-header .folder-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-md);
+    flex-shrink: 0;
+}
+
+.folder-header .folder-icon .icon {
+    color: white;
+    width: 16px;
+    height: 16px;
+}
+
+/* Folder Name */
 .folder-header .folder-name {
     flex: 1;
-    font-weight: 600;
-    font-size: 1.05em;
+    font-weight: 500;
+    font-size: 0.95em;
+    color: var(--text-primary);
 }
 
+/* Folder Count Badge */
 .folder-header .folder-count {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    margin-right: 8px;
+    background: var(--bg-container);
+    color: var(--text-muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-right: var(--space-sm);
+    min-width: 24px;
+    text-align: center;
 }
 
+/* Folder Action Buttons */
 .folder-header-actions {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--transition-fast);
 }
 
 .folder-header:hover .folder-header-actions {
@@ -1340,159 +1599,166 @@
 }
 
 .folder-action-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 6px;
     width: 28px;
     height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
     cursor: pointer;
-    color: white;
-    font-size: 0.85em;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease;
+    transition: all var(--transition-fast);
 }
 
 .folder-action-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--bg-container);
+    color: var(--text-primary);
 }
 
 .folder-action-btn.delete:hover {
-    background: rgba(239, 68, 68, 0.8);
+    background: #fef2f2;
+    color: #ef4444;
 }
 
+.folder-action-btn .icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* Folder Contents */
 .folder-contents {
-    padding: 12px;
+    padding: 0;
     display: none;
+    background: var(--bg-container);
 }
 
 .folder-contents.expanded {
     display: block;
+    padding: var(--space-md);
+    border-top: 1px solid var(--border-color);
 }
 
 .folder-contents-empty {
     text-align: center;
-    padding: 20px;
+    padding: var(--space-xl) var(--space-md);
     color: var(--text-muted);
-    font-style: italic;
+    font-size: 0.85em;
+    background: var(--folder-surface);
+    border-radius: 8px;
+    border: 2px dashed var(--border-color);
+}
+
+/* ==================== UNFILED SECTION ==================== */
+
+.unfiled-section {
+    margin-top: var(--space-lg);
+    padding-top: 0;
+    border-top: none;
+}
+
+/* Divider with centered label */
+.unfiled-divider {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.8em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.unfiled-divider::before,
+.unfiled-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.unfiled-divider::before {
+    margin-right: var(--space-md);
+}
+
+.unfiled-divider::after {
+    margin-left: var(--space-md);
+}
+
+.unfiled-divider .unfiled-count {
+    background: var(--folder-surface);
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: var(--space-sm);
     font-size: 0.9em;
 }
 
-/* Unfiled Section */
-.unfiled-section {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 2px dashed var(--border-color);
-}
-
+/* Hide old unfiled header */
 .unfiled-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-    color: var(--text-muted);
+    display: none;
 }
 
-.unfiled-header .unfiled-icon {
-    font-size: 1.1em;
-    margin-right: 10px;
+.unfiled-items {
+    /* Items render normally */
 }
 
-.unfiled-header .unfiled-title {
-    font-weight: 600;
-    font-size: 1em;
-}
+/* ==================== DRAG & DROP STATES ==================== */
 
-.unfiled-header .unfiled-count {
-    margin-left: 8px;
-    background: var(--bg-input-section);
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-}
-
-/* Add to Folder Button on Items */
-.item-folder-btn {
-    position: absolute;
-    top: 10px;
-    left: 50px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 0.7em;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.popup-list-item:hover .item-folder-btn {
-    opacity: 1;
-}
-
-.item-folder-btn:hover {
-    transform: scale(1.05);
-}
-
-/* Folder Badge on Items */
-.item-folder-badge {
-    position: absolute;
-    top: 10px;
-    left: 50px;
-    background: #6366f1;
-    color: white;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.7em;
-    font-weight: 500;
-}
-
-/* Create Folder Button in Author Popup */
-.create-folder-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 16px;
-    background: var(--bg-input-section);
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
-    color: var(--text-muted);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.create-folder-btn:hover {
-    background: #e0e7ff;
-    border-color: #6366f1;
-    color: #6366f1;
-}
-
-.create-folder-btn .plus-icon {
-    margin-right: 8px;
-    font-size: 1.2em;
-}
-
-/* Drag styles for folders */
 .folder-section.dragging {
     opacity: 0.5;
-    transform: rotate(1deg);
 }
 
 .folder-section.drag-over {
-    box-shadow: 0 0 0 3px #6366f1;
+    box-shadow: 0 0 0 2px var(--color-primary);
 }
 
-/* Item dragging to folder */
-.popup-list-item.dragging-to-folder {
+.popup-list-item.dragging {
     opacity: 0.6;
-    border: 2px dashed #6366f1;
 }
 
 .folder-header.drop-target {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+.folder-header.drop-target .folder-icon {
+    background: #10b981;
+}
+
+.unfiled-section.drop-target {
+    background: var(--color-primary-light);
+    border-radius: 12px;
+    padding: var(--space-md);
+    margin: var(--space-md) 0;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 480px) {
+    .form-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .form-buttons .btn,
+    .form-buttons .btn-folder {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .folder-modal .folder-modal-content {
+        margin: 4vh auto;
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0;
+        margin-bottom: 0;
+    }
+    
+    .folder-header .folder-name {
+        font-size: 0.9em;
+    }
+    
+    .folder-header-actions {
+        opacity: 1;
+    }
 }

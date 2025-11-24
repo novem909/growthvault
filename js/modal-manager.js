@@ -570,9 +570,13 @@ export class ModalManager {
             const itemCount = folder.itemIds.length;
             return `
                 <div class="folder-list-item" data-action="select-folder" data-folder-id="${folder.id}">
-                    <span class="folder-icon">📁</span>
+                    <span class="folder-icon">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                        </svg>
+                    </span>
                     <span class="folder-name">${this.escapeHtml(folder.name)}</span>
-                    <span class="folder-count">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
+                    <span class="folder-count">${itemCount}</span>
                 </div>
             `;
         }).join('');
@@ -767,7 +771,12 @@ export class ModalManager {
             const createBtn = document.createElement('button');
             createBtn.className = 'create-folder-btn';
             createBtn.dataset.action = 'create-folder-in-popup';
-            createBtn.innerHTML = '<span class="plus-icon">+</span> Create New Folder';
+            createBtn.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Create New Folder
+            `;
             itemsContainer.appendChild(createBtn);
 
             // Render folders
@@ -813,12 +822,28 @@ export class ModalManager {
         header.dataset.action = 'toggle-folder';
         header.dataset.folderId = folder.id;
         header.innerHTML = `
-            <span class="folder-icon">📂</span>
+            <svg class="folder-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+            <span class="folder-icon">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+            </span>
             <span class="folder-name">${this.escapeHtml(folder.name)}</span>
             <span class="folder-count">${items.length}</span>
             <div class="folder-header-actions">
-                <button class="folder-action-btn" data-action="rename-folder" data-folder-id="${folder.id}" title="Rename">✏️</button>
-                <button class="folder-action-btn delete" data-action="delete-folder" data-folder-id="${folder.id}" title="Delete">🗑️</button>
+                <button class="folder-action-btn" data-action="rename-folder" data-folder-id="${folder.id}" title="Rename">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                </button>
+                <button class="folder-action-btn delete" data-action="delete-folder" data-folder-id="${folder.id}" title="Delete">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
+                </button>
             </div>
         `;
 
@@ -851,14 +876,10 @@ export class ModalManager {
         section.className = 'unfiled-section';
         section.dataset.folderId = 'unfiled';
 
-        const header = document.createElement('div');
-        header.className = 'unfiled-header';
-        header.innerHTML = `
-            <span class="unfiled-icon">📄</span>
-            <span class="unfiled-title">Unfiled Items</span>
-            <span class="unfiled-count">${items.length}</span>
-        `;
-        section.appendChild(header);
+        const divider = document.createElement('div');
+        divider.className = 'unfiled-divider';
+        divider.innerHTML = `Unfiled <span class="unfiled-count">${items.length}</span>`;
+        section.appendChild(divider);
 
         const itemsDiv = document.createElement('div');
         itemsDiv.className = 'unfiled-items';

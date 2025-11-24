@@ -78,7 +78,13 @@
                 </div>
                 <div class="form-buttons">
                     <button type="submit" class="btn">Add Item</button>
-                    <button type="button" class="btn btn-folder" data-action="add-to-folder">Add to Folder</button>
+                    <button type="button" class="btn btn-folder" data-action="add-to-folder">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                            <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+                        </svg>
+                        Add to Folder
+                    </button>
                 </div>
             </form>
 
@@ -165,18 +171,27 @@
         <div class="folder-modal-content">
             <div class="folder-modal-header">
                 <h3>Select Folder</h3>
-                <button class="modal-close" data-action="close-folder-select">×</button>
+                <button class="folder-modal-close" data-action="close-folder-select">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
             </div>
             <div class="folder-author-select">
-                <label for="folderAuthorSelect">Author:</label>
+                <label for="folderAuthorSelect">Author</label>
                 <select id="folderAuthorSelect"></select>
             </div>
+            <button class="folder-create-inline" data-action="create-folder-from-modal">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                New Folder
+            </button>
             <div class="folder-list" id="folderSelectList">
                 <!-- Dynamically populated -->
             </div>
             <div class="folder-modal-actions">
-                <button class="btn btn-secondary" data-action="create-folder-from-modal">+ New Folder</button>
-                <button class="btn btn-secondary" data-action="close-folder-select">Cancel</button>
+                <button class="btn btn-text" data-action="close-folder-select">Cancel</button>
             </div>
         </div>
     </div>
@@ -185,16 +200,20 @@
     <div id="createFolderModal" class="modal folder-modal">
         <div class="folder-modal-content folder-modal-small">
             <div class="folder-modal-header">
-                <h3>Create New Folder</h3>
-                <button class="modal-close" data-action="close-create-folder">×</button>
+                <h3>New Folder</h3>
+                <button class="folder-modal-close" data-action="close-create-folder">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
             </div>
             <div class="input-group">
                 <label for="newFolderName">Folder Name</label>
-                <input type="text" id="newFolderName" placeholder="Enter folder name...">
+                <input type="text" id="newFolderName" placeholder="e.g., Business Ideas">
             </div>
             <div class="folder-modal-actions">
-                <button class="btn" data-action="confirm-create-folder">Create Folder</button>
-                <button class="btn btn-secondary" data-action="close-create-folder">Cancel</button>
+                <button class="btn btn-text" data-action="close-create-folder">Cancel</button>
+                <button class="btn" data-action="confirm-create-folder">Create</button>
             </div>
         </div>
     </div>
