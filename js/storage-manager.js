@@ -13,10 +13,20 @@ export class StorageManager {
     /**
      * Save complete application state to localStorage
      * @param {Object} data - Data to save (items, counter, order, undo, titles, etc.)
-     * @returns {Object} {success: boolean, error?: string}
+     * @returns {Object} {success: boolean, error?: string, attemptedSize?: number}
      */
     save(data) {
         try {
+            // Check if localStorage is available
+            if (!this.isAvailable()) {
+                console.error('❌ localStorage is not available');
+                return { 
+                    success: false, 
+                    error: 'Storage not available. Check if private/incognito mode is enabled.',
+                    attemptedSize: 0
+                };
+            }
+
             // Preserve existing timestamp if present (from Firebase), otherwise create new one
             const timestamp = data.timestamp || new Date().toISOString();
             
@@ -25,13 +35,43 @@ export class StorageManager {
                 timestamp: timestamp
             };
             
-            localStorage.setItem(this.storageKey, JSON.stringify(dataToSave));
+            const jsonString = JSON.stringify(dataToSave);
+            const attemptedSize = new Blob([jsonString]).size;
+            
+            console.log('💾 Attempting to save:', {
+                size: this.formatBytes(attemptedSize),
+                items: data.items?.length || 0
+            });
+            
+            localStorage.setItem(this.storageKey, jsonString);
             console.log('✅ Saved to localStorage:', this.storageKey, timestamp === data.timestamp ? '(preserved timestamp)' : '(new timestamp)');
-            return { success: true, timestamp: timestamp };
+            return { success: true, timestamp: timestamp, attemptedSize };
         } catch (error) {
             console.error('❌ Failed to save to localStorage:', error);
-            return { success: false, error: error.message };
+            
+            // Calculate size of failed attempt
+            const jsonString = JSON.stringify(data);
+            const attemptedSize = new Blob([jsonString]).size;
+            
+            return { 
+                success: false, 
+                error: error.message,
+                errorName: error.name,
+                attemptedSize
+            };
         }
+    }
+    
+    /**
+     * Format bytes to human-readable size
+     * @param {number} bytes
+     * @returns {string}
+     */
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        if (bytes < 1024) return bytes + ' Bytes';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
     /**
@@ -89,11 +129,17 @@ export class StorageManager {
      */
     isAvailable() {
         try {
+            if (typeof localStorage === 'undefined') {
+                console.error('❌ localStorage is undefined');
+                return false;
+            }
+            
             const test = '__storage_test__';
             localStorage.setItem(test, test);
             localStorage.removeItem(test);
             return true;
         } catch (error) {
+            console.error('❌ localStorage availability check failed:', error.name, error.message);
             return false;
         }
     }

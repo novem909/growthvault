@@ -110,11 +110,20 @@ export class ListManager {
             });
             console.error('❌ Failed to save item:', saveResult.error);
             
-            // Provide helpful error message
+            // Provide helpful error message with context
             const storageInfo = this.getStorageInfo();
-            const errorMsg = saveResult.error.includes('quota') || saveResult.error.includes('QuotaExceeded')
-                ? `Storage full (${storageInfo.formattedSize}). Try deleting old items or sign in to sync to cloud.`
-                : `Failed to save: ${saveResult.error}`;
+            const attemptedSize = saveResult.attemptedSize || 0;
+            const attemptedSizeFormatted = this.storageManager.formatBytes(attemptedSize);
+            
+            let errorMsg;
+            if (saveResult.errorName === 'QuotaExceededError' || 
+                saveResult.error.toLowerCase().includes('quota')) {
+                errorMsg = `Storage full! Current: ${storageInfo.formattedSize}, Tried to save: ${attemptedSizeFormatted}. Delete old items or sign in to sync to cloud.`;
+            } else if (saveResult.error.includes('not available')) {
+                errorMsg = saveResult.error; // Already has helpful message
+            } else {
+                errorMsg = `Failed to save: ${saveResult.error}`;
+            }
             
             return { success: false, error: errorMsg };
         }
