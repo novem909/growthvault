@@ -359,10 +359,18 @@ export class UIManager {
     updateStorageInfo() {
         const storageInfo = this.listManager.getStorageInfo();
         const element = document.getElementById('storageInfo');
+        const state = this.stateManager.getState();
+        const itemCount = state.items.length;
         
         if (element) {
+            // Calculate approximate quota (localStorage is typically 5-10MB)
+            const sizeBytes = storageInfo.size;
+            const estimatedQuota = 5 * 1024 * 1024; // Conservative 5MB estimate
+            const percentUsed = ((sizeBytes / estimatedQuota) * 100).toFixed(0);
+            const warningIcon = percentUsed > 80 ? '⚠️' : '🟢';
+            
             element.innerHTML = `
-                <span class="auto-save-indicator">🟢 Auto-saved locally (${storageInfo.formattedSize})</span>
+                <span class="auto-save-indicator">${warningIcon} ${itemCount} items • ${storageInfo.formattedSize}${percentUsed > 50 ? ` (${percentUsed}%)` : ''}</span>
             `;
         }
     }

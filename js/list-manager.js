@@ -503,9 +503,11 @@ export class ListManager {
         let width = img.width;
         let height = img.height;
 
-        // Resize if too large (max 1920px on longest side for desktop, 1280px for mobile)
+        // Resize if too large - aggressive compression for mobile to avoid storage issues
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        const maxDimension = isMobile ? 1280 : 1920;
+        const maxDimension = isMobile ? 800 : 1920; // Reduced from 1280 to 800 for mobile
+        
+        console.log('🖼️  Original dimensions:', { width, height, isMobile });
         
         if (width > maxDimension || height > maxDimension) {
             if (width > height) {
@@ -515,6 +517,7 @@ export class ListManager {
                 width = (width / height) * maxDimension;
                 height = maxDimension;
             }
+            console.log('📐 Resized to:', { width: Math.round(width), height: Math.round(height) });
         }
 
         canvas.width = width;
@@ -523,13 +526,16 @@ export class ListManager {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Use appropriate quality based on device
-        const quality = isMobile ? 0.7 : 0.8;
+        // More aggressive quality reduction on mobile
+        const quality = isMobile ? 0.6 : 0.8; // Reduced from 0.7 to 0.6 for mobile
         
-        // Convert to JPEG for better compression (unless it's PNG with transparency)
-        const outputType = mimeType === 'image/png' ? 'image/png' : 'image/jpeg';
+        // Always convert to JPEG for better compression (PNG is much larger)
+        const outputType = 'image/jpeg';
         
-        return canvas.toDataURL(outputType, quality);
+        const result = canvas.toDataURL(outputType, quality);
+        console.log('✂️  Compression settings:', { quality, outputType, isMobile });
+        
+        return result;
     }
 
     /**
