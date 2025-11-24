@@ -1,21 +1,110 @@
 /**
  * GrowthVault - Storage Manager
- * Handles localStorage persistence operations
+ * Handles storage with IndexedDB (large data) and localStorage (fallback)
  */
 
 import { CONFIG } from './config.js';
+import { IndexedDBManager } from './indexeddb-manager.js';
 
 export class StorageManager {
     constructor(storageKey = CONFIG.STORAGE_KEY) {
         this.storageKey = storageKey;
+        this.indexedDB = new IndexedDBManager();
+        this.useIndexedDB = false;
+        this.initPromise = this.initStorage();
     }
 
     /**
-     * Save complete application state to localStorage
-     * @param {Object} data - Data to save (items, counter, order, undo, titles, etc.)
-     * @returns {Object} {success: boolean, error?: string, attemptedSize?: number}
+     * Initialize storage, prefer IndexedDB for larger capacity
      */
-    save(data) {
+    async initStorage() {
+        try {
+            if (this.indexedDB.isAvailable()) {
+                await this.indexedDB.init();
+                this.useIndexedDB = true;
+                console.log('✅ Using IndexedDB for storage (50MB+ capacity)');
+                
+                // Check if we need to migrate from localStorage
+                await this.migrateIfNeeded();
+            } else {
+                console.log('⚠️ IndexedDB not available, using localStorage (5MB limit)');
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize IndexedDB, falling back to localStorage:', error);
+            this.useIndexedDB = false;
+        }
+    }
+
+    /**
+     * Migrate data from localStorage to IndexedDB if needed
+     */
+    async migrateIfNeeded() {
+        try {
+            // Check if localStorage has data but IndexedDB doesn't
+            const localData = this.loadFromLocalStorage();
+            if (localData) {
+                const indexedData = await this.indexedDB.load();
+                if (!indexedData) {
+                    console.log('🔄 Migrating data from localStorage to IndexedDB...');
+                    await this.indexedDB.save(localData);
+                    // Clear localStorage after successful migration
+                    localStorage.removeItem(this.storageKey);
+                    console.log('✅ Migration complete, localStorage cleared');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Migration failed:', error);
+        }
+    }
+
+    /**
+     * Load data from localStorage (internal method)
+     */
+    loadFromLocalStorage() {
+        try {
+            const saved = localStorage.getItem(this.storageKey);
+            if (!saved) return null;
+            return JSON.parse(saved);
+        } catch (error) {
+            console.error('❌ Failed to load from localStorage:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Save complete application state to storage (IndexedDB or localStorage)
+     * @param {Object} data - Data to save (items, counter, order, undo, titles, etc.)
+     * @returns {Promise<Object>} {success: boolean, error?: string, attemptedSize?: number}
+     */
+    async save(data) {
+        // Ensure storage is initialized
+        await this.initPromise;
+
+        // Try IndexedDB first (much higher capacity)
+        if (this.useIndexedDB) {
+            try {
+                const result = await this.indexedDB.save(data);
+                return { 
+                    success: true, 
+                    timestamp: result.timestamp,
+                    attemptedSize: result.size,
+                    storageType: 'IndexedDB'
+                };
+            } catch (error) {
+                console.error('❌ IndexedDB save failed, trying localStorage:', error);
+                // Fall back to localStorage
+                this.useIndexedDB = false;
+            }
+        }
+
+        // Fall back to localStorage (or use directly if IndexedDB not available)
+        return this.saveToLocalStorage(data);
+    }
+
+    /**
+     * Save to localStorage (fallback method)
+     */
+    saveToLocalStorage(data) {
         try {
             // Check if localStorage is available
             if (!this.isAvailable()) {
@@ -103,14 +192,32 @@ export class StorageManager {
     }
 
     /**
-     * Load application state from localStorage
-     * @returns {Object|null} Saved data or null if not found/error
+     * Load application state from storage (IndexedDB or localStorage)
+     * @returns {Promise<Object|null>} Saved data or null if not found/error
      */
-    load() {
+    async load() {
+        // Ensure storage is initialized
+        await this.initPromise;
+
+        // Try IndexedDB first
+        if (this.useIndexedDB) {
+            try {
+                const data = await this.indexedDB.load();
+                if (data) {
+                    console.log('✅ Loaded from IndexedDB');
+                    return data;
+                }
+            } catch (error) {
+                console.error('❌ Failed to load from IndexedDB:', error);
+                // Fall back to localStorage
+            }
+        }
+
+        // Fall back to localStorage
         try {
             const saved = localStorage.getItem(this.storageKey);
             if (!saved) {
-                console.log('ℹ️  No saved data found in localStorage');
+                console.log('ℹ️  No saved data found');
                 return null;
             }
 
@@ -124,24 +231,52 @@ export class StorageManager {
     }
 
     /**
-     * Clear all data from localStorage
+     * Clear all data from storage (IndexedDB and localStorage)
      */
-    clear() {
+    async clear() {
+        await this.initPromise;
+        
+        const results = [];
+        
+        // Clear IndexedDB if available
+        if (this.useIndexedDB) {
+            try {
+                await this.indexedDB.clear();
+                results.push('IndexedDB cleared');
+            } catch (error) {
+                console.error('❌ Failed to clear IndexedDB:', error);
+            }
+        }
+        
+        // Clear localStorage
         try {
             localStorage.removeItem(this.storageKey);
-            console.log('✅ Cleared localStorage:', this.storageKey);
-            return { success: true };
+            results.push('localStorage cleared');
         } catch (error) {
             console.error('❌ Failed to clear localStorage:', error);
-            return { success: false, error: error.message };
         }
+        
+        console.log('✅ Storage cleared:', results.join(', '));
+        return { success: true };
     }
 
     /**
      * Get size of stored data in bytes
-     * @returns {number} Size in bytes
+     * @returns {Promise<number>} Size in bytes
      */
-    getSize() {
+    async getSize() {
+        await this.initPromise;
+        
+        // Try IndexedDB first
+        if (this.useIndexedDB) {
+            try {
+                return await this.indexedDB.getSize();
+            } catch (error) {
+                console.error('❌ Failed to get IndexedDB size:', error);
+            }
+        }
+        
+        // Fall back to localStorage
         try {
             const data = localStorage.getItem(this.storageKey);
             return data ? new Blob([data]).size : 0;
@@ -174,10 +309,10 @@ export class StorageManager {
 
     /**
      * Get human-readable storage size
-     * @returns {string} Size with unit (KB/MB)
+     * @returns {Promise<string>} Size with unit (KB/MB)
      */
-    getFormattedSize() {
-        const bytes = this.getSize();
+    async getFormattedSize() {
+        const bytes = await this.getSize();
         if (bytes === 0) return '0 Bytes';
         if (bytes < 1024) return bytes + ' Bytes';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
