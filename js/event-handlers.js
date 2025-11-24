@@ -160,6 +160,50 @@ export class EventHandlers {
                 case 'open-item-modal-from-popup':
                     this.handleOpenItemModal(parseInt(target.dataset.itemId));
                     break;
+
+                // Folder actions
+                case 'add-to-folder':
+                    this.handleAddToFolder();
+                    break;
+                    
+                case 'select-folder':
+                    this.handleSelectFolder(parseInt(target.dataset.folderId));
+                    break;
+                    
+                case 'create-folder-from-modal':
+                    this.modalManager.openCreateFolderModal();
+                    break;
+                    
+                case 'close-folder-select':
+                    this.modalManager.closeFolderSelectModal();
+                    break;
+                    
+                case 'confirm-create-folder':
+                    this.handleConfirmCreateFolder();
+                    break;
+                    
+                case 'close-create-folder':
+                    this.modalManager.closeCreateFolderModal();
+                    break;
+                    
+                case 'toggle-folder':
+                    e.stopPropagation();
+                    this.modalManager.toggleFolder(parseInt(target.dataset.folderId));
+                    break;
+                    
+                case 'rename-folder':
+                    e.stopPropagation();
+                    this.handleRenameFolder(parseInt(target.dataset.folderId));
+                    break;
+                    
+                case 'delete-folder':
+                    e.stopPropagation();
+                    this.handleDeleteFolder(parseInt(target.dataset.folderId));
+                    break;
+                    
+                case 'create-folder-in-popup':
+                    this.handleCreateFolderInPopup();
+                    break;
             }
         });
     }
@@ -483,6 +527,101 @@ export class EventHandlers {
                     showToast('Item deleted', 'default');
                 }
             }
+        }
+    }
+
+    // ==================== FOLDER HANDLERS ====================
+
+    /**
+     * Handle "Add to Folder" button click
+     */
+    handleAddToFolder() {
+        const authorInput = document.getElementById('authorInput');
+        const titleInput = document.getElementById('titleInput');
+        const textInput = document.getElementById('textInput');
+        const imageInput = document.getElementById('imageInput');
+
+        const rawHtml = textInput?.innerHTML || '';
+        const sanitizedText = Validators.sanitizeRichText(rawHtml);
+
+        const itemData = {
+            author: authorInput?.value.trim() || '',
+            title: titleInput?.value.trim() || '',
+            text: sanitizedText,
+            imageFile: imageInput?.files?.[0] || null
+        };
+
+        // Validate minimum data
+        if (!itemData.author) {
+            if (typeof showToast === 'function') {
+                showToast('Please enter an author name', 'error');
+            }
+            return;
+        }
+
+        const plainText = Validators.extractTextFromHtml(sanitizedText).trim();
+        if (!plainText && !itemData.imageFile) {
+            if (typeof showToast === 'function') {
+                showToast('Please enter text or select an image', 'error');
+            }
+            return;
+        }
+
+        // Open folder select modal
+        this.modalManager.openFolderSelectModal(itemData);
+    }
+
+    /**
+     * Handle folder selection from modal
+     * @param {number} folderId - Selected folder ID
+     */
+    async handleSelectFolder(folderId) {
+        const result = await this.modalManager.selectFolder(folderId);
+        
+        if (result.success) {
+            this.uiManager.clearForm();
+            this.uiManager.updateStorageInfo();
+            
+            if (typeof showToast === 'function') {
+                showToast('Item added to folder!', 'success');
+            }
+        } else {
+            if (typeof showToast === 'function') {
+                showToast(result.error || 'Failed to add item', 'error');
+            }
+        }
+    }
+
+    /**
+     * Handle confirm create folder from modal
+     */
+    async handleConfirmCreateFolder() {
+        await this.modalManager.confirmCreateFolder();
+    }
+
+    /**
+     * Handle rename folder
+     * @param {number} folderId - Folder ID
+     */
+    async handleRenameFolder(folderId) {
+        await this.modalManager.renameFolderFromPopup(folderId);
+    }
+
+    /**
+     * Handle delete folder
+     * @param {number} folderId - Folder ID
+     */
+    async handleDeleteFolder(folderId) {
+        await this.modalManager.deleteFolderFromPopup(folderId);
+    }
+
+    /**
+     * Handle create folder from popup
+     */
+    handleCreateFolderInPopup() {
+        const currentAuthor = this.modalManager.currentAuthor;
+        if (currentAuthor) {
+            this.modalManager.openCreateFolderModal(currentAuthor);
         }
     }
 }

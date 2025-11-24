@@ -7,6 +7,8 @@ export class StateManager {
     constructor() {
         this.state = {
             items: [],
+            folders: [],           // Array of folder objects
+            folderOrder: {},       // { authorName: [folderId1, folderId2, ...] }
             itemCounter: 1,
             authorOrder: [],
             undoStack: [],
@@ -115,6 +117,8 @@ export class StateManager {
     reset() {
         this.setState({
             items: [],
+            folders: [],
+            folderOrder: {},
             itemCounter: 1,
             authorOrder: [],
             undoStack: [],
@@ -130,6 +134,8 @@ export class StateManager {
     loadState(data) {
         this.setState({
             items: data.items || [],
+            folders: data.folders || [],
+            folderOrder: data.folderOrder || {},
             itemCounter: data.itemCounter || 1,
             authorOrder: data.authorOrder || [],
             undoStack: data.undoStack || [],
@@ -146,6 +152,8 @@ export class StateManager {
     getStateForSaving() {
         const data = {
             items: this.state.items,
+            folders: this.state.folders,
+            folderOrder: this.state.folderOrder,
             itemCounter: this.state.itemCounter,
             authorOrder: this.state.authorOrder,
             undoStack: this.state.undoStack,

@@ -76,7 +76,10 @@
                     <label for="imageInput">Image (optional)</label>
                     <input type="file" id="imageInput" accept="image/*">
                 </div>
-                <button type="submit" class="btn">Add Item</button>
+                <div class="form-buttons">
+                    <button type="submit" class="btn">Add Item</button>
+                    <button type="button" class="btn btn-folder" data-action="add-to-folder">Add to Folder</button>
+                </div>
             </form>
 
             <div class="data-management">
@@ -155,6 +158,45 @@
     <div id="imageZoomOverlay" class="image-zoom-overlay" data-action="close-image-zoom">
         <button class="image-zoom-close" data-action="close-image-zoom" title="Close (ESC)">×</button>
         <img id="zoomedImage" class="zoomed-image" alt="Zoomed image" data-action="prevent-close">
+    </div>
+
+    <!-- Folder Select Modal -->
+    <div id="folderSelectModal" class="modal folder-modal">
+        <div class="folder-modal-content">
+            <div class="folder-modal-header">
+                <h3>Select Folder</h3>
+                <button class="modal-close" data-action="close-folder-select">×</button>
+            </div>
+            <div class="folder-author-select">
+                <label for="folderAuthorSelect">Author:</label>
+                <select id="folderAuthorSelect"></select>
+            </div>
+            <div class="folder-list" id="folderSelectList">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="folder-modal-actions">
+                <button class="btn btn-secondary" data-action="create-folder-from-modal">+ New Folder</button>
+                <button class="btn btn-secondary" data-action="close-folder-select">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Folder Modal -->
+    <div id="createFolderModal" class="modal folder-modal">
+        <div class="folder-modal-content folder-modal-small">
+            <div class="folder-modal-header">
+                <h3>Create New Folder</h3>
+                <button class="modal-close" data-action="close-create-folder">×</button>
+            </div>
+            <div class="input-group">
+                <label for="newFolderName">Folder Name</label>
+                <input type="text" id="newFolderName" placeholder="Enter folder name...">
+            </div>
+            <div class="folder-modal-actions">
+                <button class="btn" data-action="confirm-create-folder">Create Folder</button>
+                <button class="btn btn-secondary" data-action="close-create-folder">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- Floating Action Button -->

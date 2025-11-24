@@ -594,6 +594,309 @@ export class ListManager {
     async getStorageInfo() {
         return this.persistenceManager.getStorageInfo();
     }
+
+    // ==================== FOLDER METHODS ====================
+
+    /**
+     * Create a new folder for an author
+     * @param {string} author - Author name
+     * @param {string} name - Folder name
+     * @returns {Promise<Object>} {success: boolean, folder?: Object, error?: string}
+     */
+    async createFolder(author, name) {
+        if (!author || !author.trim()) {
+            return { success: false, error: 'Author is required' };
+        }
+        if (!name || !name.trim()) {
+            return { success: false, error: 'Folder name is required' };
+        }
+
+        const state = this.stateManager.getState();
+        
+        // Check for duplicate folder name for this author
+        const existingFolder = state.folders.find(
+            f => f.author === author && f.name.toLowerCase() === name.trim().toLowerCase()
+        );
+        if (existingFolder) {
+            return { success: false, error: 'A folder with this name already exists' };
+        }
+
+        const folder = {
+            id: Date.now(),
+            name: name.trim(),
+            author: author.trim(),
+            itemIds: [],
+            createdAt: new Date().toISOString()
+        };
+
+        const newFolders = [...state.folders, folder];
+        
+        // Update folder order for this author
+        const folderOrder = { ...state.folderOrder };
+        if (!folderOrder[author]) {
+            folderOrder[author] = [];
+        }
+        folderOrder[author] = [...folderOrder[author], folder.id];
+
+        this.stateManager.setState({ folders: newFolders, folderOrder });
+        await this.save();
+
+        console.log('📁 Folder created:', folder.name, 'for author:', author);
+        return { success: true, folder };
+    }
+
+    /**
+     * Delete a folder (items move back to unfiled)
+     * @param {number} folderId - Folder ID
+     * @returns {Promise<Object>} {success: boolean, error?: string}
+     */
+    async deleteFolder(folderId) {
+        const state = this.stateManager.getState();
+        const folder = state.folders.find(f => f.id === folderId);
+        
+        if (!folder) {
+            return { success: false, error: 'Folder not found' };
+        }
+
+        const newFolders = state.folders.filter(f => f.id !== folderId);
+        
+        // Remove from folder order
+        const folderOrder = { ...state.folderOrder };
+        if (folderOrder[folder.author]) {
+            folderOrder[folder.author] = folderOrder[folder.author].filter(id => id !== folderId);
+        }
+
+        this.stateManager.setState({ folders: newFolders, folderOrder });
+        await this.save();
+
+        console.log('🗑️ Folder deleted:', folder.name);
+        return { success: true };
+    }
+
+    /**
+     * Rename a folder
+     * @param {number} folderId - Folder ID
+     * @param {string} newName - New folder name
+     * @returns {Promise<Object>} {success: boolean, error?: string}
+     */
+    async renameFolder(folderId, newName) {
+        if (!newName || !newName.trim()) {
+            return { success: false, error: 'Folder name is required' };
+        }
+
+        const state = this.stateManager.getState();
+        const folder = state.folders.find(f => f.id === folderId);
+        
+        if (!folder) {
+            return { success: false, error: 'Folder not found' };
+        }
+
+        // Check for duplicate name
+        const duplicate = state.folders.find(
+            f => f.id !== folderId && 
+                 f.author === folder.author && 
+                 f.name.toLowerCase() === newName.trim().toLowerCase()
+        );
+        if (duplicate) {
+            return { success: false, error: 'A folder with this name already exists' };
+        }
+
+        const newFolders = state.folders.map(f => 
+            f.id === folderId ? { ...f, name: newName.trim() } : f
+        );
+
+        this.stateManager.setState({ folders: newFolders });
+        await this.save();
+
+        console.log('✏️ Folder renamed to:', newName);
+        return { success: true };
+    }
+
+    /**
+     * Add an item to a folder
+     * @param {number} itemId - Item ID
+     * @param {number} folderId - Folder ID
+     * @returns {Promise<Object>} {success: boolean, error?: string}
+     */
+    async addItemToFolder(itemId, folderId) {
+        const state = this.stateManager.getState();
+        const folder = state.folders.find(f => f.id === folderId);
+        const item = state.items.find(i => i.id === itemId);
+        
+        if (!folder) {
+            return { success: false, error: 'Folder not found' };
+        }
+        if (!item) {
+            return { success: false, error: 'Item not found' };
+        }
+        if (item.author !== folder.author) {
+            return { success: false, error: 'Item and folder must belong to the same author' };
+        }
+        if (folder.itemIds.includes(itemId)) {
+            return { success: false, error: 'Item is already in this folder' };
+        }
+
+        // Remove item from any other folder first
+        let newFolders = state.folders.map(f => {
+            if (f.itemIds.includes(itemId)) {
+                return { ...f, itemIds: f.itemIds.filter(id => id !== itemId) };
+            }
+            return f;
+        });
+
+        // Add to target folder
+        newFolders = newFolders.map(f => 
+            f.id === folderId ? { ...f, itemIds: [...f.itemIds, itemId] } : f
+        );
+
+        this.stateManager.setState({ folders: newFolders });
+        await this.save();
+
+        console.log('📂 Item added to folder:', folder.name);
+        return { success: true };
+    }
+
+    /**
+     * Remove an item from its folder (move to unfiled)
+     * @param {number} itemId - Item ID
+     * @returns {Promise<Object>} {success: boolean, error?: string}
+     */
+    async removeItemFromFolder(itemId) {
+        const state = this.stateManager.getState();
+        
+        const newFolders = state.folders.map(f => {
+            if (f.itemIds.includes(itemId)) {
+                return { ...f, itemIds: f.itemIds.filter(id => id !== itemId) };
+            }
+            return f;
+        });
+
+        this.stateManager.setState({ folders: newFolders });
+        await this.save();
+
+        console.log('📤 Item removed from folder');
+        return { success: true };
+    }
+
+    /**
+     * Move item between folders
+     * @param {number} itemId - Item ID
+     * @param {number} fromFolderId - Source folder ID (can be null for unfiled)
+     * @param {number} toFolderId - Target folder ID (can be null for unfiled)
+     * @returns {Promise<Object>} {success: boolean, error?: string}
+     */
+    async moveItemBetweenFolders(itemId, fromFolderId, toFolderId) {
+        if (toFolderId === null) {
+            return this.removeItemFromFolder(itemId);
+        }
+        return this.addItemToFolder(itemId, toFolderId);
+    }
+
+    /**
+     * Reorder folders for an author
+     * @param {string} author - Author name
+     * @param {Array<number>} newOrder - New folder ID order
+     * @returns {Promise<Object>} {success: boolean}
+     */
+    async reorderFolders(author, newOrder) {
+        const state = this.stateManager.getState();
+        const folderOrder = { ...state.folderOrder };
+        folderOrder[author] = newOrder;
+
+        this.stateManager.setState({ folderOrder });
+        await this.save();
+
+        console.log('🔄 Folder order updated for:', author);
+        return { success: true };
+    }
+
+    /**
+     * Reorder items within a folder
+     * @param {number} folderId - Folder ID
+     * @param {Array<number>} newItemOrder - New item ID order
+     * @returns {Promise<Object>} {success: boolean}
+     */
+    async reorderItemsInFolder(folderId, newItemOrder) {
+        const state = this.stateManager.getState();
+        
+        const newFolders = state.folders.map(f => 
+            f.id === folderId ? { ...f, itemIds: newItemOrder } : f
+        );
+
+        this.stateManager.setState({ folders: newFolders });
+        await this.save();
+
+        console.log('🔄 Items reordered in folder');
+        return { success: true };
+    }
+
+    /**
+     * Get all items in a folder
+     * @param {number} folderId - Folder ID
+     * @returns {Array} Items in the folder (ordered)
+     */
+    getItemsInFolder(folderId) {
+        const state = this.stateManager.getState();
+        const folder = state.folders.find(f => f.id === folderId);
+        
+        if (!folder) return [];
+        
+        return folder.itemIds
+            .map(id => state.items.find(item => item.id === id))
+            .filter(Boolean);
+    }
+
+    /**
+     * Get unfiled items for an author (not in any folder)
+     * @param {string} author - Author name
+     * @returns {Array} Unfiled items
+     */
+    getUnfiledItems(author) {
+        const state = this.stateManager.getState();
+        const authorItems = state.items.filter(item => item.author === author);
+        const authorFolders = state.folders.filter(f => f.author === author);
+        
+        // Get all item IDs that are in folders
+        const filedItemIds = new Set();
+        authorFolders.forEach(folder => {
+            folder.itemIds.forEach(id => filedItemIds.add(id));
+        });
+
+        // Return items not in any folder
+        return authorItems.filter(item => !filedItemIds.has(item.id));
+    }
+
+    /**
+     * Get folders for an author (ordered)
+     * @param {string} author - Author name
+     * @returns {Array} Folders for the author
+     */
+    getFoldersForAuthor(author) {
+        const state = this.stateManager.getState();
+        const authorFolders = state.folders.filter(f => f.author === author);
+        const order = state.folderOrder[author] || [];
+
+        // Sort by order, then by creation date for any not in order
+        return authorFolders.sort((a, b) => {
+            const aIndex = order.indexOf(a.id);
+            const bIndex = order.indexOf(b.id);
+            
+            if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+            if (aIndex !== -1) return -1;
+            if (bIndex !== -1) return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+    }
+
+    /**
+     * Get the folder containing an item
+     * @param {number} itemId - Item ID
+     * @returns {Object|null} Folder or null if unfiled
+     */
+    getFolderForItem(itemId) {
+        const state = this.stateManager.getState();
+        return state.folders.find(f => f.itemIds.includes(itemId)) || null;
+    }
 }
 
 export default ListManager;
