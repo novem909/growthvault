@@ -220,6 +220,7 @@ export class FirebaseManager {
                     // Force UI update
                     if (this.uiManager) {
                         this.uiManager.renderItems();
+                        await this.uiManager.updateStorageInfo();
                         console.log('🎨 UI refreshed with Firebase data');
                     }
                     
@@ -266,7 +267,7 @@ export class FirebaseManager {
 
         const userId = this.currentUser.uid;
         
-        this.firebaseListener = this.database.ref(`users/${userId}/data`).on('value', (snapshot) => {
+        this.firebaseListener = this.database.ref(`users/${userId}/data`).on('value', async (snapshot) => {
             const data = snapshot.val();
             
             if (data && data.timestamp) {
@@ -288,11 +289,12 @@ export class FirebaseManager {
                     console.log('☁️  Remote data newer, updating...');
                     this.stateManager.loadState(data);
                     // Update local storage but skip Firebase sync to prevent loop
-                    this.listManager.save(true);
+                    await this.listManager.save(true);
                     
                     // Force UI update
                     if (this.uiManager) {
                         this.uiManager.renderItems();
+                        await this.uiManager.updateStorageInfo();
                         console.log('🎨 UI refreshed from real-time update');
                     }
                 } else {

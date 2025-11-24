@@ -271,14 +271,14 @@ export class EventHandlers {
      * Handle delete author
      * @param {string} author - Author name
      */
-    handleDeleteAuthor(author) {
+    async handleDeleteAuthor(author) {
         const confirmMessage = `Delete all items by "${author}"?`;
         
         if (confirm(confirmMessage)) {
-            const result = this.listManager.deleteAuthor(author);
+            const result = await this.listManager.deleteAuthor(author);
             
             if (result.success) {
-                this.uiManager.updateStorageInfo();
+                await this.uiManager.updateStorageInfo();
                 
                 if (typeof showToast === 'function') {
                     showToast(`Deleted ${result.count} items`, 'default');
@@ -299,11 +299,11 @@ export class EventHandlers {
      * Handle delete item
      * @param {number} itemId - Item ID
      */
-    handleDeleteItem(itemId) {
-        const result = this.listManager.deleteItem(itemId);
+    async handleDeleteItem(itemId) {
+        const result = await this.listManager.deleteItem(itemId);
         
         if (result.success) {
-            this.uiManager.updateStorageInfo();
+            await this.uiManager.updateStorageInfo();
         }
     }
 
@@ -318,12 +318,12 @@ export class EventHandlers {
     /**
      * Handle undo
      */
-    handleUndo() {
-        const result = this.listManager.undo();
+    async handleUndo() {
+        const result = await this.listManager.undo();
         
         if (result.success) {
             this.uiManager.showUndoNotification(result.action, result.data);
-            this.uiManager.updateStorageInfo();
+            await this.uiManager.updateStorageInfo();
         } else {
             if (typeof showToast === 'function') {
                 showToast('Nothing to undo', 'default');
@@ -365,14 +365,14 @@ export class EventHandlers {
     /**
      * Handle clear all data
      */
-    handleClearAllData() {
+    async handleClearAllData() {
         const confirmMessage = 'Clear ALL data? This cannot be undone.';
         
         if (confirm(confirmMessage)) {
-            const result = this.listManager.clearAllData();
+            const result = await this.listManager.clearAllData();
             
             if (result.success) {
-                this.uiManager.updateStorageInfo();
+                await this.uiManager.updateStorageInfo();
                 
                 if (typeof showToast === 'function') {
                     showToast('All data cleared', 'default');
@@ -397,7 +397,7 @@ export class EventHandlers {
     /**
      * Handle delete current modal item
      */
-    handleDeleteCurrentModalItem() {
+    async handleDeleteCurrentModalItem() {
         const currentItemId = this.modalManager.currentItemId;
         
         if (!currentItemId) {
@@ -411,10 +411,10 @@ export class EventHandlers {
         
         if (confirm(confirmMessage)) {
             this.modalManager.closeContentModal();
-            const result = this.listManager.deleteItem(currentItemId);
+            const result = await this.listManager.deleteItem(currentItemId);
             
             if (result.success) {
-                this.uiManager.updateStorageInfo();
+                await this.uiManager.updateStorageInfo();
                 
                 if (typeof showToast === 'function') {
                     showToast('Item deleted', 'default');
@@ -426,7 +426,7 @@ export class EventHandlers {
     /**
      * Handle delete author from popup
      */
-    handleDeleteAuthorFromPopup() {
+    async handleDeleteAuthorFromPopup() {
         const currentAuthor = this.modalManager.currentAuthor;
         
         if (!currentAuthor) {
@@ -440,10 +440,10 @@ export class EventHandlers {
         
         if (confirm(confirmMessage)) {
             this.modalManager.closeAuthorPopup();
-            const result = this.listManager.deleteAuthor(currentAuthor);
+            const result = await this.listManager.deleteAuthor(currentAuthor);
             
             if (result.success) {
-                this.uiManager.updateStorageInfo();
+                await this.uiManager.updateStorageInfo();
                 
                 if (typeof showToast === 'function') {
                     showToast(`Deleted ${result.count} items`, 'default');
@@ -457,11 +457,11 @@ export class EventHandlers {
      * @param {number} itemId - Item ID
      * @param {string} itemTitle - Item title for confirmation
      */
-    handleDeleteItemFromPopup(itemId, itemTitle) {
+    async handleDeleteItemFromPopup(itemId, itemTitle) {
         const confirmMessage = `Are you sure you want to delete "${itemTitle}"?`;
         
         if (confirm(confirmMessage)) {
-            const result = this.listManager.deleteItem(itemId);
+            const result = await this.listManager.deleteItem(itemId);
             
             if (result.success) {
                 // Check if any items remain for current author
@@ -477,7 +477,7 @@ export class EventHandlers {
                     }
                 }
                 
-                this.uiManager.updateStorageInfo();
+                await this.uiManager.updateStorageInfo();
                 
                 if (typeof showToast === 'function') {
                     showToast('Item deleted', 'default');

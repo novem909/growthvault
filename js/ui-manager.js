@@ -148,7 +148,7 @@ export class UIManager {
                 }
             });
 
-            box.addEventListener('drop', (e) => {
+            box.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 box.classList.remove('drag-over');
 
@@ -163,7 +163,7 @@ export class UIManager {
                         box.parentNode.insertBefore(draggedAuthor, box);
                     }
 
-                    this.updateAuthorOrderFromDOM();
+                    await this.updateAuthorOrderFromDOM();
                 }
             });
 
@@ -181,10 +181,10 @@ export class UIManager {
     /**
      * Update author order based on current DOM order
      */
-    updateAuthorOrderFromDOM() {
+    async updateAuthorOrderFromDOM() {
         const authorBoxes = this.visualList.querySelectorAll('.author-box');
         const newOrder = Array.from(authorBoxes).map(box => box.dataset.author);
-        this.listManager.updateAuthorOrder(newOrder);
+        await this.listManager.updateAuthorOrder(newOrder);
     }
 
     /**
@@ -356,8 +356,8 @@ export class UIManager {
     /**
      * Update storage info display
      */
-    updateStorageInfo() {
-        const storageInfo = this.listManager.getStorageInfo();
+    async updateStorageInfo() {
+        const storageInfo = await this.listManager.getStorageInfo();
         const element = document.getElementById('storageInfo');
         const state = this.stateManager.getState();
         const itemCount = state.items.length;

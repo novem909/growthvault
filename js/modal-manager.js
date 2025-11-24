@@ -54,10 +54,10 @@ export class ModalManager {
             modalText.contentEditable = true;
             
             // Save on blur
-            modalText.onblur = () => {
+            modalText.onblur = async () => {
                 const newHtml = Validators.sanitizeRichText(modalText.innerHTML || '');
                 if (item.text !== newHtml) {
-                    this.updateItemText(itemId, newHtml);
+                    await this.updateItemText(itemId, newHtml);
                 }
             };
             modalText.onpaste = (event) => {
@@ -102,13 +102,13 @@ export class ModalManager {
     /**
      * Close content modal
      */
-    closeContentModal() {
+    async closeContentModal() {
         // Save any text changes before closing
         if (this.currentItemInModal) {
             const modalText = document.getElementById('modalText');
             if (modalText && modalText.isContentEditable) {
                 const newHtml = Validators.sanitizeRichText(modalText.innerHTML || '');
-                this.updateItemText(this.currentItemInModal, newHtml);
+                await this.updateItemText(this.currentItemInModal, newHtml);
             }
         }
 
@@ -337,7 +337,7 @@ export class ModalManager {
      * Update item order in state based on DOM order
      * @param {string} author - Author name
      */
-    updateAuthorItemsFromDOM(author) {
+    async updateAuthorItemsFromDOM(author) {
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
@@ -367,7 +367,7 @@ export class ModalManager {
         ];
 
         this.stateManager.setState({ items: newItems });
-        this.listManager.save();
+        await this.listManager.save();
 
         console.log('🔄 Reordered items for author:', author);
     }
@@ -375,7 +375,7 @@ export class ModalManager {
     /**
      * Delete current item in modal
      */
-    deleteCurrentModalItem() {
+    async deleteCurrentModalItem() {
         if (!this.currentItemInModal) {
             console.warn('No item in modal to delete');
             return;
@@ -392,7 +392,7 @@ export class ModalManager {
         const confirmMessage = `Are you sure you want to delete "${item.title || 'Untitled'}"?`;
         
         if (confirm(confirmMessage)) {
-            this.listManager.deleteItem(this.currentItemId);
+            await this.listManager.deleteItem(this.currentItemId);
             this.closeContentModal();
 
             // If in author popup, refresh or close if no items left
@@ -414,7 +414,7 @@ export class ModalManager {
     /**
      * Delete all items by author (from popup)
      */
-    deleteAuthorFromPopup() {
+    async deleteAuthorFromPopup() {
         if (!this.currentAuthor) {
             console.warn('No author in popup to delete');
             return;
@@ -426,7 +426,7 @@ export class ModalManager {
         const confirmMessage = `Delete all ${items.length} items by "${this.currentAuthor}"?`;
         
         if (confirm(confirmMessage)) {
-            const result = this.listManager.deleteAuthor(this.currentAuthor);
+            const result = await this.listManager.deleteAuthor(this.currentAuthor);
             
             if (result.success) {
                 this.closeAuthorPopup();
@@ -443,7 +443,7 @@ export class ModalManager {
      * @param {number} itemId - Item ID
      * @param {string} newText - New text content
      */
-    updateItemText(itemId, newText) {
+    async updateItemText(itemId, newText) {
         const state = this.stateManager.getState();
         const item = state.items.find(i => i.id === itemId);
         
@@ -454,7 +454,7 @@ export class ModalManager {
             );
             
             this.stateManager.setState({ items: updatedItems });
-            this.listManager.save();
+            await this.listManager.save();
             
             console.log('✏️  Updated item text:', itemId);
         }

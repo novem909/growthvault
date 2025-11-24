@@ -55,7 +55,7 @@ class GrowthVaultApp {
 
         // Initial render
         this.uiManager.renderItems();
-        this.uiManager.updateStorageInfo();
+        await this.uiManager.updateStorageInfo();
 
         // Initialize theme
         if (typeof initializeTheme === 'function') {
@@ -91,17 +91,17 @@ class GrowthVaultApp {
         };
 
         // Modal handlers
-        window.deleteCurrentModalItem = () => {
-            this.modalManager.deleteCurrentModalItem();
+        window.deleteCurrentModalItem = async () => {
+            await this.modalManager.deleteCurrentModalItem();
         };
 
-        window.closeModal = () => {
-            this.modalManager.closeContentModal();
+        window.closeModal = async () => {
+            await this.modalManager.closeContentModal();
         };
 
         // Author popup handlers
-        window.deleteAuthorFromPopup = () => {
-            this.modalManager.deleteAuthorFromPopup();
+        window.deleteAuthorFromPopup = async () => {
+            await this.modalManager.deleteAuthorFromPopup();
         };
 
         window.closeAuthorPopup = () => {
@@ -112,9 +112,9 @@ class GrowthVaultApp {
             this.modalManager.openAuthorPopup(author);
         };
 
-        window.deleteAuthor = (author, event) => {
+        window.deleteAuthor = async (author, event) => {
             if (event) event.stopPropagation();
-            this.eventHandlers.handleDeleteAuthor(author);
+            await this.eventHandlers.handleDeleteAuthor(author);
         };
 
         window.openModal = (itemId) => {
@@ -126,11 +126,11 @@ class GrowthVaultApp {
             exportData: () => {
                 this.eventHandlers.handleExportData();
             },
-            clearAllData: () => {
-                this.eventHandlers.handleClearAllData();
+            clearAllData: async () => {
+                await this.eventHandlers.handleClearAllData();
             },
-            saveToStorage: () => {
-                this.listManager.save();
+            saveToStorage: async () => {
+                await this.listManager.save();
             },
             // Expose managers for debugging
             _managers: {
