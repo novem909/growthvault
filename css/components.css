@@ -376,12 +376,12 @@
 
 .modal-content {
     background: var(--bg-container);
-    margin: 20vh auto;
+    margin: 2.5vh auto;
     padding: 16px 12px 16px 12px;
     border-radius: 16px;
-    width: 90vw;
-    max-width: 800px;
-    max-height: 60vh;
+    width: 95vw;
+    max-width: 1400px;
+    height: 95vh;
     overflow-y: auto;
     box-shadow: 0 20px 40px var(--shadow-medium);
     position: relative;
@@ -637,12 +637,12 @@
 
 .author-popup-content {
     background: var(--bg-container);
-    margin: 15vh auto;
-    padding: 20px;
+    margin: 2.5vh auto;
+    padding: 24px;
     border-radius: 16px;
     width: 95%;
-    max-width: 700px;
-    max-height: 70vh;
+    max-width: 1400px;
+    height: 95vh;
     overflow-y: auto;
     box-shadow: 0 25px 50px var(--shadow-medium);
     position: relative;
@@ -1203,12 +1203,12 @@
 
 .folder-modal .folder-modal-content {
     background: var(--bg-container);
-    margin: 18vh auto;
+    margin: 10vh auto;
     padding: 20px;
     border-radius: 12px;
     width: 90%;
-    max-width: 360px;
-    max-height: 64vh;
+    max-width: 400px;
+    max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     animation: modalFadeIn var(--transition-normal) ease-out;

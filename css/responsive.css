@@ -148,11 +148,11 @@
     }
 
     .modal-content {
-        width: 95vw;
-        max-height: 70vh;
-        margin: 15vh auto;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
         padding: 12px 8px 12px 8px;
-        border-radius: 12px;
+        border-radius: 0;
     }
 
     .modal-header {
@@ -195,11 +195,11 @@
     }
 
     .author-popup-content {
-        width: 95vw;
-        max-height: 75vh;
-        margin: 12.5vh auto;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
         padding: 16px 12px;
-        border-radius: 12px;
+        border-radius: 0;
     }
 
     .author-popup-header {
