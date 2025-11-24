@@ -159,6 +159,7 @@ export class ListManager {
         // Save undo state
         if (saveUndo) {
             this.saveStateForUndo('deleteItem', {
+                itemId: id,
                 title: item.title,
                 author: item.author
             });
@@ -367,16 +368,26 @@ export class ListManager {
     }
 
     /**
-     * Save state for undo
+     * Save state for undo - stores only deleted items, not entire state
      * @param {string} action - Action name
      * @param {Object} data - Action data
      */
     saveStateForUndo(action, data) {
         const state = this.stateManager.getState();
+        
+        // Only store the specific items being deleted, not the entire state
+        let deletedItems = [];
+        if (action === 'deleteItem' && data.itemId) {
+            const item = state.items.find(i => i.id === data.itemId);
+            if (item) deletedItems = [item];
+        } else if (action === 'deleteAuthor' && data.author) {
+            deletedItems = state.items.filter(i => i.author === data.author);
+        }
+        
         const undoState = {
             action: action,
             data: data,
-            items: JSON.parse(JSON.stringify(state.items)),
+            deletedItems: deletedItems, // Store only deleted items, not full state
             authorOrder: [...state.authorOrder],
             timestamp: Date.now()
         };
@@ -389,7 +400,7 @@ export class ListManager {
         }
 
         this.stateManager.setState({ undoStack: newUndoStack });
-        console.log('💾 Undo state saved:', action);
+        console.log('💾 Undo state saved:', action, `(${deletedItems.length} items)`);
     }
 
     /**
@@ -407,16 +418,30 @@ export class ListManager {
         const lastState = state.undoStack[state.undoStack.length - 1];
         const newUndoStack = state.undoStack.slice(0, -1);
         
-        // Restore the state before the action
+        // Handle both old format (items) and new format (deletedItems)
+        let restoredItems;
+        if (lastState.deletedItems) {
+            // New format: restore only deleted items
+            restoredItems = [...state.items, ...lastState.deletedItems];
+        } else if (lastState.items) {
+            // Old format: restore entire state (migration path)
+            restoredItems = JSON.parse(JSON.stringify(lastState.items));
+            console.warn('⚠️  Using old undo format - consider clearing undo history');
+        } else {
+            console.error('❌ Invalid undo state');
+            return { success: false, error: 'Invalid undo state' };
+        }
+        
         this.stateManager.setState({
-            items: JSON.parse(JSON.stringify(lastState.items)),
+            items: restoredItems,
             authorOrder: [...lastState.authorOrder],
             undoStack: newUndoStack
         });
         
         this.save();
         
-        console.log('↩️  Undone action:', lastState.action);
+        const itemCount = lastState.deletedItems?.length || '?';
+        console.log('↩️  Undone action:', lastState.action, `(restored ${itemCount} items)`);
         return { 
             success: true, 
             action: lastState.action,
