@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Debugger - GrowthVault</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f8fafc;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1e293b; }
+        h2 { color: #475569; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .info-grid {
+            display: grid;
+            gap: 10px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+        .label { font-weight: 600; color: #64748b; }
+        .value { color: #1e293b; font-family: monospace; }
+        .warning { color: #ea580c; font-weight: 600; }
+        .error { color: #dc2626; font-weight: 600; }
+        .success { color: #16a34a; font-weight: 600; }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #4f46e5; }
+        button.danger { background: #dc2626; }
+        button.danger:hover { background: #b91c1c; }
+        .log {
+            background: #1e293b;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #10b981, #ea580c, #dc2626);
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #1e293b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 GrowthVault Storage Debugger</h1>
+    
+    <div class="card">
+        <h2>📱 Device & Browser Info</h2>
+        <div class="info-grid" id="deviceInfo"></div>
+    </div>
+
+    <div class="card">
+        <h2>💾 Storage Status</h2>
+        <div class="info-grid" id="storageInfo"></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-text" id="progressText">Checking...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📊 Current Data Analysis</h2>
+        <div class="info-grid" id="dataAnalysis"></div>
+    </div>
+
+    <div class="card">
+        <h2>🔧 Storage Actions</h2>
+        <button onclick="testStorage()">Test Storage Write</button>
+        <button onclick="analyzeUndoStack()">Analyze Undo Stack</button>
+        <button onclick="cleanupUndoStack()">Cleanup Undo Stack</button>
+        <button onclick="exportDebugData()">Export Debug Info</button>
+        <button onclick="clearStorage()" class="danger">Clear All Storage</button>
+    </div>
+
+    <div class="card">
+        <h2>📝 Debug Log</h2>
+        <div class="log" id="debugLog">Initializing debugger...</div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'visualListBuilder_data';
+        let logContent = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : type === 'success' ? '✅' : '📍';
+            const entry = `[${timestamp}] ${prefix} ${message}`;
+            logContent.push(entry);
+            document.getElementById('debugLog').textContent = logContent.join('\n');
+            console.log(entry);
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            if (bytes < 1024) return bytes + ' Bytes';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // Initialize device info
+        function initDeviceInfo() {
+            const info = {
+                'User Agent': navigator.userAgent.substring(0, 50) + '...',
+                'Platform': navigator.platform,
+                'Screen Size': `${window.screen.width} x ${window.screen.height}`,
+                'Viewport': `${window.innerWidth} x ${window.innerHeight}`,
+                'Is Mobile': /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'Yes' : 'No',
+                'Is iOS': /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'Yes' : 'No',
+                'Is Safari': /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? 'Yes' : 'No',
+                'Online': navigator.onLine ? 'Yes' : 'No'
+            };
+
+            const container = document.getElementById('deviceInfo');
+            container.innerHTML = Object.entries(info).map(([key, value]) => `
+                <div class="info-row">
+                    <span class="label">${key}:</span>
+                    <span class="value">${value}</span>
+                </div>
+            `).join('');
+            
+            log(`Device detected: ${info['Is Mobile'] === 'Yes' ? 'Mobile' : 'Desktop'} (${info.Platform})`);
+        }
+
+        // Check localStorage availability and quota
+        async function checkStorage() {
+            const container = document.getElementById('storageInfo');
+            let storageAvailable = false;
+            let storageSize = 0;
+            let quotaInfo = null;
+
+            // Test localStorage availability
+            try {
+                const test = '__test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                storageAvailable = true;
+                log('localStorage is available', 'success');
+            } catch (e) {
+                log(`localStorage test failed: ${e.name} - ${e.message}`, 'error');
+            }
+
+            // Get current storage size
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (data) {
+                    storageSize = new Blob([data]).size;
+                    log(`Current data size: ${formatBytes(storageSize)}`);
+                }
+            } catch (e) {
+                log(`Failed to get storage size: ${e.message}`, 'error');
+            }
+
+            // Try to estimate quota (works in Chrome/Edge)
+            if (navigator.storage && navigator.storage.estimate) {
+                try {
+                    quotaInfo = await navigator.storage.estimate();
+                    log(`Storage quota: ${formatBytes(quotaInfo.quota)}, Used: ${formatBytes(quotaInfo.usage)}`);
+                } catch (e) {
+                    log('Cannot estimate storage quota (normal on iOS)', 'warning');
+                }
+            }
+
+            // iOS Safari localStorage is limited to 5-10MB
+            const estimatedQuota = quotaInfo?.quota || (5 * 1024 * 1024); // Default to 5MB for iOS
+            const usagePercent = (storageSize / estimatedQuota) * 100;
+
+            // Update UI
+            const info = {
+                'localStorage Available': storageAvailable ? '<span class="success">Yes</span>' : '<span class="error">No</span>',
+                'Current Size': formatBytes(storageSize),
+                'Estimated Quota': formatBytes(estimatedQuota),
+                'Usage': `${usagePercent.toFixed(1)}%`,
+                'Status': usagePercent > 80 ? '<span class="error">Critical</span>' : 
+                         usagePercent > 60 ? '<span class="warning">Warning</span>' : 
+                         '<span class="success">Good</span>'
+            };
+
+            container.innerHTML = Object.entries(info).map(([key, value]) => `
+                <div class="info-row">
+                    <span class="label">${key}:</span>
+                    <span class="value">${value}</span>
+                </div>
+            `).join('');
+
+            // Update progress bar
+            document.getElementById('progressFill').style.width = Math.min(usagePercent, 100) + '%';
+            document.getElementById('progressText').textContent = `${usagePercent.toFixed(1)}% Used`;
+        }
+
+        // Analyze stored data
+        function analyzeData() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) {
+                    log('No data found in localStorage', 'warning');
+                    return;
+                }
+
+                const parsed = JSON.parse(data);
+                const analysis = {
+                    'Items Count': parsed.items?.length || 0,
+                    'Undo Stack Size': parsed.undoStack?.length || 0,
+                    'Authors': parsed.authorOrder?.length || 0,
+                    'Has Images': parsed.items?.some(i => i.image) ? 'Yes' : 'No',
+                    'Timestamp': parsed.timestamp ? new Date(parsed.timestamp).toLocaleString() : 'N/A'
+                };
+
+                // Check for old undo format
+                let undoProblems = 0;
+                if (parsed.undoStack && parsed.undoStack.length > 0) {
+                    parsed.undoStack.forEach((state, i) => {
+                        if (state.items) {
+                            undoProblems++;
+                            log(`Undo entry ${i} uses old format (stores full state)`, 'warning');
+                        }
+                    });
+                }
+
+                if (undoProblems > 0) {
+                    analysis['Undo Problems'] = `<span class="error">${undoProblems} entries using old format</span>`;
+                }
+
+                // Calculate sizes
+                const itemsSize = new Blob([JSON.stringify(parsed.items || [])]).size;
+                const undoSize = new Blob([JSON.stringify(parsed.undoStack || [])]).size;
+                
+                analysis['Items Size'] = formatBytes(itemsSize);
+                analysis['Undo Stack Size'] = formatBytes(undoSize);
+                
+                const container = document.getElementById('dataAnalysis');
+                container.innerHTML = Object.entries(analysis).map(([key, value]) => `
+                    <div class="info-row">
+                        <span class="label">${key}:</span>
+                        <span class="value">${value}</span>
+                    </div>
+                `).join('');
+
+                log(`Data analysis complete: ${analysis['Items Count']} items, ${analysis['Undo Stack Size']} undo entries`);
+            } catch (e) {
+                log(`Failed to analyze data: ${e.message}`, 'error');
+            }
+        }
+
+        // Test storage write
+        function testStorage() {
+            try {
+                const testData = {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    size: 'small'
+                };
+                
+                localStorage.setItem('__test_write__', JSON.stringify(testData));
+                const retrieved = localStorage.getItem('__test_write__');
+                localStorage.removeItem('__test_write__');
+                
+                if (retrieved) {
+                    log('Storage write test PASSED', 'success');
+                    alert('✅ Storage write test successful!');
+                } else {
+                    log('Storage write test FAILED - could not retrieve', 'error');
+                    alert('❌ Storage write test failed!');
+                }
+            } catch (e) {
+                log(`Storage write test FAILED: ${e.name} - ${e.message}`, 'error');
+                alert(`❌ Storage write test failed: ${e.message}`);
+            }
+        }
+
+        // Analyze undo stack
+        function analyzeUndoStack() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) {
+                    alert('No data found');
+                    return;
+                }
+
+                const parsed = JSON.parse(data);
+                if (!parsed.undoStack || parsed.undoStack.length === 0) {
+                    alert('Undo stack is empty');
+                    return;
+                }
+
+                let report = 'UNDO STACK ANALYSIS\n\n';
+                let totalSize = 0;
+                let oldFormatCount = 0;
+
+                parsed.undoStack.forEach((entry, i) => {
+                    const entrySize = new Blob([JSON.stringify(entry)]).size;
+                    totalSize += entrySize;
+                    
+                    const isOldFormat = !!entry.items;
+                    if (isOldFormat) oldFormatCount++;
+                    
+                    report += `Entry ${i + 1}:\n`;
+                    report += `  Action: ${entry.action || 'unknown'}\n`;
+                    report += `  Size: ${formatBytes(entrySize)}\n`;
+                    report += `  Format: ${isOldFormat ? 'OLD (full state)' : 'NEW (only deleted items)'}\n`;
+                    if (entry.data) {
+                        report += `  Data: ${JSON.stringify(entry.data).substring(0, 100)}...\n`;
+                    }
+                    report += '\n';
+                });
+
+                report += `TOTAL SIZE: ${formatBytes(totalSize)}\n`;
+                report += `Old format entries: ${oldFormatCount}/${parsed.undoStack.length}\n`;
+
+                if (oldFormatCount > 0) {
+                    report += '\n⚠️ RECOMMENDATION: Clean up undo stack to save space!';
+                }
+
+                log(`Undo stack analyzed: ${parsed.undoStack.length} entries, ${formatBytes(totalSize)}`, 'info');
+                alert(report);
+            } catch (e) {
+                log(`Failed to analyze undo stack: ${e.message}`, 'error');
+                alert('Failed to analyze undo stack: ' + e.message);
+            }
+        }
+
+        // Cleanup undo stack (convert old format or clear)
+        function cleanupUndoStack() {
+            if (!confirm('This will clear the undo history. Continue?')) return;
+            
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) {
+                    alert('No data found');
+                    return;
+                }
+
+                const parsed = JSON.parse(data);
+                const oldSize = new Blob([JSON.stringify(parsed.undoStack || [])]).size;
+                
+                // Clear undo stack
+                parsed.undoStack = [];
+                
+                // Save back
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                
+                const newSize = new Blob([JSON.stringify(parsed.undoStack)]).size;
+                const saved = oldSize - newSize;
+                
+                log(`Undo stack cleared. Saved ${formatBytes(saved)}`, 'success');
+                alert(`✅ Undo stack cleared!\nSpace saved: ${formatBytes(saved)}`);
+                
+                // Refresh analysis
+                checkStorage();
+                analyzeData();
+            } catch (e) {
+                log(`Failed to cleanup undo stack: ${e.message}`, 'error');
+                alert('Failed to cleanup: ' + e.message);
+            }
+        }
+
+        // Export debug data
+        function exportDebugData() {
+            try {
+                const debugInfo = {
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    screen: `${window.screen.width}x${window.screen.height}`,
+                    localStorage: {},
+                    errors: []
+                };
+
+                // Get all localStorage data
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    try {
+                        const value = localStorage.getItem(key);
+                        debugInfo.localStorage[key] = {
+                            size: new Blob([value]).size,
+                            preview: value.substring(0, 100)
+                        };
+                    } catch (e) {
+                        debugInfo.errors.push(`Failed to read ${key}: ${e.message}`);
+                    }
+                }
+
+                // Export
+                const blob = new Blob([JSON.stringify(debugInfo, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `growthvault-debug-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                log('Debug data exported', 'success');
+            } catch (e) {
+                log(`Failed to export debug data: ${e.message}`, 'error');
+                alert('Failed to export: ' + e.message);
+            }
+        }
+
+        // Clear storage
+        function clearStorage() {
+            if (!confirm('⚠️ This will delete ALL data. Are you sure?')) return;
+            if (!confirm('⚠️ FINAL WARNING: This cannot be undone. Continue?')) return;
+            
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                log('Storage cleared', 'success');
+                alert('✅ Storage cleared!');
+                checkStorage();
+                analyzeData();
+            } catch (e) {
+                log(`Failed to clear storage: ${e.message}`, 'error');
+                alert('Failed to clear: ' + e.message);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Debugger initialized');
+            initDeviceInfo();
+            checkStorage();
+            analyzeData();
+        });
+
+        // Auto-refresh every 5 seconds
+        setInterval(() => {
+            checkStorage();
+            analyzeData();
+        }, 5000);
+    </script>
+</body>
+</html>
