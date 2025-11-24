@@ -82,8 +82,11 @@
     text-align: center;
 }
 
-.input-form .btn {
-    grid-column: 5 / 9;
+.form-buttons {
+    grid-column: 4 / 10;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
 }
 
 .list-container {

@@ -65,8 +65,11 @@
         grid-column: unset !important;
     }
     
-    .input-form .btn {
-        grid-column: unset !important;
+    .form-buttons {
+        width: 100%;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
     }
 
     input[type="text"],
@@ -84,10 +87,15 @@
     }
 
     .btn {
-        width: 100%;
         padding: 14px 24px;
         font-size: 1em;
         min-height: 48px;
+    }
+    
+    .form-buttons .btn,
+    .form-buttons .btn-folder {
+        flex: 1;
+        min-width: 0;
     }
 
     .data-management {
