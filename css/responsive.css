@@ -232,8 +232,7 @@
     }
 
     .author-items {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 12px;
     }
 
     .popup-list-item {
