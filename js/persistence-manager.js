@@ -104,13 +104,22 @@ export class PersistenceManager {
      * Get storage usage info (proxies to local storage manager)
      */
     async getStorageInfo() {
+        const isLoggedIn = this.firebase && this.firebase.currentUser;
+        const info = {
+            size: 0,
+            formattedSize: '0 B',
+            isAvailable: false,
+            type: 'local',
+            isCloud: isLoggedIn
+        };
+
         if (this.storage) {
-            return {
-                size: await this.storage.getSize(),
-                formattedSize: await this.storage.getFormattedSize(),
-                isAvailable: this.storage.isAvailable()
-            };
+            info.size = await this.storage.getSize();
+            info.formattedSize = await this.storage.getFormattedSize();
+            info.isAvailable = this.storage.isAvailable();
+            info.type = this.storage.getStorageType();
         }
-        return { size: 0, formattedSize: '0 B', isAvailable: false };
+        
+        return info;
     }
 }

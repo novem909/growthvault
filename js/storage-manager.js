@@ -315,6 +315,14 @@ export class StorageManager {
     }
 
     /**
+     * Get the current storage type (IndexedDB or localStorage)
+     * @returns {string} 'IndexedDB' | 'localStorage'
+     */
+    getStorageType() {
+        return this.useIndexedDB ? 'IndexedDB' : 'localStorage';
+    }
+
+    /**
      * Get human-readable storage size
      * @returns {Promise<string>} Size with unit (KB/MB)
      */

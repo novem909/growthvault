@@ -363,14 +363,38 @@ export class UIManager {
         const itemCount = state.items.length;
         
         if (element) {
-            // Calculate approximate quota (localStorage is typically 5-10MB)
+            let icon = '🟢';
+            let percentUsed = 0;
+            let quotaText = '';
+            
+            // Determine quota based on storage type and mode
             const sizeBytes = storageInfo.size;
-            const estimatedQuota = 5 * 1024 * 1024; // Conservative 5MB estimate
-            const percentUsed = ((sizeBytes / estimatedQuota) * 100).toFixed(0);
-            const warningIcon = percentUsed > 80 ? '⚠️' : '🟢';
+            
+            if (storageInfo.isCloud) {
+                // Cloud Mode: Quota is virtually unlimited (1GB+ on Firebase)
+                // Local cache size is just informational
+                icon = '☁️';
+                quotaText = 'Synced';
+            } else {
+                // Local Mode
+                let estimatedQuota;
+                
+                if (storageInfo.type === 'IndexedDB') {
+                    estimatedQuota = 50 * 1024 * 1024; // 50MB
+                } else {
+                    estimatedQuota = 5 * 1024 * 1024; // 5MB
+                }
+                
+                percentUsed = ((sizeBytes / estimatedQuota) * 100).toFixed(0);
+                
+                if (percentUsed > 90) icon = '⚠️';
+                else if (percentUsed > 70) icon = '🟡';
+                
+                quotaText = percentUsed > 10 ? `(${percentUsed}%)` : '';
+            }
             
             element.innerHTML = `
-                <span class="auto-save-indicator">${warningIcon} ${itemCount} items • ${storageInfo.formattedSize}${percentUsed > 50 ? ` (${percentUsed}%)` : ''}</span>
+                <span class="auto-save-indicator" title="Storage: ${storageInfo.type}">${icon} ${itemCount} items • ${storageInfo.formattedSize} ${quotaText}</span>
             `;
         }
     }
