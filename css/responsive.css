@@ -149,8 +149,8 @@
 
     .modal-content {
         width: 95vw;
-        height: 90vh;
-        margin: 5vh auto;
+        max-height: 85vh;
+        margin: 7.5vh auto;
         padding: 12px 8px 12px 8px;
         border-radius: 12px;
     }
@@ -195,10 +195,10 @@
     }
 
     .author-popup-content {
-        width: 98vw;
-        max-height: 92vh;
-        margin: 4vh auto;
-        padding: 20px 12px;
+        width: 95vw;
+        max-height: 85vh;
+        margin: 7.5vh auto;
+        padding: 16px 12px;
         border-radius: 12px;
     }
 
