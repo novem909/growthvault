@@ -38,24 +38,52 @@ export class StorageManager {
             const jsonString = JSON.stringify(dataToSave);
             const attemptedSize = new Blob([jsonString]).size;
             
+            // Check current storage before attempting save
+            const currentData = localStorage.getItem(this.storageKey);
+            const currentSize = currentData ? new Blob([currentData]).size : 0;
+            
             console.log('💾 Attempting to save:', {
-                size: this.formatBytes(attemptedSize),
-                items: data.items?.length || 0
+                currentSize: this.formatBytes(currentSize),
+                newSize: this.formatBytes(attemptedSize),
+                items: data.items?.length || 0,
+                hasUndoStack: (data.undoStack?.length || 0) > 0
             });
+            
+            // Try to detect if we're about to exceed quota
+            if (attemptedSize > 4 * 1024 * 1024) { // Warning at 4MB
+                console.warn('⚠️  Large data size detected:', this.formatBytes(attemptedSize));
+            }
             
             localStorage.setItem(this.storageKey, jsonString);
             console.log('✅ Saved to localStorage:', this.storageKey, timestamp === data.timestamp ? '(preserved timestamp)' : '(new timestamp)');
             return { success: true, timestamp: timestamp, attemptedSize };
         } catch (error) {
-            console.error('❌ Failed to save to localStorage:', error);
+            console.error('❌ Failed to save to localStorage:', error, {
+                errorName: error.name,
+                errorMessage: error.message,
+                errorStack: error.stack
+            });
             
             // Calculate size of failed attempt
-            const jsonString = JSON.stringify(data);
-            const attemptedSize = new Blob([jsonString]).size;
+            let attemptedSize = 0;
+            try {
+                const jsonString = JSON.stringify(data);
+                attemptedSize = new Blob([jsonString]).size;
+            } catch (e) {
+                console.error('❌ Could not calculate size:', e);
+            }
+            
+            // More specific error messages
+            let errorMessage = error.message;
+            if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+                errorMessage = 'Storage quota exceeded. Try clearing old data or signing in to sync.';
+            } else if (error.name === 'SecurityError') {
+                errorMessage = 'Storage blocked by browser security settings. Check if cookies are enabled.';
+            }
             
             return { 
                 success: false, 
-                error: error.message,
+                error: errorMessage,
                 errorName: error.name,
                 attemptedSize
             };

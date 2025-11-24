@@ -189,19 +189,28 @@ export class FirebaseManager {
             if (data) {
                 // Check timestamps to resolve conflicts
                 const state = this.stateManager.getState();
+                const localItemCount = state.items?.length || 0;
+                const remoteItemCount = data.items?.length || 0;
                 const localTimestamp = state.lastSaveTimestamp || 0;
                 const remoteTimestamp = data.timestamp ? new Date(data.timestamp).getTime() : 0;
 
-                console.log('⚖️  Comparing timestamps:', {
-                    local: localTimestamp,
-                    remote: remoteTimestamp,
+                console.log('⚖️  Comparing data:', {
+                    localItems: localItemCount,
+                    remoteItems: remoteItemCount,
+                    localTimestamp: localTimestamp,
+                    remoteTimestamp: remoteTimestamp,
                     localDate: localTimestamp ? new Date(localTimestamp).toISOString() : 'none',
                     remoteDate: data.timestamp || 'none'
                 });
 
-                if (remoteTimestamp > localTimestamp) {
-                    // Remote is newer
-                    console.log('☁️  Remote is newer, loading...');
+                // Special case: Don't overwrite local data with empty Firebase data
+                if (remoteItemCount === 0 && localItemCount > 0) {
+                    console.log('⚠️  Firebase has no items but local has data. Keeping local data and syncing to Firebase.');
+                    const localState = this.stateManager.getStateForSaving();
+                    await this.saveToFirebase(localState);
+                } else if (remoteTimestamp > localTimestamp || (localTimestamp === 0 && remoteItemCount > 0)) {
+                    // Remote is newer OR local has no timestamp but remote has data
+                    console.log('☁️  Remote is newer or local has no timestamp, loading from Firebase...');
                     this.stateManager.loadState(data);
                     
                     // Save to localStorage with preserved Firebase timestamp
@@ -214,7 +223,7 @@ export class FirebaseManager {
                         console.log('🎨 UI refreshed with Firebase data');
                     }
                     
-                    console.log('✅ Loaded newer data from Firebase');
+                    console.log('✅ Loaded data from Firebase');
                 } else if (localTimestamp > remoteTimestamp) {
                     // Local is newer, push to Firebase
                     console.log('📤 Local data is newer, syncing to Firebase...');
