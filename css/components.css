@@ -325,11 +325,11 @@
 }
 
 .delete-btn {
-    top: 12px;
-    right: 12px;
-    width: 28px;
-    height: 28px;
-    font-size: 0.85em;
+    top: 6px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    font-size: 0.8em;
 }
 
 .author-box:hover .author-delete-btn {
@@ -738,8 +738,8 @@
 .popup-list-item {
     background: var(--bg-container);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 10px 14px;
     box-shadow: 0 1px 4px var(--shadow-light);
     transition: transform 0.2s ease, opacity 0.2s ease;
     cursor: move;
@@ -770,15 +770,15 @@
 }
 
 .item-title {
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 8px;
-    margin-top: 36px;
+    margin-bottom: 6px;
+    margin-top: 24px;
     cursor: pointer;
     transition: transform 0.2s ease, opacity 0.2s ease;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
     border: 1px solid transparent;
     background: var(--bg-input-section);
     position: relative;
@@ -792,25 +792,25 @@
 }
 
 .item-text {
-    margin-bottom: 16px;
-    margin-top: 36px;
+    margin-bottom: 8px;
+    margin-top: 0;
     color: var(--text-secondary);
     font-size: 0.85em;
-    line-height: 1.6;
+    line-height: 1.5;
     word-wrap: break-word;
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
     font-family: 'Inter', sans-serif;
     background: var(--bg-input-section);
     border: 1px solid var(--border-color);
     overflow-x: hidden;
     overflow-y: hidden;
-    max-height: 120px;
+    max-height: 80px;
     position: relative;
     width: 100%;
     box-sizing: border-box;
@@ -860,13 +860,13 @@
 
 .item-date {
     position: absolute;
-    top: 10px;
-    right: 50px;
+    top: 8px;
+    right: 42px;
     background: #64748b;
     color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.75em;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7em;
     font-weight: 400;
     z-index: 10;
     font-family: 'Inter', sans-serif;
