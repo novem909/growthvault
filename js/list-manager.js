@@ -457,6 +457,32 @@ export class ListManager {
      */
     async save(skipFirebaseSync = false, options = {}) {
         const state = this.stateManager.getStateForSaving();
+        
+        // Implement Monotonic Timestamp Logic for local saves
+        // This ensures we always advance the timestamp, even if the system clock is behind (clock skew),
+        // solving the issue where Mobile -> Web sync fails because Mobile time < Web time.
+        if (!options.preserveTimestamp) {
+            const lastTimestamp = this.stateManager.get('lastSaveTimestamp') || 0;
+            const now = Date.now();
+            
+            // Ensure we always move forward, even if system clock is slow
+            const nextTimestamp = Math.max(now, lastTimestamp + 1);
+            
+            if (nextTimestamp > now) {
+                console.warn('⚠️ Clock skew detected: System time is behind last save. Adjusting timestamp forward.', {
+                    now,
+                    last: lastTimestamp,
+                    adjusted: nextTimestamp,
+                    diff: nextTimestamp - now
+                });
+            }
+            
+            state.timestamp = new Date(nextTimestamp).toISOString();
+            
+            // Force storage to use our calculated timestamp
+            options.preserveTimestamp = true;
+        }
+
         const result = await this.storageManager.save(state, options);
         let syncPromise = Promise.resolve();
         
