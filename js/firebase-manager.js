@@ -77,16 +77,8 @@ export class FirebaseManager {
                 // Sign out
                 await this.auth.signOut();
                 
-                // Clear local data on explicit sign out
-                this.stateManager.setState({
-                    items: [],
-                    itemCounter: 1,
-                    authorOrder: [],
-                    undoStack: [],
-                    authorTitles: {},
-                    lastSaveTimestamp: 0
-                });
-                this.listManager.storageManager.clear();
+                // Keep local data as backup - it will be synced when signing back in
+                console.log('💾 Local data preserved for next sign-in');
                 
                 if (typeof showToast === 'function') {
                     showToast('Signed out', 'default');
