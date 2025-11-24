@@ -109,7 +109,14 @@ export class ListManager {
                 itemCounter: state.itemCounter
             });
             console.error('❌ Failed to save item:', saveResult.error);
-            return { success: false, error: 'Storage full! ' + saveResult.error };
+            
+            // Provide helpful error message
+            const storageInfo = this.getStorageInfo();
+            const errorMsg = saveResult.error.includes('quota') || saveResult.error.includes('QuotaExceeded')
+                ? `Storage full (${storageInfo.formattedSize}). Try deleting old items or sign in to sync to cloud.`
+                : `Failed to save: ${saveResult.error}`;
+            
+            return { success: false, error: errorMsg };
         }
 
         if (saveResult.syncPromise) {
@@ -445,17 +452,75 @@ export class ListManager {
     }
 
     /**
-     * Read image file as data URL
+     * Read image file as data URL with compression
      * @param {File} file - Image file
-     * @returns {Promise<string>} Data URL
+     * @returns {Promise<string>} Compressed data URL
      */
     readImageFile(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        // Compress image to reduce storage size
+                        const compressed = this.compressImage(img, file.type);
+                        console.log('📷 Image compressed:', {
+                            original: file.size,
+                            compressed: compressed.length,
+                            reduction: ((1 - compressed.length / file.size) * 100).toFixed(1) + '%'
+                        });
+                        resolve(compressed);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = e.target.result;
+            };
             reader.onerror = () => reject(new Error('Failed to read file'));
             reader.readAsDataURL(file);
         });
+    }
+
+    /**
+     * Compress image to reduce storage size
+     * @param {HTMLImageElement} img - Image element
+     * @param {string} mimeType - Original MIME type
+     * @returns {string} Compressed data URL
+     */
+    compressImage(img, mimeType) {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Resize if too large (max 1920px on longest side for desktop, 1280px for mobile)
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const maxDimension = isMobile ? 1280 : 1920;
+        
+        if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+                height = (height / width) * maxDimension;
+                width = maxDimension;
+            } else {
+                width = (width / height) * maxDimension;
+                height = maxDimension;
+            }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Use appropriate quality based on device
+        const quality = isMobile ? 0.7 : 0.8;
+        
+        // Convert to JPEG for better compression (unless it's PNG with transparency)
+        const outputType = mimeType === 'image/png' ? 'image/png' : 'image/jpeg';
+        
+        return canvas.toDataURL(outputType, quality);
     }
 
     /**
