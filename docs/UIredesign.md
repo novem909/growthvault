@@ -40,6 +40,26 @@
 
 **If a visual change requires JS modification, STOP and discuss first.**
 
+### ⚡ Performance Requirements:
+
+**The app must remain smooth and fast. No performance degradation allowed.**
+
+- **Fonts**: Use `font-display: swap`, subset fonts if large, limit to 2-3 font files max
+- **Animations**: Use `transform` and `opacity` only (GPU-accelerated), avoid animating `width`, `height`, `top`, `left`
+- **Shadows/Blurs**: Use sparingly - `box-shadow` and `filter: blur()` are expensive
+- **Textures**: Keep SVG/image textures tiny (<5KB), use CSS-only solutions where possible
+- **Selectors**: Avoid deeply nested selectors, keep CSS specificity low
+- **Paint**: Avoid properties that trigger layout/paint on scroll (use `will-change` sparingly)
+- **Test on mobile**: Must remain smooth on lower-powered devices
+
+**Performance checklist before committing:**
+- [ ] Page loads quickly (no flash of unstyled content)
+- [ ] Scrolling is 60fps smooth
+- [ ] Animations don't stutter
+- [ ] Hover states respond instantly
+- [ ] Modals open/close without lag
+- [ ] Works well on mobile
+
 ---
 
 ## Current State Analysis
