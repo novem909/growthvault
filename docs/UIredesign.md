@@ -60,6 +60,49 @@
 - [ ] Modals open/close without lag
 - [ ] Works well on mobile
 
+### ♿ Accessibility (WCAG AA):
+- **Color contrast**: Minimum 4.5:1 for text, 3:1 for large text/UI
+- **Focus states**: All interactive elements must have visible focus indicators
+- **Motion**: Respect `prefers-reduced-motion` media query
+- **Font sizes**: Base font minimum 16px, never smaller than 12px
+- **Touch targets**: Minimum 44x44px on mobile
+
+### 🌐 Browser Compatibility:
+- Chrome, Firefox, Safari, Edge (latest 2 versions)
+- iOS Safari, Android Chrome
+- Test both light and dark themes in each
+
+### 🔄 Rollback Strategy:
+- **Commit frequently** - Small, atomic commits for each component/section
+- **Branch safety** - All work stays on `gv-folders` branch until approved
+- **Git tags** - Tag working states before major changes: `git tag pre-ui-redesign`
+- **If broken** - `git revert` or `git checkout` to restore
+
+### 📋 Testing Checklist (run after EVERY change):
+- [ ] Add new item (with text, image, both)
+- [ ] Create folder, add items to it
+- [ ] Rename and delete folder
+- [ ] Drag items between folders
+- [ ] Open author popup, expand/collapse folders
+- [ ] Edit item title and text
+- [ ] Delete item from popup
+- [ ] Toggle dark/light mode
+- [ ] Sign in/out (if Firebase configured)
+- [ ] Export and import data
+- [ ] Refresh page - data persists
+
+### 🎨 Theme Consistency:
+- **Both themes updated together** - Never leave one broken
+- **CSS variables only** - No hardcoded colors anywhere
+- **Test theme toggle** - Smooth transition, no flash
+
+### 📦 Incremental Approach:
+1. Start with `variables.css` - colors and fonts
+2. Then `base.css` - typography foundations
+3. Then component by component
+4. Polish and animations last
+5. **Never change everything at once**
+
 ---
 
 ## Current State Analysis
