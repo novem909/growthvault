@@ -380,7 +380,7 @@
 }
 
 .editable-header:hover {
-    background: rgba(255, 255, 255, 0.1);
+    /* No hover highlight */
 }
 
 .editable-header.editing {
@@ -722,25 +722,28 @@
 }
 
 .author-popup-close {
-    background: var(--color-error);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    width: 40px;
+    height: 40px;
     cursor: pointer;
-    font-size: 1.3em;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
 .author-popup-close:hover {
-    background: #b91c1c;
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.author-popup-close .icon {
+    width: 20px;
+    height: 20px;
 }
 
 .author-popup-delete {
@@ -1504,7 +1507,7 @@
 .author-popup-buttons {
     display: flex;
     gap: var(--space-sm);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
 }
 
 .create-folder-btn,
@@ -1689,7 +1692,7 @@
 /* ==================== UNFILED SECTION ==================== */
 
 .unfiled-section {
-    margin-top: var(--space-lg);
+    margin-top: var(--space-sm);
     padding-top: 0;
     border-top: none;
 }
@@ -1698,7 +1701,7 @@
 .unfiled-divider {
     display: flex;
     align-items: center;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
     color: var(--text-muted);
     font-size: 0.8em;
     font-weight: 500;
@@ -1750,11 +1753,13 @@
 }
 
 .folder-header.drop-target {
-    /* No highlight */
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
 }
 
 .unfiled-section.drop-target {
-    /* No highlight */
+    background: var(--color-primary-light);
+    border-radius: 8px;
 }
 
 /* ==================== RESPONSIVE ==================== */

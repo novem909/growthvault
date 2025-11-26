@@ -162,7 +162,7 @@ export class ModalManager {
 
         // Set title
         if (title) {
-            title.textContent = `${author} (${items.length} entries)`;
+            title.textContent = author;
             title.dataset.author = author;
         }
 
@@ -754,7 +754,7 @@ export class ModalManager {
 
         // Set title
         if (title) {
-            title.textContent = `${author} (${allItems.length} entries)`;
+            title.textContent = author;
             title.dataset.author = author;
         }
 
