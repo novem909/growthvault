@@ -1,5 +1,47 @@
 # GrowthVault UI Redesign Plan
 
+---
+
+## ⚠️ CRITICAL: STYLING ONLY - DO NOT BREAK FUNCTIONALITY
+
+**This redesign is LIMITED TO visual styling changes. DO NOT modify any JavaScript logic or functionality.**
+
+### Protected Features (DO NOT TOUCH):
+- Firebase authentication & sync
+- Folder system (create, delete, rename, drag-drop)
+- Content CRUD operations (add, edit, delete items)
+- Author management
+- Import/export functionality
+- IndexedDB & localStorage persistence
+- Cloud sync & offline support
+- Undo/redo functionality
+- Image compression & handling
+- Rich text editing
+
+### Files to Modify (CSS ONLY):
+- `css/variables.css` - Colors, fonts, spacing tokens
+- `css/base.css` - Base element styles
+- `css/layout.css` - Grid and layout structures
+- `css/components.css` - Component styling
+- `css/animations.css` - Transitions and keyframes
+- `css/responsive.css` - Mobile breakpoints
+
+### Files to AVOID Modifying:
+- All `js/*.js` files - NO CHANGES
+- `index.html` - Structure changes only if absolutely necessary for styling (add classes, not restructure)
+- Any data handling or event logic
+
+### Rules:
+1. **Test after every change** - Ensure all features still work
+2. **CSS classes only** - Add new classes, don't rename existing ones used by JS
+3. **Preserve data attributes** - `data-action`, `data-id`, etc. are used by event handlers
+4. **Keep HTML IDs** - JavaScript relies on specific element IDs
+5. **No structural HTML changes** - Unless adding wrapper divs for styling purposes only
+
+**If a visual change requires JS modification, STOP and discuss first.**
+
+---
+
 ## Current State Analysis
 
 **What exists:**
