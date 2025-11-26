@@ -287,21 +287,33 @@ export class ModalManager {
         let draggedItem = null;
 
         items.forEach(item => {
+            item.draggable = true;
+
             item.addEventListener('dragstart', (e) => {
                 draggedItem = item;
                 item.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setDragImage(item, item.offsetWidth / 2, 20);
                 e.dataTransfer.setData('text/plain', item.dataset.id);
+                
+                requestAnimationFrame(() => {
+                    if (draggedItem) {
+                        draggedItem.style.pointerEvents = 'none';
+                    }
+                });
             });
 
             item.addEventListener('dragend', () => {
-                item.classList.remove('dragging');
+                if (draggedItem) {
+                    draggedItem.classList.remove('dragging');
+                    draggedItem.style.pointerEvents = '';
+                }
                 items.forEach(i => i.classList.remove('drag-over'));
                 draggedItem = null;
             });
 
             item.addEventListener('dragover', (e) => {
-                if (draggedItem && draggedItem !== item) {
+                if (draggedItem && draggedItem !== item && draggedItem.parentNode === item.parentNode) {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'move';
                     item.classList.add('drag-over');
@@ -318,33 +330,20 @@ export class ModalManager {
                 e.preventDefault();
                 item.classList.remove('drag-over');
 
-                if (draggedItem && draggedItem !== item) {
-                    const draggedIndex = Array.from(itemsContainer.children).indexOf(draggedItem);
-                    const targetIndex = Array.from(itemsContainer.children).indexOf(item);
+                if (draggedItem && draggedItem !== item && draggedItem.parentNode === item.parentNode) {
+                    const parent = item.parentNode;
+                    const siblings = Array.from(parent.querySelectorAll('.popup-list-item'));
+                    const draggedIndex = siblings.indexOf(draggedItem);
+                    const targetIndex = siblings.indexOf(item);
 
                     if (draggedIndex < targetIndex) {
-                        item.parentNode.insertBefore(draggedItem, item.nextSibling);
+                        item.after(draggedItem);
                     } else {
-                        item.parentNode.insertBefore(draggedItem, item);
+                        item.before(draggedItem);
                     }
 
                     this.updateAuthorItemsFromDOM(author);
                 }
-            });
-
-            // Prevent drag from interfering with click events
-            let isDragging = false;
-            item.addEventListener('mousedown', () => isDragging = false);
-            item.addEventListener('mousemove', () => isDragging = true);
-
-            const clickableElements = item.querySelectorAll('.item-text, .delete-btn, .item-title, .item-image');
-            clickableElements.forEach(el => {
-                el.addEventListener('click', (e) => {
-                    if (isDragging) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                });
             });
         });
     }

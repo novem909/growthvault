@@ -70,14 +70,18 @@
                          role="textbox"
                          contenteditable="true"
                          aria-multiline="true"
-                         data-placeholder="Paste your text here with full formatting..."></div>
+                         data-placeholder="Paste content here"></div>
                 </div>
                 <div class="input-group">
                     <label for="imageInput">Image (optional)</label>
-                    <input type="file" id="imageInput" accept="image/*">
+                    <div class="file-input-wrapper">
+                        <label for="imageInput" class="file-input-label">Upload Image</label>
+                        <input type="file" id="imageInput" accept="image/*">
+                        <span class="file-input-text" id="fileInputText">No file chosen</span>
+                    </div>
                 </div>
                 <div class="form-buttons">
-                    <button type="submit" class="btn">Add Item</button>
+                    <button type="submit" class="btn btn-folder">Add Item</button>
                     <button type="button" class="btn btn-folder" data-action="add-to-folder">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>

@@ -1,77 +1,124 @@
 /**
  * CSS Custom Properties (Variables)
- * Theme colors and design tokens
+ * "Digital Vault" Theme - Premium, refined aesthetic
  */
 
 :root {
-    /* Background Gradients */
-    --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    --bg-container: white;
-    --bg-input-section: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    --bg-list-container: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    /* Typography */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
     
-    /* Text Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #374151;
-    --text-muted: #64748b;
+    /* Backgrounds - Warm Parchment */
+    --bg-primary: #FDFBF7;
+    --bg-secondary: #F7F4ED;
+    --bg-container: #FFFFFF;
+    --bg-input-section: #F7F4ED;
+    --bg-list-container: #FDFBF7;
+    --bg-elevated: #FFFFFF;
     
-    /* Border and Shadows */
-    --border-color: #e2e8f0;
-    --shadow-light: rgba(0, 0, 0, 0.1);
-    --shadow-medium: rgba(0, 0, 0, 0.2);
+    /* Text Colors - Warm tones */
+    --text-primary: #1C1917;
+    --text-secondary: #57534E;
+    --text-muted: #A8A29E;
     
-    /* Spacing System (8px grid) */
+    /* Accent Colors - Amber/Gold */
+    --color-primary: #B45309;
+    --color-primary-hover: #D97706;
+    --color-primary-light: #FEF3C7;
+    --color-primary-border: #FCD34D;
+    --color-accent: #F59E0B;
+    
+    /* Borders & Shadows */
+    --border-color: #E7E5E4;
+    --border-strong: #D6D3D1;
+    --shadow-light: rgba(28, 25, 23, 0.06);
+    --shadow-medium: rgba(28, 25, 23, 0.12);
+    --shadow-strong: rgba(28, 25, 23, 0.18);
+    
+    /* Spacing System (8px base) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    
+    /* Legacy spacing (for compatibility) */
     --space-xs: 4px;
     --space-sm: 8px;
     --space-md: 16px;
     --space-lg: 24px;
     --space-xl: 32px;
     
-    /* Brand Colors */
-    --color-primary: #6366f1;
-    --color-primary-hover: #5855f6;
-    --color-primary-light: #e0e7ff;
-    --color-primary-border: #c7d2fe;
-    
     /* Folder-specific */
-    --folder-surface: #f8fafc;
-    --folder-surface-hover: #f1f5f9;
-    --folder-header-bg: #f1f5f9;
-    --folder-header-hover: #e2e8f0;
+    --folder-surface: #F7F4ED;
+    --folder-surface-hover: #F0EDE5;
+    --folder-header-bg: #F0EDE5;
+    --folder-header-hover: #E8E4DB;
     
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-normal: 200ms ease;
+    /* Transitions - Refined easing */
+    --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    
+    /* Radii */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    
+    /* Status Colors */
+    --color-success: #059669;
+    --color-error: #DC2626;
+    --color-warning: #D97706;
 }
 
-/* Dark Theme */
+/* Dark Theme - Vault Interior */
 [data-theme="dark"] {
-    --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --bg-container: #1e293b;
-    --bg-input-section: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    --bg-list-container: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    --text-primary: #f8fafc;
-    --text-secondary: #e2e8f0;
-    --text-muted: #94a3b8;
-    --border-color: #475569;
+    /* Backgrounds - Deep warm black */
+    --bg-primary: #0C0A09;
+    --bg-secondary: #1C1917;
+    --bg-container: #1C1917;
+    --bg-input-section: #1C1917;
+    --bg-list-container: #0C0A09;
+    --bg-elevated: #292524;
+    
+    /* Text - Warm whites */
+    --text-primary: #FAFAF9;
+    --text-secondary: #D6D3D1;
+    --text-muted: #78716C;
+    
+    /* Accent - Bright amber */
+    --color-primary: #F59E0B;
+    --color-primary-hover: #FBBF24;
+    --color-primary-light: #451A03;
+    --color-primary-border: #B45309;
+    --color-accent: #FBBF24;
+    
+    /* Borders & Shadows */
+    --border-color: #292524;
+    --border-strong: #44403C;
     --shadow-light: rgba(0, 0, 0, 0.3);
     --shadow-medium: rgba(0, 0, 0, 0.5);
+    --shadow-strong: rgba(0, 0, 0, 0.7);
     
-    /* Dark mode folder colors */
-    --color-primary-light: #312e81;
-    --color-primary-border: #4338ca;
-    --folder-surface: #334155;
-    --folder-surface-hover: #475569;
-    --folder-header-bg: #334155;
-    --folder-header-hover: #475569;
+    /* Folder-specific */
+    --folder-surface: #292524;
+    --folder-surface-hover: #44403C;
+    --folder-header-bg: #292524;
+    --folder-header-hover: #44403C;
 }
 
 [data-theme="dark"] .skeleton {
     background: linear-gradient(
         90deg,
-        #334155 25%,
-        #475569 50%,
-        #334155 75%
+        #292524 25%,
+        #44403C 50%,
+        #292524 75%
     );
     background-size: 200% 100%;
 }

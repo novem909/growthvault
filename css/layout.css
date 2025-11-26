@@ -15,7 +15,7 @@
 }
 
 .input-section {
-    padding: 20px 32px 40px 32px;
+    padding: 20px 32px 20px 32px;
     background: var(--bg-input-section);
     border-bottom: 1px solid var(--border-color);
     position: relative;
@@ -98,8 +98,8 @@
 
 .list-title {
     text-align: center;
-    margin-top: 0px;
-    margin-bottom: 32px;
+    margin-top: 16px;
+    margin-bottom: 24px;
     color: var(--text-primary);
     font-size: 1.75em;
     font-weight: 600;
@@ -113,7 +113,7 @@
     gap: 24px;
     max-height: 650px;
     overflow-y: auto;
-    padding-right: 8px;
+    padding: 16px 8px 8px 0;
 }
 
 .visual-list::-webkit-scrollbar {

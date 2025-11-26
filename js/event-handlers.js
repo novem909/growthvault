@@ -255,6 +255,16 @@ export class EventHandlers {
                 }
             });
         }
+
+        // Image input file name display
+        const imageInput = document.getElementById('imageInput');
+        const fileInputText = document.getElementById('fileInputText');
+        if (imageInput && fileInputText) {
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files?.[0];
+                fileInputText.textContent = file ? file.name : 'No file chosen';
+            });
+        }
     }
 
     /**

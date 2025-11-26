@@ -88,7 +88,11 @@ function openImageZoom(imageSrc) {
 }
 
 function closeImageZoom(event) {
-    if (event.target === event.currentTarget || event.type === 'keydown') {
+    const isCloseButton = event.target.classList.contains('image-zoom-close');
+    const isOverlayClick = event.target === event.currentTarget;
+    const isKeyPress = event.type === 'keydown';
+    
+    if (isCloseButton || isOverlayClick || isKeyPress) {
         const overlay = document.getElementById('imageZoomOverlay');
         overlay.classList.remove('active');
         document.removeEventListener('keydown', handleZoomEscKey);

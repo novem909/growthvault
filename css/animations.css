@@ -50,10 +50,10 @@
 @keyframes swapPulse {
     0%,
     100% {
-        box-shadow: 0 0 0 3px #6366f1, 0 0 20px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 0 0 2px var(--color-primary), 0 0 20px rgba(180, 83, 9, 0.25);
     }
     50% {
-        box-shadow: 0 0 0 5px #6366f1, 0 0 30px rgba(99, 102, 241, 0.6);
+        box-shadow: 0 0 0 4px var(--color-primary), 0 0 30px rgba(180, 83, 9, 0.4);
     }
 }
 
@@ -132,9 +132,4 @@
     animation: ripple-animation 0.6s ease-out;
 }
 
-.author-box.drag-over,
-.list-item.drag-over,
-.popup-list-item.drag-over,
-.modal-content-section.drag-over {
-    animation: swapPulse 0.6s ease infinite;
-}
+/* Drag-over states use CSS only, no animation for smoother experience */

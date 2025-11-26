@@ -197,6 +197,8 @@ export class UIManager {
             this.textInput.innerHTML = '';
         }
         if (this.imageInput) this.imageInput.value = '';
+        const fileInputText = document.getElementById('fileInputText');
+        if (fileInputText) fileInputText.textContent = 'No file chosen';
     }
 
     /**
