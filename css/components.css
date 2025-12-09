@@ -1762,6 +1762,89 @@
     border-radius: 8px;
 }
 
+/* ==================== MOBILE TOUCH DRAG & DROP ==================== */
+
+/* Element being dragged (original, semi-hidden) */
+.touch-dragging {
+    opacity: 0.3 !important;
+    transform: scale(0.98) !important;
+    transition: opacity 0.15s ease, transform 0.15s ease !important;
+}
+
+/* Ghost element following finger */
+.touch-drag-ghost {
+    border-radius: var(--radius-lg);
+    background: var(--bg-container);
+    overflow: hidden;
+}
+
+/* Placeholder showing where item will drop */
+.touch-drag-placeholder {
+    animation: touchPlaceholderPulse 1s ease-in-out infinite;
+}
+
+@keyframes touchPlaceholderPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+/* Valid drop target highlight */
+.touch-drag-over {
+    box-shadow: 0 0 0 2px var(--color-primary), 0 0 20px rgba(180, 83, 9, 0.25) !important;
+    transform: scale(1.02);
+    transition: all 0.15s ease !important;
+}
+
+/* Drop complete animation */
+.touch-drop-complete {
+    animation: touchDropComplete 0.3s ease-out;
+}
+
+@keyframes touchDropComplete {
+    0% {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(0.98);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: none;
+    }
+}
+
+/* Author box specific touch states */
+.author-box.touch-dragging {
+    opacity: 0.3;
+}
+
+.author-box.touch-drag-over {
+    background: var(--color-primary-light);
+}
+
+/* Popup item specific touch states */
+.popup-list-item.touch-dragging {
+    opacity: 0.3;
+}
+
+.popup-list-item.touch-drag-over {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+/* Folder header touch drop target */
+.folder-header.touch-drag-over {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+/* Unfiled section touch drop target */
+.unfiled-section.touch-drag-over {
+    background: var(--color-primary-light);
+    border-radius: 8px;
+}
+
 /* ==================== RESPONSIVE ==================== */
 
 @media (max-width: 480px) {

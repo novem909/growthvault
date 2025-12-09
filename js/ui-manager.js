@@ -5,6 +5,7 @@
 
 import { CONFIG } from './config.js';
 import { Validators } from './validators.js';
+import { TouchDragHandler } from './touch-drag.js';
 
 export class UIManager {
     constructor(stateManager, listManager) {
@@ -19,6 +20,9 @@ export class UIManager {
         this.textInput = document.querySelector(CONFIG.SELECTORS.TEXT_INPUT);
         this.imageInput = document.querySelector(CONFIG.SELECTORS.IMAGE_INPUT);
         this.setupRichTextInput();
+        
+        // Touch drag handler for mobile
+        this.touchDragHandler = null;
         
         // Subscribe to state changes
         this.stateManager.subscribe('items-changed', (newState, oldState) => {
@@ -55,6 +59,9 @@ export class UIManager {
 
         // Add drag and drop after rendering
         this.addAuthorDragAndDrop();
+        
+        // Setup touch drag for mobile
+        this.setupTouchDragForAuthors();
         
         console.log('🎨 Rendered', orderedAuthors.length, 'author boxes');
     }
@@ -175,6 +182,40 @@ export class UIManager {
                     e.stopPropagation();
                 }
             });
+        });
+    }
+
+    /**
+     * Setup touch drag and drop for author boxes (mobile)
+     */
+    setupTouchDragForAuthors() {
+        // Only setup on touch devices
+        if (!TouchDragHandler.isTouchDevice()) return;
+        
+        // Destroy previous handler if exists
+        if (this.touchDragHandler) {
+            this.touchDragHandler.destroy();
+            this.touchDragHandler = null;
+        }
+        
+        // Create new touch drag handler for author boxes
+        this.touchDragHandler = new TouchDragHandler({
+            container: CONFIG.SELECTORS.VISUAL_LIST,
+            draggable: '.author-box',
+            handle: '.author-drag-handle',
+            dropTargets: '.author-box',
+            holdDuration: 200,
+            onDragStart: (item) => {
+                console.log('📱 Touch drag started:', item.dataset.author);
+            },
+            onDrop: async (item, target, position) => {
+                console.log('📱 Touch drop:', item.dataset.author, 'position:', position);
+                // Update author order based on new DOM positions
+                await this.updateAuthorOrderFromDOM();
+            },
+            onCancel: (item) => {
+                console.log('📱 Touch drag cancelled:', item.dataset.author);
+            }
         });
     }
 

@@ -5,6 +5,7 @@
 
 import { CONFIG } from './config.js';
 import { Validators } from './validators.js';
+import { TouchDragHandler } from './touch-drag.js';
 
 export class ModalManager {
     constructor(stateManager, listManager) {
@@ -15,6 +16,7 @@ export class ModalManager {
         this.currentAuthor = null; // Author currently in author popup
         this.pendingItemData = null; // Item data waiting to be saved to folder
         this.expandedFolders = new Set(); // Track which folders are expanded
+        this.popupTouchDragHandler = null; // Touch drag handler for popup items
         
         // Get modal elements
         this.contentModal = document.querySelector(CONFIG.SELECTORS.CONTENT_MODAL);
@@ -867,6 +869,9 @@ export class ModalManager {
 
             // Setup drag and drop
             this.setupFolderDragAndDrop(author);
+            
+            // Setup touch drag for mobile
+            this.setupTouchDragForPopupItems(author);
 
             console.log('👤 Opened author popup for:', author, `(${folders.length} folders, ${unfiledItems.length} unfiled)`);
         } catch (error) {
@@ -1136,6 +1141,101 @@ export class ModalManager {
                 }
             }
         }
+    }
+
+    /**
+     * Setup touch drag and drop for popup items (mobile)
+     * @param {string} author - Author name
+     */
+    setupTouchDragForPopupItems(author) {
+        // Only setup on touch devices
+        if (!TouchDragHandler.isTouchDevice()) return;
+        
+        // Destroy previous handler if exists
+        if (this.popupTouchDragHandler) {
+            this.popupTouchDragHandler.destroy();
+            this.popupTouchDragHandler = null;
+        }
+        
+        const itemsContainer = document.getElementById('authorPopupItems');
+        if (!itemsContainer) return;
+        
+        // Create touch drag handler for popup items
+        this.popupTouchDragHandler = new TouchDragHandler({
+            container: '#authorPopupItems',
+            draggable: '.popup-list-item',
+            dropTargets: '.popup-list-item, .folder-header, .unfiled-section',
+            holdDuration: 200,
+            onDragStart: (item) => {
+                console.log('📱 Touch drag started for item:', item.dataset.id);
+            },
+            onDrop: async (item, target, position) => {
+                const itemId = parseInt(item.dataset.id);
+                console.log('📱 Touch drop item:', itemId, 'position:', position);
+                
+                // Check if dropped on a folder header
+                if (target && target.classList.contains('folder-header')) {
+                    const folderId = parseInt(target.dataset.folderId);
+                    if (folderId) {
+                        await this.listManager.addItemToFolder(itemId, folderId);
+                        this.openAuthorPopup(author); // Refresh
+                        return;
+                    }
+                }
+                
+                // Check if dropped on unfiled section
+                if (target && (target.classList.contains('unfiled-section') || target.closest('.unfiled-section'))) {
+                    await this.listManager.removeItemFromFolder(itemId);
+                    this.openAuthorPopup(author); // Refresh
+                    return;
+                }
+                
+                // Otherwise, reorder items within same container
+                await this.updatePopupItemsFromDOM(author);
+            },
+            onCancel: (item) => {
+                console.log('📱 Touch drag cancelled for item:', item.dataset.id);
+            }
+        });
+    }
+
+    /**
+     * Update popup items order from DOM (for touch drag reordering)
+     * @param {string} author - Author name
+     */
+    async updatePopupItemsFromDOM(author) {
+        const itemsContainer = document.getElementById('authorPopupItems');
+        if (!itemsContainer) return;
+
+        const domOrder = Array.from(itemsContainer.querySelectorAll('.popup-list-item'))
+            .map(item => parseInt(item.dataset.id));
+
+        const state = this.stateManager.getState();
+        const allItems = [...state.items];
+
+        // Separate items by this author and others
+        const authorItems = allItems.filter(item => item.author === author);
+        const otherItems = allItems.filter(item => item.author !== author);
+
+        // Reorder author's items based on DOM
+        const reorderedAuthorItems = domOrder.map(id => 
+            authorItems.find(item => item.id === id)
+        ).filter(Boolean);
+
+        // Merge back: find position of first author item in original array
+        const firstAuthorIndex = allItems.findIndex(item => item.author === author);
+        
+        // Reconstruct items array
+        const newItems = [
+            ...allItems.slice(0, firstAuthorIndex),
+            ...reorderedAuthorItems,
+            ...allItems.slice(firstAuthorIndex + authorItems.length)
+        ];
+
+        this.stateManager.setState({ items: newItems });
+        await this.listManager.save();
+
+        console.log('📱 Reordered items for author:', author);
     }
 }
 
