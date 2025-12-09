@@ -859,7 +859,7 @@ export class ListManager {
         // Get all item IDs that are in folders
         const filedItemIds = new Set();
         authorFolders.forEach(folder => {
-            folder.itemIds.forEach(id => filedItemIds.add(id));
+            (folder.itemIds || []).forEach(id => filedItemIds.add(id));
         });
 
         // Return items not in any folder
