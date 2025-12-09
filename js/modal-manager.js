@@ -1094,11 +1094,11 @@ export class ModalManager {
      */
     async deleteFolderFromPopup(folderId) {
         const state = this.stateManager.getState();
-        const folder = state.folders.find(f => f.id === folderId);
+        const folder = (state.folders || []).find(f => f.id === folderId);
         
         if (!folder) return;
 
-        const itemCount = folder.itemIds.length;
+        const itemCount = (folder.itemIds || []).length;
         const message = itemCount > 0 
             ? `Delete folder "${folder.name}"? ${itemCount} item(s) will be moved to Unfiled.`
             : `Delete empty folder "${folder.name}"?`;
@@ -1121,7 +1121,7 @@ export class ModalManager {
      */
     async renameFolderFromPopup(folderId) {
         const state = this.stateManager.getState();
-        const folder = state.folders.find(f => f.id === folderId);
+        const folder = (state.folders || []).find(f => f.id === folderId);
         
         if (!folder) return;
 
