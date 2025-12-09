@@ -614,7 +614,7 @@ export class ListManager {
         const state = this.stateManager.getState();
         
         // Check for duplicate folder name for this author
-        const existingFolder = state.folders.find(
+        const existingFolder = (state.folders || []).find(
             f => f.author === author && f.name.toLowerCase() === name.trim().toLowerCase()
         );
         if (existingFolder) {
@@ -629,10 +629,10 @@ export class ListManager {
             createdAt: new Date().toISOString()
         };
 
-        const newFolders = [...state.folders, folder];
+        const newFolders = [...(state.folders || []), folder];
         
         // Update folder order for this author
-        const folderOrder = { ...state.folderOrder };
+        const folderOrder = { ...(state.folderOrder || {}) };
         if (!folderOrder[author]) {
             folderOrder[author] = [];
         }
@@ -652,16 +652,16 @@ export class ListManager {
      */
     async deleteFolder(folderId) {
         const state = this.stateManager.getState();
-        const folder = state.folders.find(f => f.id === folderId);
+        const folder = (state.folders || []).find(f => f.id === folderId);
         
         if (!folder) {
             return { success: false, error: 'Folder not found' };
         }
 
-        const newFolders = state.folders.filter(f => f.id !== folderId);
+        const newFolders = (state.folders || []).filter(f => f.id !== folderId);
         
         // Remove from folder order
-        const folderOrder = { ...state.folderOrder };
+        const folderOrder = { ...(state.folderOrder || {}) };
         if (folderOrder[folder.author]) {
             folderOrder[folder.author] = folderOrder[folder.author].filter(id => id !== folderId);
         }
@@ -685,14 +685,14 @@ export class ListManager {
         }
 
         const state = this.stateManager.getState();
-        const folder = state.folders.find(f => f.id === folderId);
+        const folder = (state.folders || []).find(f => f.id === folderId);
         
         if (!folder) {
             return { success: false, error: 'Folder not found' };
         }
 
         // Check for duplicate name
-        const duplicate = state.folders.find(
+        const duplicate = (state.folders || []).find(
             f => f.id !== folderId && 
                  f.author === folder.author && 
                  f.name.toLowerCase() === newName.trim().toLowerCase()
@@ -701,7 +701,7 @@ export class ListManager {
             return { success: false, error: 'A folder with this name already exists' };
         }
 
-        const newFolders = state.folders.map(f => 
+        const newFolders = (state.folders || []).map(f => 
             f.id === folderId ? { ...f, name: newName.trim() } : f
         );
 
@@ -720,8 +720,8 @@ export class ListManager {
      */
     async addItemToFolder(itemId, folderId) {
         const state = this.stateManager.getState();
-        const folder = state.folders.find(f => f.id === folderId);
-        const item = state.items.find(i => i.id === itemId);
+        const folder = (state.folders || []).find(f => f.id === folderId);
+        const item = (state.items || []).find(i => i.id === itemId);
         
         if (!folder) {
             return { success: false, error: 'Folder not found' };
@@ -737,7 +737,7 @@ export class ListManager {
         }
 
         // Remove item from any other folder first
-        let newFolders = state.folders.map(f => {
+        let newFolders = (state.folders || []).map(f => {
             if (f.itemIds.includes(itemId)) {
                 return { ...f, itemIds: f.itemIds.filter(id => id !== itemId) };
             }
@@ -764,7 +764,7 @@ export class ListManager {
     async removeItemFromFolder(itemId) {
         const state = this.stateManager.getState();
         
-        const newFolders = state.folders.map(f => {
+        const newFolders = (state.folders || []).map(f => {
             if (f.itemIds.includes(itemId)) {
                 return { ...f, itemIds: f.itemIds.filter(id => id !== itemId) };
             }
@@ -800,7 +800,7 @@ export class ListManager {
      */
     async reorderFolders(author, newOrder) {
         const state = this.stateManager.getState();
-        const folderOrder = { ...state.folderOrder };
+        const folderOrder = { ...(state.folderOrder || {}) };
         folderOrder[author] = newOrder;
 
         this.stateManager.setState({ folderOrder });
@@ -819,7 +819,7 @@ export class ListManager {
     async reorderItemsInFolder(folderId, newItemOrder) {
         const state = this.stateManager.getState();
         
-        const newFolders = state.folders.map(f => 
+        const newFolders = (state.folders || []).map(f => 
             f.id === folderId ? { ...f, itemIds: newItemOrder } : f
         );
 
@@ -837,12 +837,12 @@ export class ListManager {
      */
     getItemsInFolder(folderId) {
         const state = this.stateManager.getState();
-        const folder = state.folders.find(f => f.id === folderId);
+        const folder = (state.folders || []).find(f => f.id === folderId);
         
         if (!folder) return [];
         
-        return folder.itemIds
-            .map(id => state.items.find(item => item.id === id))
+        return (folder.itemIds || [])
+            .map(id => (state.items || []).find(item => item.id === id))
             .filter(Boolean);
     }
 
@@ -853,8 +853,8 @@ export class ListManager {
      */
     getUnfiledItems(author) {
         const state = this.stateManager.getState();
-        const authorItems = state.items.filter(item => item.author === author);
-        const authorFolders = state.folders.filter(f => f.author === author);
+        const authorItems = (state.items || []).filter(item => item.author === author);
+        const authorFolders = (state.folders || []).filter(f => f.author === author);
         
         // Get all item IDs that are in folders
         const filedItemIds = new Set();
@@ -873,8 +873,8 @@ export class ListManager {
      */
     getFoldersForAuthor(author) {
         const state = this.stateManager.getState();
-        const authorFolders = state.folders.filter(f => f.author === author);
-        const order = state.folderOrder[author] || [];
+        const authorFolders = (state.folders || []).filter(f => f.author === author);
+        const order = (state.folderOrder || {})[author] || [];
 
         // Sort by order, then by creation date for any not in order
         return authorFolders.sort((a, b) => {
@@ -895,7 +895,7 @@ export class ListManager {
      */
     getFolderForItem(itemId) {
         const state = this.stateManager.getState();
-        return state.folders.find(f => f.itemIds.includes(itemId)) || null;
+        return (state.folders || []).find(f => f.itemIds.includes(itemId)) || null;
     }
 }
 
