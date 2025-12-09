@@ -290,6 +290,10 @@ export class ModalManager {
      * @param {string} author - Author name
      */
     addPopupDragAndDrop(author) {
+        // Skip drag-and-drop on mobile - it doesn't work and interferes with touch
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) return;
+        
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
@@ -740,16 +744,25 @@ export class ModalManager {
                 this.updateFolderList(author);
             }
             
-            // Refresh author popup if open (with delay for mobile keyboard dismiss)
+            // Refresh author popup if open
             if (this.currentAuthor === author) {
-                // Small delay to allow mobile keyboard to fully dismiss
-                setTimeout(() => {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+                    // On mobile, close popup completely to avoid touch issues
+                    // User can click author box again to see the new folder
+                    this.closeAuthorPopup();
+                } else {
+                    // On desktop, refresh in place
                     this.openAuthorPopup(author);
-                }, 100);
+                }
             }
 
             if (typeof showToast === 'function') {
-                showToast(`Folder "${folderName}" created`, 'success');
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const msg = isMobile 
+                    ? `Folder "${folderName}" created. Tap author to view.`
+                    : `Folder "${folderName}" created`;
+                showToast(msg, 'success');
             }
         } else {
             if (typeof showToast === 'function') {
@@ -767,6 +780,14 @@ export class ModalManager {
      * @param {string} author - Author name
      */
     openAuthorPopupWithFolders(author) {
+        // Ensure folder modals are closed (defensive)
+        if (this.createFolderModal) {
+            this.createFolderModal.style.display = 'none';
+        }
+        if (this.folderSelectModal) {
+            this.folderSelectModal.style.display = 'none';
+        }
+        
         const state = this.stateManager.getState();
         const allItems = state.items.filter(item => item.author === author);
         
@@ -972,6 +993,10 @@ export class ModalManager {
      * @param {string} author - Author name
      */
     setupFolderDragAndDrop(author) {
+        // Skip drag-and-drop on mobile - it doesn't work and interferes with touch
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) return;
+        
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
