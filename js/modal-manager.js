@@ -780,94 +780,109 @@ export class ModalManager {
      * @param {string} author - Author name
      */
     openAuthorPopupWithFolders(author) {
-        // Ensure folder modals are closed (defensive)
-        if (this.createFolderModal) {
-            this.createFolderModal.style.display = 'none';
-        }
-        if (this.folderSelectModal) {
-            this.folderSelectModal.style.display = 'none';
-        }
-        
-        const state = this.stateManager.getState();
-        const allItems = state.items.filter(item => item.author === author);
-        
-        if (allItems.length === 0) {
-            console.warn('No items found for author:', author);
-            return;
-        }
-
-        this.currentAuthor = author;
-
-        const popup = document.getElementById('authorPopup');
-        const title = document.getElementById('authorPopupTitle');
-        const itemsContainer = document.getElementById('authorPopupItems');
-
-        // Set title
-        if (title) {
-            title.textContent = author;
-            title.dataset.author = author;
-        }
-
-        // Get folders and unfiled items
-        const folders = this.listManager.getFoldersForAuthor(author);
-        const unfiledItems = this.listManager.getUnfiledItems(author);
-
-        // Build content
-        if (itemsContainer) {
-            itemsContainer.innerHTML = '';
-
-            // Action buttons container
-            const buttonsDiv = document.createElement('div');
-            buttonsDiv.className = 'author-popup-buttons';
-
-            // Add content button
-            const addContentBtn = document.createElement('button');
-            addContentBtn.className = 'add-content-btn';
-            addContentBtn.dataset.action = 'add-content-for-author';
-            addContentBtn.dataset.author = author;
-            addContentBtn.innerHTML = `
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add Content
-            `;
-            buttonsDiv.appendChild(addContentBtn);
-
-            // Create folder button
-            const createBtn = document.createElement('button');
-            createBtn.className = 'create-folder-btn';
-            createBtn.dataset.action = 'create-folder-in-popup';
-            createBtn.innerHTML = `
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                    <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
-                </svg>
-                New Folder
-            `;
-            buttonsDiv.appendChild(createBtn);
-
-            itemsContainer.appendChild(buttonsDiv);
-
-            // Render folders
-            folders.forEach(folder => {
-                this.renderFolderSection(folder, itemsContainer, author);
+        try {
+            console.log('👤 Opening author popup for:', author);
+            
+            // Ensure folder modals are closed (defensive)
+            if (this.createFolderModal) {
+                this.createFolderModal.style.display = 'none';
+            }
+            if (this.folderSelectModal) {
+                this.folderSelectModal.style.display = 'none';
+            }
+            
+            const state = this.stateManager.getState();
+            console.log('📊 State:', { 
+                items: state.items?.length, 
+                folders: state.folders?.length,
+                folderOrder: state.folderOrder 
             });
+            
+            const allItems = state.items.filter(item => item.author === author);
+            
+            if (allItems.length === 0) {
+                console.warn('No items found for author:', author);
+                return;
+            }
 
-            // Render unfiled section
-            if (unfiledItems.length > 0 || folders.length > 0) {
-                this.renderUnfiledSection(unfiledItems, itemsContainer, author);
+            this.currentAuthor = author;
+
+            const popup = document.getElementById('authorPopup');
+            const title = document.getElementById('authorPopupTitle');
+            const itemsContainer = document.getElementById('authorPopupItems');
+
+            // Set title
+            if (title) {
+                title.textContent = author;
+                title.dataset.author = author;
+            }
+
+            // Get folders and unfiled items
+            const folders = this.listManager.getFoldersForAuthor(author);
+            const unfiledItems = this.listManager.getUnfiledItems(author);
+
+            // Build content
+            if (itemsContainer) {
+                itemsContainer.innerHTML = '';
+
+                // Action buttons container
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.className = 'author-popup-buttons';
+
+                // Add content button
+                const addContentBtn = document.createElement('button');
+                addContentBtn.className = 'add-content-btn';
+                addContentBtn.dataset.action = 'add-content-for-author';
+                addContentBtn.dataset.author = author;
+                addContentBtn.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add Content
+                `;
+                buttonsDiv.appendChild(addContentBtn);
+
+                // Create folder button
+                const createBtn = document.createElement('button');
+                createBtn.className = 'create-folder-btn';
+                createBtn.dataset.action = 'create-folder-in-popup';
+                createBtn.innerHTML = `
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                        <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+                    </svg>
+                    New Folder
+                `;
+                buttonsDiv.appendChild(createBtn);
+
+                itemsContainer.appendChild(buttonsDiv);
+
+                // Render folders
+                folders.forEach(folder => {
+                    this.renderFolderSection(folder, itemsContainer, author);
+                });
+
+                // Render unfiled section
+                if (unfiledItems.length > 0 || folders.length > 0) {
+                    this.renderUnfiledSection(unfiledItems, itemsContainer, author);
+                }
+            }
+
+            // Show popup
+            if (popup) {
+                popup.style.display = 'flex';
+            }
+
+            // Setup drag and drop
+            this.setupFolderDragAndDrop(author);
+
+            console.log('👤 Opened author popup for:', author, `(${folders.length} folders, ${unfiledItems.length} unfiled)`);
+        } catch (error) {
+            console.error('❌ Error opening author popup:', error);
+            if (typeof showToast === 'function') {
+                showToast('Error opening author view', 'error');
             }
         }
-
-        // Show popup
-        if (popup) {
-            popup.style.display = 'flex';
-        }
-
-        // Setup drag and drop
-        this.setupFolderDragAndDrop(author);
-
-        console.log('👤 Opened author popup for:', author, `(${folders.length} folders, ${unfiledItems.length} unfiled)`);
     }
 
     /**
