@@ -781,8 +781,6 @@ export class ModalManager {
      */
     openAuthorPopupWithFolders(author) {
         try {
-            console.log('👤 Opening author popup for:', author);
-            
             // Ensure folder modals are closed (defensive)
             if (this.createFolderModal) {
                 this.createFolderModal.style.display = 'none';
@@ -792,12 +790,6 @@ export class ModalManager {
             }
             
             const state = this.stateManager.getState();
-            console.log('📊 State:', { 
-                items: state.items?.length, 
-                folders: state.folders?.length,
-                folderOrder: state.folderOrder 
-            });
-            
             const allItems = state.items.filter(item => item.author === author);
             
             if (allItems.length === 0) {
