@@ -118,6 +118,11 @@ export class ModalManager {
 
         this.currentItemInModal = null;
         
+        // Blur active element to dismiss mobile keyboard
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+        }
+        
         if (this.contentModal) {
             this.contentModal.style.display = 'none';
         }
@@ -267,6 +272,11 @@ export class ModalManager {
      */
     closeAuthorPopup() {
         this.currentAuthor = null;
+        
+        // Blur active element to dismiss mobile keyboard
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+        }
         
         if (this.authorPopup) {
             this.authorPopup.style.display = 'none';
@@ -587,6 +597,11 @@ export class ModalManager {
     closeFolderSelectModal() {
         this.pendingItemData = null;
         
+        // Blur active element to dismiss mobile keyboard
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+        }
+        
         if (this.folderSelectModal) {
             this.folderSelectModal.style.display = 'none';
         }
@@ -663,6 +678,17 @@ export class ModalManager {
     closeCreateFolderModal() {
         this.createFolderForAuthor = null;
         
+        // Blur any focused input to dismiss mobile keyboard
+        const input = document.getElementById('newFolderName');
+        if (input) {
+            input.blur();
+        }
+        
+        // Also blur active element as fallback
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+        }
+        
         if (this.createFolderModal) {
             this.createFolderModal.style.display = 'none';
         }
@@ -714,9 +740,12 @@ export class ModalManager {
                 this.updateFolderList(author);
             }
             
-            // Refresh author popup if open
+            // Refresh author popup if open (with delay for mobile keyboard dismiss)
             if (this.currentAuthor === author) {
-                this.openAuthorPopup(author);
+                // Small delay to allow mobile keyboard to fully dismiss
+                setTimeout(() => {
+                    this.openAuthorPopup(author);
+                }, 100);
             }
 
             if (typeof showToast === 'function') {
