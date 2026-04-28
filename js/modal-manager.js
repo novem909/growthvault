@@ -50,7 +50,34 @@ export class ModalManager {
         const modalDate = document.getElementById('modalDate');
         const modalTitle = document.querySelector('.modal-title');
 
-        if (modalAuthor) modalAuthor.textContent = item.author;
+        if (modalAuthor) {
+            modalAuthor.textContent = item.author;
+            modalAuthor.contentEditable = 'true';
+            modalAuthor.spellcheck = false;
+            modalAuthor.onblur = async () => {
+                const newAuthor = (modalAuthor.textContent || '').trim();
+                if (!newAuthor) {
+                    modalAuthor.textContent = item.author;
+                    return;
+                }
+                if (newAuthor === item.author) return;
+                const result = await this.updateItemAuthor(itemId, newAuthor);
+                if (result.success) {
+                    item.author = newAuthor;
+                } else {
+                    modalAuthor.textContent = item.author;
+                    if (typeof showToast === 'function') {
+                        showToast(result.error || 'Failed to update author', 'error');
+                    }
+                }
+            };
+            modalAuthor.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    modalAuthor.blur();
+                }
+            };
+        }
         if (modalDate) modalDate.textContent = item.date;
         if (modalTitle) modalTitle.textContent = item.title || 'Untitled';
 
@@ -470,6 +497,35 @@ export class ModalManager {
     }
 
     /**
+     * Update an item's author. Moves only this item — other items by the
+     * old author are unaffected.
+     * @param {number} itemId
+     * @param {string} newAuthor
+     */
+    async updateItemAuthor(itemId, newAuthor) {
+        const trimmed = (newAuthor || '').trim();
+        const validation = Validators.validateAuthor(trimmed);
+        if (!validation.valid) {
+            return { success: false, error: validation.error };
+        }
+
+        const state = this.stateManager.getState();
+        const item = state.items.find(i => i.id === itemId);
+        if (!item) return { success: false, error: 'Item not found' };
+        if (item.author === trimmed) return { success: true };
+
+        const updatedItems = state.items.map(i =>
+            i.id === itemId ? { ...i, author: trimmed } : i
+        );
+
+        this.stateManager.setState({ items: updatedItems });
+        await this.listManager.save();
+
+        console.log('✏️  Updated item author:', itemId, '→', trimmed);
+        return { success: true };
+    }
+
+    /**
      * Update item text
      * @param {number} itemId - Item ID
      * @param {string} newText - New text content
@@ -805,10 +861,39 @@ export class ModalManager {
             const title = document.getElementById('authorPopupTitle');
             const itemsContainer = document.getElementById('authorPopupItems');
 
-            // Set title
+            // Set title — editable; blur or Enter commits a global rename
             if (title) {
                 title.textContent = author;
                 title.dataset.author = author;
+                title.contentEditable = 'true';
+                title.spellcheck = false;
+                title.onblur = async () => {
+                    const newName = (title.textContent || '').trim();
+                    if (!newName) {
+                        title.textContent = author;
+                        return;
+                    }
+                    if (newName === author) return;
+                    const result = await this.listManager.renameAuthor(author, newName);
+                    if (result.success) {
+                        this.currentAuthor = result.newName;
+                        this.openAuthorPopup(result.newName);
+                        if (typeof showToast === 'function') {
+                            showToast('Author renamed', 'success');
+                        }
+                    } else {
+                        title.textContent = author;
+                        if (typeof showToast === 'function') {
+                            showToast(result.error || 'Failed to rename author', 'error');
+                        }
+                    }
+                };
+                title.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        title.blur();
+                    }
+                };
             }
 
             // Get folders and unfiled items

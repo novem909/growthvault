@@ -183,6 +183,54 @@ export class ListManager {
     }
 
     /**
+     * Rename an author across all items, folders, and ordering metadata.
+     * Rejects if the target name already belongs to a different author
+     * (we don't auto-merge — the user should delete one side first).
+     * @param {string} oldName
+     * @param {string} newName
+     */
+    async renameAuthor(oldName, newName) {
+        const trimmed = (newName || '').trim();
+        const validation = Validators.validateAuthor(trimmed);
+        if (!validation.valid) return { success: false, error: validation.error };
+        if (oldName === trimmed) return { success: true, newName: trimmed };
+
+        const state = this.stateManager.getState();
+
+        const conflict = state.items.some(i => i.author === trimmed);
+        if (conflict) {
+            return { success: false, error: `"${trimmed}" already exists — rename or delete it first` };
+        }
+
+        const updatedItems = state.items.map(i =>
+            i.author === oldName ? { ...i, author: trimmed } : i
+        );
+        const updatedFolders = (state.folders || []).map(f =>
+            f.author === oldName ? { ...f, author: trimmed } : f
+        );
+        const updatedAuthorOrder = (state.authorOrder || []).map(a =>
+            a === oldName ? trimmed : a
+        );
+        const updatedFolderOrder = { ...(state.folderOrder || {}) };
+        if (updatedFolderOrder[oldName]) {
+            updatedFolderOrder[trimmed] = updatedFolderOrder[oldName];
+            delete updatedFolderOrder[oldName];
+        }
+
+        this.stateManager.setState({
+            items: updatedItems,
+            folders: updatedFolders,
+            authorOrder: updatedAuthorOrder,
+            folderOrder: updatedFolderOrder
+        });
+
+        await this.save();
+
+        console.log('✏️  Renamed author:', oldName, '→', trimmed);
+        return { success: true, newName: trimmed };
+    }
+
+    /**
      * Delete all items by author
      * @param {string} author - Author name
      * @returns {Promise<Object>} {success: boolean, count: number}
