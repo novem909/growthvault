@@ -50,10 +50,10 @@
 @keyframes swapPulse {
     0%,
     100% {
-        box-shadow: 0 0 0 2px var(--color-primary), 0 0 20px rgba(180, 83, 9, 0.25);
+        box-shadow: 0 0 0 2px var(--color-primary), 0 0 20px var(--shadow-medium);
     }
     50% {
-        box-shadow: 0 0 0 4px var(--color-primary), 0 0 30px rgba(180, 83, 9, 0.4);
+        box-shadow: 0 0 0 4px var(--color-primary), 0 0 30px var(--shadow-strong);
     }
 }
 
