@@ -17,7 +17,19 @@ export class ListManager {
         
         console.log('📋 ListManager initialized with PersistenceManager');
     }
-    
+
+    /**
+     * Generate a collision-resistant numeric ID.
+     * Date.now() alone collides when two adds happen within the same millisecond
+     * (rapid double-tap, or near-simultaneous adds across desktop/mobile), which
+     * caused items to share IDs and "delete one deletes both" behavior.
+     * Multiplying by 1000 and adding a random 0–999 suffix keeps IDs numeric
+     * (preserves parseInt callers) while making same-ms collisions ~1-in-1000.
+     */
+    generateId() {
+        return Date.now() * 1000 + Math.floor(Math.random() * 1000);
+    }
+
     /**
      * Add a new item to the list
      * @param {Object} itemData - {author, title, text, imageFile?}
@@ -58,7 +70,7 @@ export class ListManager {
         // Create item
         const now = new Date();
         const item = {
-            id: Date.now(),
+            id: this.generateId(),
             date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             author: author.trim(),
             title: title?.trim() || 'Untitled',
@@ -622,7 +634,7 @@ export class ListManager {
         }
 
         const folder = {
-            id: Date.now(),
+            id: this.generateId(),
             name: name.trim(),
             author: author.trim(),
             itemIds: [],

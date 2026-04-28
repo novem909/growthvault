@@ -132,9 +132,12 @@ export class StateManager {
      * @param {Object} data - Saved data object
      */
     loadState(data) {
+        const items = this.dedupeById(data.items || []);
+        const folders = this.dedupeById(data.folders || []);
+
         this.setState({
-            items: data.items || [],
-            folders: data.folders || [],
+            items,
+            folders,
             folderOrder: data.folderOrder || {},
             itemCounter: data.itemCounter || 1,
             authorOrder: data.authorOrder || [],
@@ -143,6 +146,37 @@ export class StateManager {
             lastSaveTimestamp: data.timestamp ? new Date(data.timestamp).getTime() : 0
         });
         console.log('📥 State loaded from saved data');
+    }
+
+    /**
+     * Remove entries with duplicate `id` values, keeping the first occurrence.
+     * Defensive cleanup for legacy data created before collision-resistant IDs:
+     * Date.now()-based IDs could collide on rapid double-submits or
+     * near-simultaneous cross-device adds, causing "delete one deletes both".
+     * @param {Array} list
+     * @returns {Array}
+     */
+    dedupeById(list) {
+        if (!Array.isArray(list)) return [];
+        const seen = new Set();
+        const deduped = [];
+        let dropped = 0;
+        for (const entry of list) {
+            if (!entry || entry.id === undefined || entry.id === null) {
+                deduped.push(entry);
+                continue;
+            }
+            if (seen.has(entry.id)) {
+                dropped++;
+                continue;
+            }
+            seen.add(entry.id);
+            deduped.push(entry);
+        }
+        if (dropped > 0) {
+            console.warn(`🧹 Removed ${dropped} duplicate-ID entries during load`);
+        }
+        return deduped;
     }
 
     /**

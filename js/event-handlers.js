@@ -321,34 +321,47 @@ export class EventHandlers {
      * Handle form submission
      */
     async handleFormSubmit() {
-        const authorInput = document.getElementById('authorInput');
-        const titleInput = document.getElementById('titleInput');
-        const textInput = document.getElementById('textInput');
-        const imageInput = document.getElementById('imageInput');
+        // Guard against rapid double-submits (double-tap on mobile, double-click on
+        // desktop) which previously created two items per intent.
+        if (this._isSubmitting) return;
+        this._isSubmitting = true;
 
-        const rawHtml = textInput?.innerHTML || '';
-        const sanitizedText = Validators.sanitizeRichText(rawHtml);
+        const submitBtn = document.querySelector('#itemForm button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
 
-        const itemData = {
-            author: authorInput?.value.trim() || '',
-            title: titleInput?.value.trim() || '',
-            text: sanitizedText,
-            imageFile: imageInput?.files?.[0] || null
-        };
+        try {
+            const authorInput = document.getElementById('authorInput');
+            const titleInput = document.getElementById('titleInput');
+            const textInput = document.getElementById('textInput');
+            const imageInput = document.getElementById('imageInput');
 
-        const result = await this.listManager.addItem(itemData);
+            const rawHtml = textInput?.innerHTML || '';
+            const sanitizedText = Validators.sanitizeRichText(rawHtml);
 
-        if (result.success) {
-            this.uiManager.clearForm();
-            this.uiManager.updateStorageInfo();
-            
-            if (typeof showToast === 'function') {
-                showToast('Item added successfully!', 'success');
+            const itemData = {
+                author: authorInput?.value.trim() || '',
+                title: titleInput?.value.trim() || '',
+                text: sanitizedText,
+                imageFile: imageInput?.files?.[0] || null
+            };
+
+            const result = await this.listManager.addItem(itemData);
+
+            if (result.success) {
+                this.uiManager.clearForm();
+                this.uiManager.updateStorageInfo();
+
+                if (typeof showToast === 'function') {
+                    showToast('Item added successfully!', 'success');
+                }
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast(result.error || 'Failed to add item', 'error');
+                }
             }
-        } else {
-            if (typeof showToast === 'function') {
-                showToast(result.error || 'Failed to add item', 'error');
-            }
+        } finally {
+            this._isSubmitting = false;
+            if (submitBtn) submitBtn.disabled = false;
         }
     }
 
