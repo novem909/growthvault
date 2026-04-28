@@ -32,7 +32,7 @@ class GrowthVaultApp {
         
         // Initialize UI Managers
         this.uiManager = new UIManager(this.stateManager, this.listManager);
-        this.modalManager = new ModalManager(this.stateManager, this.listManager);
+        this.modalManager = new ModalManager(this.stateManager, this.listManager, this.uiManager);
         
         // Complete dependency injection
         this.firebaseManager.setListManager(this.listManager);

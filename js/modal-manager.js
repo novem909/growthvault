@@ -8,9 +8,10 @@ import { Validators } from './validators.js';
 import { TouchDragHandler } from './touch-drag.js';
 
 export class ModalManager {
-    constructor(stateManager, listManager) {
+    constructor(stateManager, listManager, uiManager = null) {
         this.stateManager = stateManager;
         this.listManager = listManager;
+        this.uiManager = uiManager;
         
         this.currentItemId = null; // ID of item currently in content modal
         this.currentAuthor = null; // Author currently in author popup
@@ -333,12 +334,15 @@ export class ModalManager {
             item.draggable = true;
 
             item.addEventListener('dragstart', (e) => {
+                this.uiManager?.setDragging(true);
                 draggedItem = item;
                 item.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setDragImage(item, item.offsetWidth / 2, 20);
                 e.dataTransfer.setData('text/plain', item.dataset.id);
-                
+                // Folder/unfiled drop targets read this MIME — set it once, here.
+                e.dataTransfer.setData('application/x-item-id', item.dataset.id);
+
                 requestAnimationFrame(() => {
                     if (draggedItem) {
                         draggedItem.style.pointerEvents = 'none';
@@ -352,7 +356,12 @@ export class ModalManager {
                     draggedItem.style.pointerEvents = '';
                 }
                 items.forEach(i => i.classList.remove('drag-over'));
+                // Clear any drop-target classes left on folder headers / unfiled
+                // section (previously handled by a duplicate listener).
+                document.querySelectorAll('.folder-header.drop-target, .unfiled-section.drop-target')
+                    .forEach(el => el.classList.remove('drop-target'));
                 draggedItem = null;
+                this.uiManager?.setDragging(false);
             });
 
             item.addEventListener('dragover', (e) => {
@@ -1097,24 +1106,11 @@ export class ModalManager {
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
-        // Item drag and drop to folders
-        const items = itemsContainer.querySelectorAll('.popup-list-item');
+        // Item dragstart/dragend are handled by addPopupDragAndDrop (called at
+        // the bottom of this method). Don't attach a second pair here — that
+        // caused two handlers per event.
         const folderHeaders = itemsContainer.querySelectorAll('.folder-header');
         const unfiledSection = itemsContainer.querySelector('.unfiled-section');
-
-        items.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', item.dataset.id);
-                e.dataTransfer.setData('application/x-item-id', item.dataset.id);
-                item.classList.add('dragging');
-            });
-
-            item.addEventListener('dragend', () => {
-                item.classList.remove('dragging');
-                folderHeaders.forEach(h => h.classList.remove('drop-target'));
-                if (unfiledSection) unfiledSection.classList.remove('drop-target');
-            });
-        });
 
         // Folder drop targets
         folderHeaders.forEach(header => {
@@ -1138,7 +1134,8 @@ export class ModalManager {
                 
                 if (itemId && folderId) {
                     await this.listManager.addItemToFolder(itemId, folderId);
-                    this.openAuthorPopup(author); // Refresh
+                    // Defer so we don't tear down the popup mid-drop event.
+                    setTimeout(() => this.openAuthorPopup(author), 0);
                 }
             });
         });
@@ -1164,7 +1161,7 @@ export class ModalManager {
                 
                 if (itemId) {
                     await this.listManager.removeItemFromFolder(itemId);
-                    this.openAuthorPopup(author); // Refresh
+                    setTimeout(() => this.openAuthorPopup(author), 0);
                 }
             });
         }
@@ -1252,33 +1249,41 @@ export class ModalManager {
             dropTargets: '.popup-list-item, .folder-header, .unfiled-section',
             holdDuration: 200,
             onDragStart: (item) => {
+                this.uiManager?.setDragging(true);
                 console.log('📱 Touch drag started for item:', item.dataset.id);
             },
             onDrop: async (item, target, position) => {
                 const itemId = parseInt(item.dataset.id);
                 console.log('📱 Touch drop item:', itemId, 'position:', position);
-                
-                // Check if dropped on a folder header
-                if (target && target.classList.contains('folder-header')) {
-                    const folderId = parseInt(target.dataset.folderId);
-                    if (folderId) {
-                        await this.listManager.addItemToFolder(itemId, folderId);
-                        this.openAuthorPopup(author); // Refresh
+
+                try {
+                    // Folder header drop
+                    if (target && target.classList.contains('folder-header')) {
+                        const folderId = parseInt(target.dataset.folderId);
+                        if (folderId) {
+                            await this.listManager.addItemToFolder(itemId, folderId);
+                            // Defer popup refresh — running it inline tears down
+                            // the touch handler we're still inside the callback of.
+                            setTimeout(() => this.openAuthorPopup(author), 0);
+                            return;
+                        }
+                    }
+
+                    // Unfiled section drop
+                    if (target && (target.classList.contains('unfiled-section') || target.closest('.unfiled-section'))) {
+                        await this.listManager.removeItemFromFolder(itemId);
+                        setTimeout(() => this.openAuthorPopup(author), 0);
                         return;
                     }
+
+                    // Reorder within the same container
+                    await this.updatePopupItemsFromDOM(author);
+                } finally {
+                    this.uiManager?.setDragging(false);
                 }
-                
-                // Check if dropped on unfiled section
-                if (target && (target.classList.contains('unfiled-section') || target.closest('.unfiled-section'))) {
-                    await this.listManager.removeItemFromFolder(itemId);
-                    this.openAuthorPopup(author); // Refresh
-                    return;
-                }
-                
-                // Otherwise, reorder items within same container
-                await this.updatePopupItemsFromDOM(author);
             },
             onCancel: (item) => {
+                this.uiManager?.setDragging(false);
                 console.log('📱 Touch drag cancelled for item:', item.dataset.id);
             }
         });

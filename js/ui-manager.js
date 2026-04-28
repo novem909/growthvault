@@ -11,7 +11,7 @@ export class UIManager {
     constructor(stateManager, listManager) {
         this.stateManager = stateManager;
         this.listManager = listManager;
-        
+
         // Get DOM elements
         this.visualList = document.querySelector(CONFIG.SELECTORS.VISUAL_LIST);
         this.form = document.querySelector(CONFIG.SELECTORS.FORM);
@@ -20,14 +20,21 @@ export class UIManager {
         this.textInput = document.querySelector(CONFIG.SELECTORS.TEXT_INPUT);
         this.imageInput = document.querySelector(CONFIG.SELECTORS.IMAGE_INPUT);
         this.setupRichTextInput();
-        
+
         // Touch drag handler for mobile
         this.touchDragHandler = null;
-        
-        // Subscribe to state changes
-        this.stateManager.subscribe('items-changed', (newState, oldState) => {
-            if (JSON.stringify(newState.items) !== JSON.stringify(oldState.items) ||
-                JSON.stringify(newState.authorOrder) !== JSON.stringify(oldState.authorOrder)) {
+
+        // Drag-coordination flags. When a drag is in flight, defer renderItems
+        // so we don't destroy the dragged DOM mid-flight (e.g., from a state
+        // mutation, Firebase real-time listener echo, or post-drop save).
+        this.isDragging = false;
+        this.pendingRender = false;
+
+        // Subscribe to state changes — use the `updates` param instead of
+        // JSON.stringify deep-compare; setState passes the keys that changed.
+        this.stateManager.subscribe('items-changed', (newState, oldState, updates) => {
+            if (!updates) return;
+            if (updates.items !== undefined || updates.authorOrder !== undefined) {
                 this.renderItems();
             }
         });
@@ -40,11 +47,28 @@ export class UIManager {
     }
 
     /**
+     * Set the drag-in-progress flag. While true, renderItems is queued
+     * instead of running. Called by the various drag handlers.
+     */
+    setDragging(dragging) {
+        this.isDragging = dragging;
+        if (!dragging && this.pendingRender) {
+            this.pendingRender = false;
+            this.renderItems();
+        }
+    }
+
+    /**
      * Render all items grouped by author
      */
     renderItems() {
+        if (this.isDragging) {
+            this.pendingRender = true;
+            return;
+        }
+
         const state = this.stateManager.getState();
-        
+
         if (state.items.length === 0) {
             this.renderEmptyState();
             return;
@@ -115,6 +139,7 @@ export class UIManager {
             box.draggable = false;
 
             dragHandle.addEventListener('dragstart', (e) => {
+                this.setDragging(true);
                 dragStartTime = Date.now();
                 draggedAuthor = box;
                 box.classList.add('dragging');
@@ -139,6 +164,7 @@ export class UIManager {
                 }
                 authorBoxes.forEach(b => b.classList.remove('drag-over'));
                 draggedAuthor = null;
+                this.setDragging(false);
             });
 
             box.addEventListener('dragover', (e) => {
@@ -206,14 +232,19 @@ export class UIManager {
             dropTargets: '.author-box',
             holdDuration: 200,
             onDragStart: (item) => {
+                this.setDragging(true);
                 console.log('📱 Touch drag started:', item.dataset.author);
             },
             onDrop: async (item, target, position) => {
                 console.log('📱 Touch drop:', item.dataset.author, 'position:', position);
-                // Update author order based on new DOM positions
-                await this.updateAuthorOrderFromDOM();
+                try {
+                    await this.updateAuthorOrderFromDOM();
+                } finally {
+                    this.setDragging(false);
+                }
             },
             onCancel: (item) => {
+                this.setDragging(false);
                 console.log('📱 Touch drag cancelled:', item.dataset.author);
             }
         });
