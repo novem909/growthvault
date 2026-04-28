@@ -270,7 +270,7 @@ export class UIManager {
         }
         if (this.imageInput) this.imageInput.value = '';
         const fileInputText = document.getElementById('fileInputText');
-        if (fileInputText) fileInputText.textContent = 'No file chosen';
+        if (fileInputText) fileInputText.textContent = 'Click to choose an image';
     }
 
     /**

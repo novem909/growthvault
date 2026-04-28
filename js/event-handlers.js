@@ -262,7 +262,7 @@ export class EventHandlers {
         if (imageInput && fileInputText) {
             imageInput.addEventListener('change', (e) => {
                 const file = e.target.files?.[0];
-                fileInputText.textContent = file ? file.name : 'No file chosen';
+                fileInputText.textContent = file ? file.name : 'Click to choose an image';
             });
         }
     }

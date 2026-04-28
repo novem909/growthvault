@@ -81,35 +81,45 @@ input[type="file"] {
     border: 0;
 }
 
+/* Unified file picker — looks and behaves like a single input field. */
 .file-input-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-.file-input-label {
-    display: inline-block !important;
-    padding: 8px 16px;
+    gap: 10px;
+    padding: 14px 16px;
     background: var(--bg-container);
-    color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 0.85em;
-    font-weight: 500;
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px var(--shadow-light);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.file-input-label:hover {
+.file-input-wrapper:hover {
+    border-color: var(--border-strong);
     background: var(--bg-secondary);
+}
+
+.file-input-wrapper:focus-within {
+    outline: none;
     border-color: var(--color-primary);
-    color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.file-input-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+    flex-shrink: 0;
 }
 
 .file-input-text {
-    font-size: 0.85em;
-    color: var(--text-muted);
+    font-size: 0.95em;
+    color: var(--text-secondary);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 input[type="text"]:focus,

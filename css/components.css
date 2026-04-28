@@ -45,7 +45,7 @@
 .btn {
     padding: 14px 28px;
     background: var(--color-primary);
-    color: white;
+    color: var(--color-on-primary);
     border: none;
     border-radius: var(--radius-md);
     font-size: 0.95em;
@@ -1009,7 +1009,7 @@
     height: 56px;
     border-radius: 50%;
     background: var(--color-primary);
-    color: white;
+    color: var(--color-on-primary);
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px var(--shadow-strong);
@@ -1359,20 +1359,20 @@
 }
 
 .folder-list-item .folder-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: var(--folder-surface);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: var(--space-md);
-    color: var(--color-primary);
+    color: var(--text-secondary);
+}
+
+.folder-list-item .folder-icon .icon {
+    width: 18px;
+    height: 18px;
 }
 
 .folder-list-item:hover .folder-icon {
-    background: var(--color-primary);
-    color: white;
+    color: var(--text-primary);
 }
 
 .folder-list-item .folder-name {
@@ -1578,21 +1578,17 @@
 
 /* Folder Icon */
 .folder-header .folder-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: var(--space-md);
     flex-shrink: 0;
+    color: var(--text-secondary);
 }
 
 .folder-header .folder-icon .icon {
-    color: white;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 /* Folder Name */
