@@ -378,7 +378,7 @@ export class ModalManager {
                 }
             });
 
-            item.addEventListener('drop', (e) => {
+            item.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 item.classList.remove('drag-over');
 
@@ -394,49 +394,89 @@ export class ModalManager {
                         item.before(draggedItem);
                     }
 
-                    this.updateAuthorItemsFromDOM(author);
+                    await this.syncPopupStateFromDOM(author);
+                    // Defer re-render so folder counts and section positions
+                    // refresh cleanly after the drop event fully resolves.
+                    setTimeout(() => this.openAuthorPopup(author), 0);
                 }
             });
         });
     }
 
     /**
-     * Update item order in state based on DOM order
-     * @param {string} author - Author name
+     * Reconstruct state from the popup DOM after a drop.
+     *
+     * Replaces the previous updateAuthorItemsFromDOM / updatePopupItemsFromDOM
+     * pair, which used a slice() reconstruction that assumed the author's
+     * items were contiguous in state.items. They aren't (items are stored in
+     * insertion order, interleaved across authors), so the slice silently
+     * dropped items belonging to OTHER authors and duplicated some of the
+     * dragged author's. That was the data-loss bug.
+     *
+     * This version walks every .popup-list-item in DOM order, buckets each
+     * by its container (folder-section vs unfiled), and rebuilds:
+     *   - state.folders[].itemIds for any folder visible in the DOM
+     *   - state.items, preserving every other author's item in place and
+     *     reordering only this author's items by DOM position.
      */
-    async updateAuthorItemsFromDOM(author) {
+    async syncPopupStateFromDOM(author) {
         const itemsContainer = document.getElementById('authorPopupItems');
         if (!itemsContainer) return;
 
-        const domOrder = Array.from(itemsContainer.querySelectorAll('.popup-list-item'))
-            .map(item => parseInt(item.dataset.id));
-
         const state = this.stateManager.getState();
-        const allItems = [...state.items];
+        const allItems = state.items || [];
+        const authorItemIds = new Set(
+            allItems.filter(i => i.author === author).map(i => i.id)
+        );
 
-        // Separate items by this author and others
-        const authorItems = allItems.filter(item => item.author === author);
-        const otherItems = allItems.filter(item => item.author !== author);
+        const folderItemsMap = new Map();   // folderId -> [itemId, ...] in DOM order
+        const allDomItemIds = [];           // all author item ids in DOM order
 
-        // Reorder author's items based on DOM
-        const reorderedAuthorItems = domOrder.map(id => 
-            authorItems.find(item => item.id === id)
-        ).filter(Boolean);
+        Array.from(itemsContainer.querySelectorAll('.popup-list-item')).forEach(el => {
+            const id = parseInt(el.dataset.id);
+            if (!authorItemIds.has(id)) return; // ignore strays from other authors
+            allDomItemIds.push(id);
 
-        // Merge back: find position of first author item in original array
-        const firstAuthorIndex = allItems.findIndex(item => item.author === author);
-        
-        // Reconstruct items array
-        const newItems = [
-            ...allItems.slice(0, firstAuthorIndex),
-            ...reorderedAuthorItems,
-            ...allItems.slice(firstAuthorIndex + authorItems.length)
-        ];
+            const folderSection = el.closest('.folder-section');
+            if (folderSection && folderSection.dataset.folderId) {
+                const folderId = parseInt(folderSection.dataset.folderId);
+                if (!folderItemsMap.has(folderId)) folderItemsMap.set(folderId, []);
+                folderItemsMap.get(folderId).push(id);
+            }
+            // Anything not in a .folder-section is implicitly unfiled —
+            // we don't need a separate list because folder.itemIds is the
+            // source of truth; "unfiled" is "not in any folder".
+        });
 
-        this.stateManager.setState({ items: newItems });
+        // Update folder membership for this author's folders that are in DOM.
+        const newFolders = (state.folders || []).map(f => {
+            if (f.author === author && folderItemsMap.has(f.id)) {
+                return { ...f, itemIds: folderItemsMap.get(f.id) };
+            }
+            return f;
+        });
+
+        // Reorder this author's items in state.items by DOM position; leave
+        // every other author's items untouched in their original positions.
+        const positionInDom = new Map();
+        allDomItemIds.forEach((id, idx) => positionInDom.set(id, idx));
+        const reorderedAuthorItems = allItems
+            .filter(i => i.author === author)
+            .slice()
+            .sort((a, b) => {
+                const aPos = positionInDom.has(a.id) ? positionInDom.get(a.id) : Number.MAX_SAFE_INTEGER;
+                const bPos = positionInDom.has(b.id) ? positionInDom.get(b.id) : Number.MAX_SAFE_INTEGER;
+                return aPos - bPos;
+            });
+        let cursor = 0;
+        const newItems = allItems.map(item =>
+            item.author === author ? reorderedAuthorItems[cursor++] : item
+        );
+
+        this.stateManager.setState({ items: newItems, folders: newFolders });
         await this.listManager.save();
 
-        console.log('🔄 Reordered items for author:', author);
+        console.log('🔄 Popup state synced from DOM for author:', author);
     }
 
     /**
@@ -1257,29 +1297,18 @@ export class ModalManager {
                 console.log('📱 Touch drop item:', itemId, 'position:', position);
 
                 try {
-                    // Folder header drop
-                    if (target && target.classList.contains('folder-header')) {
-                        const folderId = parseInt(target.dataset.folderId);
-                        if (folderId) {
-                            await this.listManager.addItemToFolder(itemId, folderId);
-                            // Defer popup refresh — running it inline tears down
-                            // the touch handler we're still inside the callback of.
-                            setTimeout(() => this.openAuthorPopup(author), 0);
-                            return;
-                        }
-                    }
-
-                    // Unfiled section drop
-                    if (target && (target.classList.contains('unfiled-section') || target.closest('.unfiled-section'))) {
-                        await this.listManager.removeItemFromFolder(itemId);
-                        setTimeout(() => this.openAuthorPopup(author), 0);
-                        return;
-                    }
-
-                    // Reorder within the same container
-                    await this.updatePopupItemsFromDOM(author);
+                    // The TouchDragHandler already moved the dragged element's
+                    // DOM position via its placeholder logic. Read the resulting
+                    // DOM as the single source of truth — this also handles the
+                    // "drop onto an item inside a folder" case correctly because
+                    // the dragged element's new ancestor is that folder section.
+                    await this.syncPopupStateFromDOM(author);
                 } finally {
                     this.uiManager?.setDragging(false);
+                    // Defer popup re-render so folder counts and section
+                    // positions refresh cleanly, and so we don't tear down the
+                    // touch handler we're still inside the callback of.
+                    setTimeout(() => this.openAuthorPopup(author), 0);
                 }
             },
             onCancel: (item) => {
@@ -1289,44 +1318,6 @@ export class ModalManager {
         });
     }
 
-    /**
-     * Update popup items order from DOM (for touch drag reordering)
-     * @param {string} author - Author name
-     */
-    async updatePopupItemsFromDOM(author) {
-        const itemsContainer = document.getElementById('authorPopupItems');
-        if (!itemsContainer) return;
-
-        const domOrder = Array.from(itemsContainer.querySelectorAll('.popup-list-item'))
-            .map(item => parseInt(item.dataset.id));
-
-        const state = this.stateManager.getState();
-        const allItems = [...state.items];
-
-        // Separate items by this author and others
-        const authorItems = allItems.filter(item => item.author === author);
-        const otherItems = allItems.filter(item => item.author !== author);
-
-        // Reorder author's items based on DOM
-        const reorderedAuthorItems = domOrder.map(id => 
-            authorItems.find(item => item.id === id)
-        ).filter(Boolean);
-
-        // Merge back: find position of first author item in original array
-        const firstAuthorIndex = allItems.findIndex(item => item.author === author);
-        
-        // Reconstruct items array
-        const newItems = [
-            ...allItems.slice(0, firstAuthorIndex),
-            ...reorderedAuthorItems,
-            ...allItems.slice(firstAuthorIndex + authorItems.length)
-        ];
-
-        this.stateManager.setState({ items: newItems });
-        await this.listManager.save();
-
-        console.log('📱 Reordered items for author:', author);
-    }
 }
 
 export default ModalManager;

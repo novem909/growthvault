@@ -244,8 +244,8 @@ export class TouchDragHandler {
         this.placeholder.style.cssText = `
             width: ${rect.width}px;
             height: ${rect.height}px;
-            background: var(--color-primary-light, rgba(180, 83, 9, 0.1));
-            border: 2px dashed var(--color-primary, #B45309);
+            background: var(--bg-secondary, rgba(0, 0, 0, 0.04));
+            border: 2px dashed var(--border-strong, rgba(0, 0, 0, 0.2));
             border-radius: var(--radius-lg, 12px);
             box-sizing: border-box;
         `;
